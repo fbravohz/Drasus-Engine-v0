@@ -28,6 +28,10 @@
 
 # --- Entorno / Secrets ---
 **/.env
+
+# --- Estado efimero de hooks (marcas de lectura por sesion) ---
+.agents/state/.session-reads/
+.agents/hooks/.fts-index.db
 **/.env.local
 **/.env.*.local
 
@@ -51,6 +55,11 @@
 **/*.pyc
 **/.venv/
 **/venv/
+**/*.egg-info/
+
+# --- Dependencias locales de folletos ---
+.agents/documents/social-strategist/brochures/**/node_modules/
+.agents/documents/social-strategist/brochures/**/node_modules_link
 
 # --- cargo-mutants (artefactos transitorios del gate de mutación, ADR-0133 capa 8) ---
 /mutants.out/
