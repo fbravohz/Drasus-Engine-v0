@@ -47,6 +47,15 @@ TEMPLATE_FILES = {
     ".agents/templates/template-session-report.md",
 }
 
+# Subconjunto de TEMPLATE_FILES que si declara un Tamano real (no es un
+# ejemplo a proposito, es su propio metadato) — el campo Tamano se valida
+# igual que en cualquier documento normativo, aunque el resto de reglas de
+# plantilla sigan exentas.
+TEMPLATE_FILES_SIZE_CHECKED = {
+    ".agents/templates/template-instruction-formats.md",
+    ".agents/templates/template-knowledge.md",
+}
+
 # writing-efficiency.md cita "base.md" dentro de un ejemplo de mal encabezado.
 BASE_MD_ALLOWED = {".agents/knowledge/writing-efficiency.md"}
 
@@ -83,9 +92,9 @@ def strip_code_blocks(lines):
 
 
 def expected_slug(rel_path):
-    """SKILL.md hereda el slug de su carpeta; el resto, de su nombre."""
+    """SKILL.md y ROLE.md heredan el slug de su carpeta; el resto, de su nombre."""
     base = os.path.basename(rel_path)
-    if base == "SKILL.md":
+    if base in {"SKILL.md", "ROLE.md"}:
         stem = os.path.basename(os.path.dirname(rel_path))
     else:
         stem = base[:-3]
@@ -100,8 +109,8 @@ def in_scope(rel_path):
 # Reglas
 # ---------------------------------------------------------------------------
 
-RE_SLUG = re.compile(r"^Slug ID:\s*`([^`]+)`", re.M)
-RE_SIZE = re.compile(r"^Tama\u00f1o:\s*`(\d+)\s*caracteres", re.M)
+RE_SLUG = re.compile(r"^-?\s*(?:Slug ID|SLUG-ID):\s*`([^`]+)`", re.M)
+RE_SIZE = re.compile(r"^-?\s*Tama\u00f1o:\s*`(\d+)\s*caracteres", re.M)
 RE_ID3 = re.compile(r"\b[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*-\d+\.\d+\.\d+\b")
 RE_NA = re.compile(
     r"^\*\*(Precedencia|Filtro de verificaci\u00f3n|Lectura bajo demanda|"
@@ -158,7 +167,9 @@ def validate(rel_path, text):
             hard.append(f"Slug ID es `{got}` pero el archivo exige `{want}`{why}")
 
     # --- Campo Tamano ----------------------------------------------------
-    if rel_path not in NO_SLUG_REQUIRED and not is_template:
+    if rel_path not in NO_SLUG_REQUIRED and (
+        not is_template or rel_path in TEMPLATE_FILES_SIZE_CHECKED
+    ):
         size_match = RE_SIZE.search(text)
         real = len(text)
         if not size_match:

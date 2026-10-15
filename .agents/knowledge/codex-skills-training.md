@@ -1,5 +1,8 @@
 # Skills en Codex: de cero a experto
 
+- Slug ID: `CODEX-SKILLS-TRAINING`
+- Tamaño: `16416 caracteres (~4104 tokens aprox., ratio 4:1)`
+
 Una skill es un paquete reutilizable de instrucciones, recursos y, opcionalmente, scripts que enseña a Codex a ejecutar un flujo repetible. No es un modelo nuevo, una memoria permanente ni un agente independiente.
 
 La skill que invocaste, [`SKILL.md`](air-file://tiregpabp5483gtqcb0m/var/home/fbravohz/Documentos/Entornos/Personal/.codex/skills/.system/skill-creator/SKILL.md?type=file&root=%252F), sirve precisamente para crear y mantener este tipo de paquetes.

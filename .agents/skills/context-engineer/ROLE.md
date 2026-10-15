@@ -2,7 +2,7 @@
 
 - Refactoriza documentos e instrucciones para agentes de IA, y diseña/estandariza procesos y arquitectura de archivos de contexto para Drasus Engine.
 - SLUG-ID: `CONTEXT-ENGINEER`
-- Tamaño: `8847 caracteres (~2212 tokens aprox., ratio 4:1)`
+- Tamaño: `8929 caracteres (~2232 tokens aprox., ratio 4:1)`
 - Lecturas:
   - [[.agents/knowledge/governance.md]] -> SIEMPRE -> Todos
   - [[.agents/knowledge/hard-prohibitions.md]] -> SIEMPRE -> Todos
