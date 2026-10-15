@@ -457,6 +457,7 @@ Documentos de estrategia societaria del propietario — no son arquitectura téc
 
 - [**SAD.md**](./SAD.md) — Documento de Arquitectura de Software (Visión General).
 - [**ADR.md**](./ADR.md) — Decisiones Arquitectónicas (Registro de decisiones inmutables).
+- [**REPOSITORY-OWNERSHIP.md**](./REPOSITORY-OWNERSHIP.md) — Matriz de propiedad entre `Drasus-Engine` y `Drasus-Context`.
 - [**templates/TEMPLATES.md**](./templates/TEMPLATES.md) — Índice de plantillas (ADR, SAD, Feature, TTR) + reglas transversales para nuevas especificaciones.
 
 ---
