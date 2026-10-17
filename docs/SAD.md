@@ -1,6 +1,6 @@
 # Drasus Engine — Software Architecture Document (SAD) — Índice
 
-El SAD se partió por sección bajo [`sad/`](./sad/). El contenido es **idéntico** al monolito original; se partió para lectura por demanda (ver `CLAUDE.md` §3). Abre solo la sección que necesites.
+El SAD se partió por sección bajo [`sad/`](./sad/). El contenido es **idéntico** al monolito original; se partió para lectura por demanda (ver [`AGENTS.md`](../AGENTS.md) y `docs/README.md`). Abre solo la sección que necesites.
 
 | Sección |
 |---------|

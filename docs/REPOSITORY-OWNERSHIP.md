@@ -10,8 +10,8 @@ Esta matriz define qué repositorio es dueño de cada familia de archivos y cóm
 
 | Familia | Dueño canónico | Tratamiento en `Drasus-Engine` | Regla de edición |
 |---|---|---|---|
-| `crates/`, `Cargo.toml`, `Cargo.lock` y `flutter_rust_bridge.yaml` | `Drasus-Engine` | Fuente directa | Se edita en el repositorio de código. |
-| `migrations/`, `scripts/`, `ui-old/` y configuración del producto | `Drasus-Engine` | Fuente directa | Se valida con las pruebas del producto. |
+| `crates/`, `Cargo.toml` y `Cargo.lock` | `Drasus-Engine` | Fuente directa | Se edita en el repositorio de código. |
+| `migrations/`, `scripts/`, la futura UI Tauri/React y configuración del producto | `Drasus-Engine` | Fuente directa | Se valida con las pruebas del producto. |
 | `docs/adr/`, `docs/features/`, `docs/modules/`, `docs/sad/`, `docs/execution/`, `docs/data-model/`, `docs/legal/` y `docs/ROADMAP.md` | `Drasus-Engine` | Fuente directa | Contienen decisiones y órdenes del producto. |
 | `docs/REPOSITORY-OWNERSHIP.md` y ADR-0164 | `Drasus-Engine` durante la separación | Fuente directa hasta completar el corte | Fijan la frontera entre ambos repositorios. |
 | `.agents/knowledge/` | `Drasus-Context` | Submódulo fijado en `.agents` | No se edita desde el repositorio de código. |
@@ -19,7 +19,7 @@ Esta matriz define qué repositorio es dueño de cada familia de archivos y cóm
 | `.agents/hooks/` y `.agents/context-runtime/` | `Drasus-Context` | Submódulo fijado en `.agents` | Incluye fuentes, manifiesto, pruebas y runtime; se excluyen entornos locales, cachés y bytecode. |
 | `.agents/debt/`, `.agents/CONTEXT-DEBT.md`, `.agents/plans/`, `.agents/sessions/`, `.agents/state/`, `.agents/memory/` y `.agents/documents/` | `Drasus-Context` | Se trasladan con la extracción inicial y se depuran por tipo | Son artefactos operativos del sistema de agentes, no fuente del producto. |
 | `.claude/skills/`, `.claude/rules/` y `.claude/settings.json` | `Drasus-Context` como fuente; `Drasus-Engine` como integración | Proyección generada o adaptador mínimo | No se mantienen copias manuales de las skills ni de los hooks. |
-| `AGENTS.md` y `CLAUDE.md` | `Drasus-Engine` para el mapa del proyecto; `Drasus-Context` para el contenido compartido | Adaptadores del producto que apuntan al contexto fijado | El mapa del producto queda aquí; las reglas generales se generan desde el repositorio de contexto. |
+| `AGENTS.md` | `Drasus-Engine` para el mapa del proyecto; `Drasus-Context` para el contenido compartido | Adaptador del producto que apunta al contexto fijado | El mapa del producto queda aquí; las reglas generales se generan desde el repositorio de contexto. |
 | `.claude/settings.local.json`, `.agents/state/.session-reads/`, `.agents/hooks/.fts-index.db`, entornos virtuales y cachés | Ningún repositorio | Solo estado local e ignorado | Nunca se versionan ni se usan como fuente de verdad. |
 | `.codex/` y demás proyecciones de plataforma | `Drasus-Context` como fuente | Proyección generada según la plataforma | La capacidad MCP y el procedimiento de la skill permanecen separados. |
 
@@ -35,7 +35,7 @@ Esta matriz define qué repositorio es dueño de cada familia de archivos y cóm
 1. Congelar el estado actual de `Drasus-Engine` sin reescribir su historial.
 2. Extraer a `Drasus-Context` las rutas de agentes y conservar el historial relevante en un repositorio separado.
 3. Sustituir `.agents` en `Drasus-Engine` por el submódulo fijado.
-4. Reducir `AGENTS.md` y `CLAUDE.md` a sus mapas y adaptadores específicos del producto.
+4. Reducir `AGENTS.md` a su mapa y adaptador específico del producto.
 5. Generar y validar las proyecciones de Claude y Codex desde el repositorio de contexto.
 6. Añadir una comprobación de compatibilidad en ambos repositorios.
 

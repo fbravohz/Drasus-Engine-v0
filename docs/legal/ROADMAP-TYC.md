@@ -66,7 +66,7 @@ Quien redacta este documento y los `LDR-XXXX` es un **agente de IA operando bajo
 ## Orden recomendado (no bloquea desarrollo, sí bloquea distribución)
 
 1. Cerrar Tabla 2 (trabajo interno, sin costo de abogado) — puede avanzar ya, en paralelo al desarrollo.
-2. Enviar Tabla 3 a abogado colegiado **antes** del primer release distribuido (disparador: fin de fase greenfield, CLAUDE.md §1) — priorizar la fila de cesión de propiedad del trabajo gratuito y la determinación de asesoría regulada, por ser las de mayor severidad.
+2. Enviar Tabla 3 a abogado colegiado **antes** del primer release distribuido (disparador: fin de fase greenfield, `AGENTS.md` §2) — priorizar la fila de cesión de propiedad del trabajo gratuito y la determinación de asesoría regulada, por ser las de mayor severidad.
 3. Publicar el texto final de T&C solo después de que la Tabla 3 tenga sign-off de abogado colegiado en al menos la jurisdicción de lanzamiento inicial.
 4. El portal público (`../drasus-portal/`) tendrá su propia política de privacidad/cookies — diferida al mismo disparador que su construcción ("primer cobro real, tras EPIC-5", ADR-0143/ADR-0145) — no se aborda en este corpus.
 

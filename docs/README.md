@@ -484,8 +484,7 @@ La carpeta `.claude/` alberga únicamente los skills (frontmatter de descubrimie
 | Skill | Rol | Descripción |
 |-------|-----|-------------|
 | [**architect**](./../.claude/skills/architect/SKILL.md) | Arquitecto Senior | Procesa, filtra y distribuye información técnica y de negocio. No desarrollador. |
-| [**bridge-engineer**](./../.claude/skills/bridge-engineer/SKILL.md) | Ingeniero de Puentes | Diseña contratos de comunicación FFI y gRPC entre Rust y Flutter |
-| [**flutter-engineer**](./../.claude/skills/flutter-engineer/SKILL.md) | Ingeniero Flutter | Crea interfaces estéticas (Thin Shell) sin lógica de negocio |
+| [**bridge-engineer**](./../.claude/skills/bridge-engineer/SKILL.md) | Ingeniero de Puentes | Diseña contratos de comunicación gRPC entre Rust y clientes Tauri/React |
 | [**partner**](./../.claude/skills/partner/SKILL.md) | Co-Founder & Socio | Análisis estratégico, visión CEO & Quant, sinergias operativas |
 | [**qa-engineer**](./../.claude/skills/qa-engineer/SKILL.md) | QA Engineer | Valida código para garantizar calidad, estabilidad y especificaciones |
 | [**quant-engineer**](./../.claude/skills/quant-engineer/SKILL.md) | Quant Engineer | Dueño de corrección estadística y financiera. Audita matemática y sesgos |
@@ -493,7 +492,7 @@ La carpeta `.claude/` alberga únicamente los skills (frontmatter de descubrimie
 | [**rust-engineer**](./../.claude/skills/rust-engineer/SKILL.md) | Rust Engineer | Lógica pesada, algoritmos cuantitativos, bases de datos (100% Rust puro) |
 | [**social-strategist**](./../.claude/skills/social-strategist/SKILL.md) | Social Strategist | Estrategia digital y orquestación de contenido para Drasus Engine |
 | [**tech-lead**](./../.claude/skills/tech-lead/SKILL.md) | Tech Lead | Lee docs/ y toma iniciativa autónoma de desarrollo, despachando a Ingenieros |
-| [**ui-designer**](./../.claude/skills/ui-designer/SKILL.md) | UI Designer | Etapa 0.5: audita y escribe la sección `## Cáscara Visual` de cada feature antes de que llegue al Flutter Engineer |
+| [**ui-designer**](./../.claude/skills/ui-designer/SKILL.md) | UI Designer | Define y audita la superficie visual Tauri/React de cada feature |
 
 `governance` no es un skill invocable: es la base de conocimiento de lectura obligatoria en [`.agents/knowledge/governance.md`](./../.agents/knowledge/governance.md), gobierna a todos los skills de la tabla anterior.
 

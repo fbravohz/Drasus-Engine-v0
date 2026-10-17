@@ -7,7 +7,7 @@
 
 | Canal | Qué es | Estado |
 |---|---|---|
-| **#1 — Flutter / SVF** | Tab en el *Banco de Verificación* de la app que ejercita el backend **real por FFI**; se prueba con el ratón. | Parcial (solo `sovereign-data-fetcher`) |
+| **#1 — Tauri/React / SVF** | Superficie visual que ejercita el backend real por gRPC; se reconstruirá desde cero. | ⏳ No implementado |
 | **#2 — CLI `verify`** (ADR-0142) | `cargo run -p app -- verify <feature> --input '<json>'`; imprime el observable en JSON. | Activo (12 cimientos del substrato + `sovereign-data-fetcher`) |
 | **#3 — API de red / Postman** | Colección Postman/grpcurl contra el servidor gRPC público. | ⛔ **No implementado** (ver §Pendientes) |
 | **Automatizado** | `cargo test` + `cargo llvm-cov`; la red de seguridad, no la prueba manual. | Activo |
@@ -31,18 +31,11 @@ cargo llvm-cov --workspace --summary-only
 cargo run -p app -- version
 cargo run -p app -- start                   # arranca + apagado limpio
 
-# Flutter (desde ui/)
-cd ui && flutter build linux                # gate obligatorio de QA Flutter
-cd ui && flutter test
-cd ui && flutter run -d linux               # app con el Banco de Verificación (Canal #1)
+# UI Tauri/React
+# Pendiente: la nueva superficie se construirá desde cero.
 ```
 
-> ⚠️ **Prerequisito del bridge antes de `flutter run` (importante):** `flutter run` carga `target/release/libbridge.so`. Tras **cualquier** cambio a `crates/bridge` o a sus dependencias Rust (`shared`, `features/*`), o una regeneración de bindings, recompila la librería nativa **antes** de correr la app:
-> ```bash
-> cargo build --release -p bridge     # desde la raíz del workspace
-> cd ui && flutter run -d linux
-> ```
-> Si te la saltas y el `.so` quedó viejo, la app **arranca pero no abre ventana** y el log muestra `Bad state: Content hash ... out-of-sync` (NO es Wayland ni se arregla reiniciando). Comparar `rustContentHash` en `ui/lib/src/rust/frb_generated.dart` vs `FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH` en `crates/bridge/src/frb_generated.rs`: si las **fuentes** coinciden, el desajuste está en el `.so` compilado → recompila release.
+> La superficie visual anterior fue retirada. El Canal #1 se documentará de nuevo cuando exista la UI Tauri/React y su contrato gRPC.
 
 **Convención Canal #2:** `cargo run -p app -- verify <feature-id> --input '<json>'`. La salida es **siempre** JSON válido con `"ok": true|false`; no requiere `jq`. Sin `--input` cada feature usa defaults de humo.
 
@@ -292,7 +285,7 @@ cargo run -p app -- verify sovereign-data-fetcher --input '{"symbol":"BTCUSDT","
 cargo test -p sovereign-data-fetcher
 ```
 
-- **Canal #1 (SVF):** ✅ `ui/lib/tabs/verification_bank/sovereign_data_fetcher_section.dart` — sección en el Banco de Verificación con datos reales por FFI (broker/símbolo/rango/timeframe + job + historial). Abrir con `cd ui && flutter run -d linux`.
+- **Canal #1 (SVF):** la superficie Flutter fue retirada; queda pendiente reconstruir esta verificación en Tauri/React sobre gRPC.
 
 ---
 
