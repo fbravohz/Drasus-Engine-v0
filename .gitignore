@@ -2,16 +2,11 @@
 /target/
 **/*.rs.bk
 
-# --- Flutter / Dart ---
+# --- Tauri / React ---
+**/node_modules/
+**/dist/
+**/.vite/
 **/build/
-**/.dart_tool/
-**/.packages
-**/.pub/
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
-**/*.flutter-dev
-**/*.iml
-**/pubspec.lock
 
 # --- IDE / Editor ---
 **/.vscode/
