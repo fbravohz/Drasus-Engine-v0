@@ -79,7 +79,7 @@ Esto convierte el mapeo en un **registro append-only**, no en configuración. La
 
 1. **¿Rechazo puro, o transformación con vista previa?** (D1) — el propietario prefiere rechazo; la vista previa con mapeo declarado es la alternativa que no pierde usuarios. Decide el Architect con veredicto legal del General-Counsel.
 2. **Catálogo inicial de plantillas por plataforma** (D2) — cuáles se soportan al arrancar y cuál es la estructura de una plantilla. Depende de TASK-060 (muestras reales), **bloqueada en el propietario**.
-3. **Redacción canónica de la doctrina compra/venta** (D3) — ¿enmienda a ADR-0155 o ADR nuevo? Es doctrina de dominio: pasa por las 7 comprobaciones de `critical-domain-reasoning.md` y por gate del Quant antes de sellarse.
+3. **Redacción canónica de la doctrina compra/venta** (D3) — ¿enmienda a ADR-0155 o ADR nuevo? Es doctrina de dominio: pasa por las 7 comprobaciones de `AGENTS.md § Razonamiento de dominio especializado` y por gate del Quant antes de sellarse.
 4. **Relación con DEBT-029** — los contratos de entrada que hoy aceptan campos desconocidos en silencio son exactamente el mecanismo que D1 prohíbe. Verificar si esta Task absorbe esa deuda o si son capas distintas.
 
 ---

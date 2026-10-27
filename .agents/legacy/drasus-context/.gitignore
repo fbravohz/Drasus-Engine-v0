@@ -1,6 +1,0 @@
-# Runtime local del harness; no forma parte del repositorio de contexto.
-context-runtime/.pytest_cache/
-context-runtime/.venv/
-context-runtime/drasus_context/
-context-runtime/drasus_context_runtime.egg-info/
-context-runtime/tests/

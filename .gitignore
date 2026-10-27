@@ -65,3 +65,7 @@ mutants_gate*.log
 
 # --- Obsidian (configuración y workspace locales del usuario, jamás versionados) ---
 .obsidian/
+
+# --- Archivos binarios de documentos e imágenes ---
+*.[pP][dD][fF]
+*.[pP][nN][gG]

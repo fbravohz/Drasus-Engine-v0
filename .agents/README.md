@@ -1,18 +1,22 @@
-# Codex layer for Drasus Engine
+# Drasus Context
 
-This is the active Codex-native layer for Drasus Engine.
+Repositorio canónico del sistema de agentes y del contexto operativo que usan los proyectos Drasus.
 
-## Responsibilities
+## Alcance
 
-- `skills/`: workflow skills, not permanent personas.
-- `knowledge/`: small contracts and routing references.
-- `context-runtime/`: workflow catalog and the `drasus_context` provider.
-- `hooks/`: only Codex-native mechanical checks once registered in `.codex/hooks.json`.
+- `knowledge/`: gobernanza y conocimiento bajo demanda.
+- `skills/`: procedimientos especializados para agentes.
+- `hooks/`: comprobaciones deterministas del ciclo de vida.
+- `context-runtime/`: catálogo, runtime y pruebas del resolver de contexto.
+- `templates/`: formatos reutilizables para documentos de agentes.
+- `plans/`, `sessions/`, `state/` y `memory/`: artefactos operativos del sistema de agentes.
 
-The former `Drasus-Context` repository has been imported under `legacy/` as a
-reference-only snapshot. It is not loaded as a single context bundle and is
-not the runtime authority for this workspace.
+El repositorio no contiene código de producto, migraciones, UI ni decisiones de dominio de `Drasus-Engine`.
 
-## Design rule
+## Integración
 
-The agent receives context by workflow. A skill selects a workflow; the context provider returns the minimum required documents and validation surface; the agent reads those sources and works in this repository.
+`Drasus-Engine` consume una revisión fijada de este repositorio como submódulo en `.agents`. Los adaptadores específicos de cada plataforma se generan desde esta fuente y no se editan manualmente en el repositorio de código.
+
+## Estado de la extracción
+
+La historia relevante de `.agents` se conservó en una rama independiente. La publicación del repositorio remoto y la conexión del submódulo quedan como pasos de integración posteriores.

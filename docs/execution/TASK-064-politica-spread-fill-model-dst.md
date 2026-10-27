@@ -33,7 +33,7 @@ Búsqueda realizada antes de proponer nada nuevo: `grep -rniE "spread.{0,20}(nul
 
 ## 1. Política de spread nulo vs. spread cero
 
-**Son dos casos distintos y no se tratan igual** (comprobación 7, `critical-domain-reasoning.md` — distinguir tipos, no promediar).
+**Son dos casos distintos y no se tratan igual** (comprobación 7, `AGENTS.md § Razonamiento de dominio especializado` — distinguir tipos, no promediar).
 
 ### 1.1 Spread NULO (campo ausente)
 
@@ -182,4 +182,4 @@ La tabla de `Bars` ya anota: *"semántica exacta sin verificar por bróker"*. Pr
 
 ## 7. Conocimiento consultado (Gate de Reportaje)
 
-`.agents/knowledge/governance.md` (gobernanza siempre activa) · `.agents/knowledge/critical-domain-reasoning.md` (las 7 comprobaciones, aplicadas en §1.1/§1.2/§2.1/§2.2/§3.2/§4.2 — esta decisión sella dominio cuantitativo) · `.agents/skills/quant-engineer/SKILL.md` (mandato documental y forma de entrega) · `.agents/knowledge/debt-management.md` (distinción DEBT vs. TASK — este hallazgo es "pregunta a decidir + trabajo a ejecutar", no un hueco en código ya construido, de ahí TASK y no DEBT) · `docs/adr/ADR-0114.md`, `docs/adr/ADR-0155.md`, `docs/adr/ADR-0156.md`, `docs/features/slippage-models.md`, `docs/features/institutional-friction-modeling.md`, `docs/features/data-sanitizer-pipeline.md`, `docs/features/data-import-wizard.md`, `docs/features/algorithmic-bars.md`, `docs/features/clock.md`, `docs/execution/TASK-059-contrato-momento-de-conocibilidad.md`, `docs/execution/TASK-063-formato-estandar-de-ingesta.md`, `.agents/plans/architect-2026-07-19-escala-barras-ingesta.md` (precedente de forma para esta misma familia de decisiones).
+`.agents/knowledge/governance.md` (gobernanza siempre activa) · `AGENTS.md § Razonamiento de dominio especializado` (las 7 comprobaciones, aplicadas en §1.1/§1.2/§2.1/§2.2/§3.2/§4.2 — esta decisión sella dominio cuantitativo) · `.agents/skills/quant-engineer/SKILL.md` (mandato documental y forma de entrega) · `.agents/knowledge/debt-management.md` (distinción DEBT vs. TASK — este hallazgo es "pregunta a decidir + trabajo a ejecutar", no un hueco en código ya construido, de ahí TASK y no DEBT) · `docs/adr/ADR-0114.md`, `docs/adr/ADR-0155.md`, `docs/adr/ADR-0156.md`, `docs/features/slippage-models.md`, `docs/features/institutional-friction-modeling.md`, `docs/features/data-sanitizer-pipeline.md`, `docs/features/data-import-wizard.md`, `docs/features/algorithmic-bars.md`, `docs/features/clock.md`, `docs/execution/TASK-059-contrato-momento-de-conocibilidad.md`, `docs/execution/TASK-063-formato-estandar-de-ingesta.md`, `.agents/plans/architect-2026-07-19-escala-barras-ingesta.md` (precedente de forma para esta misma familia de decisiones).

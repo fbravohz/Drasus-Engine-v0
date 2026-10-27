@@ -48,7 +48,7 @@ Lo que no es opción es entregar la pantalla y dejar el hueco abierto sin decidi
 
 **NO cerrado, y el ingeniero lo reportó en vez de dar la deuda por saldada:** el caso que motiva esta ficha —declarar 2007 cuando el tramo empieza en 2010— **no lo caza la contención**, porque el contenido está trivialmente contenido en un rango más ancho. Lo mismo con "un siglo sobre un archivo de un día".
 
-**Por qué no se cerró con un umbral, y por qué eso fue correcto:** medir "cuánto más ancho es demasiado" exige un criterio de dominio con auditoría de especialista (`.agents/knowledge/critical-domain-reasoning.md`), no una elección de implementación. Inventar ese número en una etapa de código habría sido exactamente el fallo que ese documento existe para impedir.
+**Por qué no se cerró con un umbral, y por qué eso fue correcto:** medir "cuánto más ancho es demasiado" exige un criterio de dominio con auditoría de especialista (`AGENTS.md § Razonamiento de dominio especializado`), no una elección de implementación. Inventar ese número en una etapa de código habría sido exactamente el fallo que ese documento existe para impedir.
 
 **La salida, y no necesita umbral alguno.** Un tramo declarado es una afirmación de **procedencia**, no de presencia de dato: declarar "de 2010 a 2017 esto viene de IC Markets" es legítimo aunque el archivo tenga huecos dentro. Por eso ninguna regla automática puede decidir si un rango ancho es un error o una declaración deliberada — **pero el usuario sí puede, si se lo enseñas**. La primera y la última fecha que el archivo realmente contiene, mostradas **junto a** lo que el usuario acaba de declarar, en el paso de confirmación. Ahí la discrepancia de 2007 salta a la vista y la decide quien responde por ella.
 

@@ -475,7 +475,6 @@ El contexto de agentes vive en este repositorio. `.agents/` contiene la capa act
 |---------|-------------|
 | [**.agents/skills/**](./../.agents/skills/) | Flujos operativos activos de Codex |
 | [**.agents/knowledge/**](./../.agents/knowledge/) | Contratos y mapas mínimos para cada flujo |
-| [**.agents/context-runtime/**](./../.agents/context-runtime/) | Catálogo y proveedor local de contexto |
 | [**.agents/legacy/**](./../.agents/legacy/) | Contexto anterior y árbol recuperado, solo como evidencia histórica |
 | [**.codex/**](./../.codex/) | Configuración y hooks nativos de Codex |
 

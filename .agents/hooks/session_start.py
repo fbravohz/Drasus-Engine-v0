@@ -16,8 +16,8 @@ def main() -> int:
                     "hookEventName": "SessionStart",
                     "additionalContext": (
                         "Drasus workspace: Codex-only mode. For non-trivial work, "
-                        "select a workflow skill and call the drasus_context MCP "
-                        "start_workflow operation before editing."
+                        "select a workflow skill, consult AGENTS.md and docs/README.md, "
+                        "then read only the relevant canonical sources before editing."
                     ),
                 }
             }

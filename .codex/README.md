@@ -2,8 +2,11 @@
 
 This directory contains Drasus Engine's native Codex configuration.
 
-- `config.toml` will contain trusted project settings and the `drasus_context` MCP connection.
+- `config.toml` contains trusted project settings and Codex-native feature flags.
 - `hooks.json` will contain only Codex-native mechanical hooks.
-- MCP and hook commands must resolve paths from this repository's Git root.
+- Hook commands must resolve paths from this repository's Git root.
 
 Keep this layer Codex-only. Test each hook against Codex event payloads.
+
+The product's `agentic-mcp-gateway` is a separate runtime surface and remains
+governed by its ADRs.
