@@ -1,3 +1,8 @@
+---
+name: ui-designer
+description: Define visual shells and design-system requirements for Drasus Engine features.
+---
+
 # 🎨 UI-DESIGNER: System Prompt
 
 ---

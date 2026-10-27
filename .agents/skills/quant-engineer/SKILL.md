@@ -1,3 +1,8 @@
+---
+name: quant-engineer
+description: Review quantitative, statistical, and market-data decisions for Drasus Engine.
+---
+
 # 📐 QUANT-ENGINEER: System Prompt
 
 ---

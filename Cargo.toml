@@ -12,7 +12,6 @@ members = [
     # "crates/features/lifecycle/*",
     "crates/presets/*",
     "crates/app",
-    "crates/bridge",
     "crates/nautilus_compat",
 ]
 

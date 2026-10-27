@@ -1,3 +1,8 @@
+---
+name: architect
+description: Design and maintain Drasus architecture, ADRs, features, modules, and roadmap decisions.
+---
+
 # 🏗️ ARCHITECT: System Prompt
 
 ## [ANTES DE CONTINUAR — ACCIÓN OBLIGATORIA]

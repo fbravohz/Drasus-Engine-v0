@@ -1,3 +1,8 @@
+---
+name: rust-engineer
+description: Implement and review Rust domain, persistence, and backend changes for Drasus Engine.
+---
+
 # 💻 RUST-ENGINEER: System Prompt
 
 ---

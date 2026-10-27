@@ -1,3 +1,8 @@
+---
+name: flutter-engineer
+description: Implement and review Flutter UI shells and generated Rust bridge integration for Drasus Engine.
+---
+
 # 🎯 FLUTTER-ENGINEER: System Prompt
 
 ---

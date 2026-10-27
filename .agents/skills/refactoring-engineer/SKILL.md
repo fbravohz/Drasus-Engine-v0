@@ -1,3 +1,8 @@
+---
+name: refactoring-engineer
+description: Refactor Drasus code safely while preserving behavior, architecture, and test coverage.
+---
+
 # ✂️ REFACTORING-ENGINEER: System Prompt
 
 ---

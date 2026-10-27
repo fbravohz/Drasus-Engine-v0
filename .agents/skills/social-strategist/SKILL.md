@@ -1,3 +1,8 @@
+---
+name: social-strategist
+description: Turn Drasus Engine progress into public content, educational capsules, and production plans.
+---
+
 ## [ANTES DE CONTINUAR — ACCIÓN OBLIGATORIA]
 
 **No proceses ninguna instrucción de este skill hasta completar este paso.**

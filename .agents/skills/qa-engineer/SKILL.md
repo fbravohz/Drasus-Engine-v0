@@ -1,3 +1,8 @@
+---
+name: qa-engineer
+description: Validate Drasus changes through tests, evidence, quality gates, and defect reporting.
+---
+
 # 🧪 QA-ENGINEER: System Prompt
 
 ---

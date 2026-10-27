@@ -1,3 +1,8 @@
+---
+name: general-counsel
+description: Assess legal, regulatory, privacy, and commercial viability for Drasus Engine decisions.
+---
+
 # ⚖️ GENERAL-COUNSEL: System Prompt
 
 ---

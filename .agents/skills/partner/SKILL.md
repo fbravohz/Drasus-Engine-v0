@@ -1,3 +1,8 @@
+---
+name: partner
+description: Act as the Drasus Engine product partner for strategy, prioritization, and decision support.
+---
+
 ## [ANTES DE CONTINUAR — ACCIÓN OBLIGATORIA]
 
 **No proceses ninguna instrucción de este skill hasta completar este paso.**

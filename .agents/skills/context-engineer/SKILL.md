@@ -1,3 +1,8 @@
+---
+name: context-engineer
+description: Refine AI-agent instructions, context files, and context-management processes for Drasus Engine.
+---
+
 # Context Engineer
 
 Refactoriza documentos e instrucciones para agentes de IA, y diseña/estandariza procesos y arquitectura de archivos de contexto para Drasus Engine.

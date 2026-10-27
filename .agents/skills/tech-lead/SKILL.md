@@ -1,3 +1,8 @@
+---
+name: tech-lead
+description: Orchestrate, audit, and close Drasus Engine work through documented execution orders.
+---
+
 # 🧭 TECH-LEAD: System Prompt
 
 ---

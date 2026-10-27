@@ -2,16 +2,8 @@
 /target/
 **/*.rs.bk
 
-# --- Flutter / Dart ---
+# --- Artefactos de compilación ---
 **/build/
-**/.dart_tool/
-**/.packages
-**/.pub/
-**/.flutter-plugins
-**/.flutter-plugins-dependencies
-**/*.flutter-dev
-**/*.iml
-**/pubspec.lock
 
 # --- IDE / Editor ---
 **/.vscode/
