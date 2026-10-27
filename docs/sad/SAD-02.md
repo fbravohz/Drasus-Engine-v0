@@ -6,8 +6,8 @@ Drasus Engine elimina la complejidad de microservicios externos y dependencias d
 
 | Componente | Tecnología | Descripción |
 | :--- | :--- | :--- |
-| **Interfaz de Usuario (UI)** | Flutter (Dart) | Renderizado fluido nativo en GPU (Impeller) para gráficos financieros masivos y una Interfaz de Usuario de ultra rendimiento. |
-| **Integración UI-Core** | flutter_rust_bridge (FFI) | Comunicación C-ABI de memoria compartida con latencia cero entre la interfaz gráfica y el motor numérico en Rust. |
+| **Interfaz de Usuario (UI)** | Tauri 2 + React/TypeScript | Aplicación de escritorio con interfaz web accesible y componentes reutilizables. |
+| **Integración UI-Core** | Protobuf + gRPC autenticado | Contratos tipados entre el Core Rust, el host Tauri y la interfaz; loopback efímero para escritorio local. |
 | **Backend Orquestador** | Rust | Core nativo compilado, empaquetado conjuntamente con la UI. |
 | **Motor de Ejecución** | NautilusTrader (núcleo v2, crates Rust) | Motor institucional consumido como dependencias Cargo nativas (sin intérprete Python), con paridad absoluta entre simulación y operativa real (ADR-0107). |
 | **Aceleración Matemática** | Rust Native (SIMD) | Optimización de algoritmos críticos a código máquina utilizando múltiples hilos de Procesador (CPU) o núcleos vectoriales. |
@@ -16,7 +16,7 @@ Drasus Engine elimina la complejidad de microservicios externos y dependencias d
 | **Motor Analítico** | DuckDB (Embebido) | Consultas SQL vectorizadas directamente sobre archivos Parquet sin saturar la memoria RAM (*Out-of-Core*). |
 | **Persistencia (OLTP)** | SQLite (Modo WAL) | Gestión de configuraciones, libros de estrategias, almacén de eventos y registros de operaciones cifrados. |
 | **Series Temporales (OLAP)** | Archivos Parquet | Almacenamiento en columnas particionado estilo Hive para datos históricos de mercado y resultados de investigación. |
-| **Transporte UI ↔ Backend** | FFI / gRPC | Intercambio binario de alta velocidad en memoria compartida (Local) o mediante flujos gRPC (Ejecución VPS Headless). |
+| **Transporte UI ↔ Backend** | gRPC | Contratos Protobuf para escritorio local, ejecución headless y futuros clientes delgados. |
 | **Interfaz de Comandos (CLI)** | Clap (Rust) | Interfaz de consola que interactúa con el motor central puenteando el API para ejecuciones locales directas. |
 
 ### 2.2 El Músculo: Simulación y Ejecución (NautilusTrader + Rust SIMD)
@@ -256,7 +256,7 @@ Para garantizar la máxima velocidad en la ruta de ejecución crítica, el siste
     *   **The Sanitizer (Quality Protocol):** Flujo secuencial: `Raw Data → Delisted Filter → Corporate Events Adjuster → PIT Validator → Clean Data`. Incluye detección de gaps e integridad OHLC.
     *   **Transformación y Carga:** Procesamiento **Polars** nativo y escritura en **Hive-Style Parquet**.
     *   **Remuestreo Dinámico:** **DuckDB** agrupa barras crudas (1m/Ticks) en temporalidades personalizadas (ej. 7 min, 21 min) al vuelo via SQL.
-    *   **Feedback:** Telemetría en tiempo real hacia la UI mediante Flutter FFI Events.
+    *   **Feedback:** Telemetría en tiempo real hacia la UI mediante streams gRPC con throttling en Rust.
 
 2.  **Simulación Histórica (Ruta de Rendimiento Crítico):**
     *   Escaneo de archivos Parquet con Polars.
@@ -276,16 +276,16 @@ Para garantizar la máxima velocidad en la ruta de ejecución crítica, el siste
 
 *   **Datos de Mercado (Series Temporales):** El histórico de movimientos de precio (Ticks y Velas) se comprime en archivos Parquet estructurados por activo, temporalidad y periodo cronológico.
 *   **Estado y Ledger:** Base de datos relacional local gestionada mediante **SQLx** para configuraciones, estrategias promovidas y registros de seguridad cifrados.
-*   **Transporte UI ↔ Backend:** Uso de **Apache Arrow** para la transmisión binaria de alta velocidad a través de FFI/gRPC. Se aplica un proceso de reducción de resolución (*downsampling*) en el servidor para permitir la visualización fluida de más de 10,000 puntos de datos en el navegador.
+*   **Transporte UI ↔ Backend:** gRPC es la frontera tipada. Apache Arrow IPC se usa para payloads numéricos cuando el contrato lo justifique; Rust aplica downsampling antes de transmitir datos de visualización.
 
-### 2.6 El Orquestador Nativo (Arquitectura Multimodal y FFI)
+### 2.6 El Orquestador Nativo (Arquitectura Multimodal y gRPC)
 
-Provee la infraestructura de comunicación entre la UI en Flutter y los motores de ejecución en Rust. Para garantizar la soberanía, rendimiento y flexibilidad, Drasus Engine implementa una **Arquitectura Multimodal** con las siguientes modalidades configurables:
+Provee la infraestructura de comunicación entre la UI Tauri/React y los motores de ejecución en Rust. El mismo contrato Protobuf/gRPC gobierna los modos locales y remotos:
 
-1. **LocalPowerUser (FFI):** Ejecución nativa por defecto. Flutter UI y Rust Core operan en la misma máquina local compartiendo memoria mediante FFI (`flutter_rust_bridge`). Latencia FFI/gRPC eliminada.
-2. **VpsMonolithic:** Ejecución local en un VPS de bajos recursos gráficos vía Escritorio Remoto (RDP). Se activa una variable global para renderizar Flutter en modo Software (sin shaders complejos) preservando los recursos del CPU del VPS.
-3. **SaaSCloudEngine (Headless CLI):** Todo el backend de Rust (los 8 módulos: Ingest a Withdraw) se compila como un Daemon CLI que se ejecuta 24/7 en un servidor de alta densidad (VPS o Contenedor Bare-Metal). La UI local en Flutter se conecta a este demonio vía **gRPC / WebSockets**, permitiendo control total y visualización acelerada en GPU desde la laptop del usuario sin interrumpir las operaciones del servidor.
-4. **HybridComputeCooperative (Local FFI + Remote Workers):** El backend Rust local corre acoplado al Frontend local vía FFI 100% del tiempo. Mantiene la base de datos transaccional SQLite en local. Sin embargo, delega de forma asíncrona tareas analíticas intensivas (backtesting masivo, optimización) o procesos de ejecución persistentes 24/7 (Execute remoto) a una o varias instancias daemon remotas en VPS vía gRPC/WebSockets, permitiendo la desconexión segura del cliente local sin interrumpir la operación del VPS.
+1. **LocalPowerUser:** Tauri supervisa el Core local; éste escucha solo en loopback con puerto efímero y credencial de sesión de vida corta.
+2. **VpsMonolithic:** Core y cliente pueden convivir en un VPS/RDP; la UI ajusta densidad y efectos a los recursos disponibles sin cambiar el contrato.
+3. **SaaSCloudEngine:** el Core headless se ejecuta 24/7 en el plano de ejecución del usuario; los clientes autorizados se conectan por gRPC sin interrumpir la operación.
+4. **HybridComputeCooperative:** una instancia local conserva su estado soberano y delega trabajo permitido a nodos remotos mediante gRPC autenticado; la desconexión del cliente no detiene la ejecución remota.
 
 
 #### Asignación de Puertos (Configuración de Red)
@@ -293,9 +293,9 @@ La infraestructura de red se gestiona mediante variables de entorno validadas, p
 
 | Servicio | Puerto Predeterminado | Protocolo | Variable de Entorno |
 | :--- | :--- | :--- | :--- |
-| **FFI Bridge** | N/A | Memoria FFI/gRPC | `CORE_CHANNEL` |
-| **Flutter FFI Events (Progreso)** | N/A | FFI/gRPC | - |
-| **gRPC / WebSockets** | 50051 | TCP | `LIVE_EVENT_CHANNEL` |
+| **Core local** | Efímero | gRPC loopback autenticado | Configurado por el host Tauri |
+| **Progreso** | El del Core | Stream gRPC | Contrato de feature |
+| **gRPC remoto** | Configurable | TLS/TCP | Configuración soberana del plano de ejecución |
 | **Shadow Watchdog** | N/A | Daemon Nativo | `WATCHDOG_DAEMON` |
 
 #### Flujo de Responsabilidades y Ejecución
@@ -308,22 +308,22 @@ Para garantizar que la interfaz de usuario mantenga una fluidez constante, el si
     2.  **Compilación Nativa:** Los algoritmos se ejecutan como código nativo Rust para su ejecución ultra-rápida.
     3.  **Ejecución (Institutional Protocol):** Inicio del motor de simulación de NautilusTrader siguiendo el ciclo síncrono: `Ingesta → Warm-up → Indicadores → Sincronización (Bar Open) → Señal → Risk Check → Order Server → Matching Engine → Account/Ledger Update`.
     4.  **Persistencia:** Almacenamiento de resultados en archivos Parquet particionados.
-    5.  **Emisión:** Comunicación de señales de progreso hacia Flutter vía FFI o flujos gRPC.
+    5.  **Emisión:** Comunicación de señales de progreso mediante streams gRPC regulados por el Core.
 *   **Optimización de Ancho de Banda (Throttling):** Los trabajadores agrupan las actualizaciones de estado y emiten señales de progreso cada 100 milisegundos, evitando la saturación del tráfico de datos y garantizando la estabilidad de la interfaz gráfica.
 
-### 2.7 El Patrón Todo en Uno (Rust + Flutter FFI)
+### 2.7 Empaquetado de Escritorio (Tauri + React)
 
-Drasus Engine se distribuye como una aplicación nativa empaquetada. Al ser compilado en Rust/Dart, no requiere runtimes adicionales (Node, Python).
+Drasus Engine se distribuye como aplicación Tauri. El paquete entrega el host de escritorio, los assets de React y el Core Rust; el usuario final no instala herramientas de desarrollo.
 
-*   **Empaquetado Completo:** El código fuente (Rust) y el motor UI (Flutter) se compilan en un único ejecutable.
+*   **Empaquetado Completo:** el host inicia, supervisa y detiene el Core local, y expone una frontera mínima a la UI.
 *   **Resolución de Dependencias Invisible:**
     * **Windows:** Creación de un `.exe` con instalador (*Inno Setup* o *NSIS*).
     * **macOS:** Creación de archivo `.app` o `.dmg` firmado para Apple Developer Program.
     * **Linux:** Creación de un `AppImage` que se ejecuta en cualquier distribución sin instalar nada.
-*   **Interfaz Premium Nativa (Impeller):**
+*   **Experiencia de escritorio:**
     * **Frameless:** Sin bordes y con barra superior personalizada.
     * **Modo Oscuro Nativo:** Sincronización del tema del dashboard con el del sistema operativo.
-    * **Local API Port Selection:** Búsqueda dinámica de un puerto local libre para evitar colisiones.
+    * **Puerto local:** el host asigna un puerto loopback efímero y transmite la sesión al Core sin exponerlo a la red.
 *   **Detección Dinámica de Hardware:** Durante el arranque, el sistema identifica la disponibilidad de tarjetas gráficas NVIDIA. 
     *   **Con GPU:** Habilita rutas opcionales aceleradas vía `candle` (CUDA/Metal dinámico, ADR-0112); nunca obligatorio.
     *   **Sin GPU:** Realiza un respaldo automático (*Fallback*) hacia la ejecución multi-hilo en el procesador central (CPU).
@@ -332,12 +332,12 @@ Drasus Engine se distribuye como una aplicación nativa empaquetada. Al ser comp
 
 Este componente traduce la lógica visual del usuario en instrucciones de ejecución de alto rendimiento.
 
-1.  **Exportación de Estrategia:** El lienzo de diseño en Flutter convierte el flujo visual en un **Árbol de Sintaxis Abstracta** (Abstract Syntax Tree) en formato JSON/Protobuf.
+1.  **Exportación de Estrategia:** el lienzo Tauri/React serializa el flujo visual en el contrato Protobuf definido por el Core.
 2.  **Validación Institucional:** El Orquestador valida la estructura y tipos del payload mediante esquemas estrictos de **Serde** (Rust).
 3.  **Patrón Factory (Fábrica):** El sistema orquesta "Bloques Pre-Compilados". La lógica central reside en código estático de NautilusTrader o indicadores compilados previamente (AOT - *Ahead-Of-Time*). El Grafo Dirigido Acíclico (DAG) visual solo define las conexiones entre estos bloques para evitar la fragilidad de compilar todo el sistema en tiempo real.
 4.  **Nodos de Inyección Directa (Escape-Hatch):** Para lógica personalizada que no existe en los bloques base, el sistema permite integrar código Rust nativo directamente en el bucle de eventos del motor.
 
-### 2.9 Infraestructura de Datos y Comunicación entre Procesos (FFI/gRPC)
+### 2.9 Infraestructura de Datos y Comunicación entre Procesos (gRPC)
 
 #### Capa de Datos (Local-First "Zero-Docker")
 | Capa | Tecnología | Función |
@@ -346,11 +346,11 @@ Este componente traduce la lógica visual del usuario en instrucciones de ejecuc
 | **Analítica (OLAP)** | Archivos Parquet | Series de tiempo comprimidas y particionadas bajo el estándar **Hive-Style** (`year=Y/month=M/`). Almacena históricos y resultados de investigación. |
 | **Consulta/Resample** | DuckDB | Ejecuta consultas SQL analíticas y **remuestreo dinámico** (ej. 7m, 21m) sobre Parquet sin redundancia de archivos. |
 | **Procesamiento ETL**| Polars (Rust Native) | Motor principal para transformación masiva y el pipeline **The Sanitizer** (Quality Protocol). |
-| **Transporte Binario** | Apache Arrow | Serialización ultrarrápida de datos hacia el frontend vía FFI/gRPC (Arrow JS). |
+| **Transporte Binario** | Protobuf/gRPC + Arrow IPC opcional | Contratos tipados; Arrow se reserva para datos numéricos voluminosos. |
 
-#### Estrategia de Comunicación (FFI/gRPC)
+#### Estrategia de Comunicación (gRPC)
 *   **Rust ↔ Workers:** Las tareas pesadas de simulación se gestionan mediante un thread pool (Tokio/Rayon). Se utiliza **memoria compartida** (`shared_memory`) para evitar la sobrecarga de serializar grandes conjuntos de datos (*DataFrames*).
-*   **Rust ↔ Flutter:** Comunicación nativa vía FFI (Foreign Function Interface) para cero latencia. Para despliegues Headless (Modo VPS), se activa el canal gRPC/WebSockets para telemetría.
+*   **Rust ↔ Cliente:** gRPC autenticado para Tauri/React local y despliegues headless; el host de escritorio controla la sesión local y el Core aplica límites de flujo.
 *   **Escalabilidad Futura:** El diseño es agnóstico al gestor de tareas; la arquitectura permite migrar hacia infraestructuras de nube distribuidas (Orquestación Rust) simplemente modificando la capa de despacho.
 
 ### 2.10 Protocolo de Acceso Remoto de Portafolio (RPAP)
@@ -370,4 +370,3 @@ Drasus Engine habilita la distribución segura y de baja latencia de ejecución 
 *   **Algoritmo de Escalado de Riesgo Local:** Cada Copier procesa localmente el escalado de tamaño de orden basándose en el capital relativo (Capital Copier / Capital Master), la volatilidad realizada del instrumento (ATR) y límites dinámicos de riesgo (Drawdown máximo y porcentaje de riesgo por operación), reduciendo el tamaño si el riesgo en dólares excede el límite del Copier.
 
 ---
-

@@ -57,9 +57,9 @@ Dentro de **una sola** cuenta maestra, el mecanismo que permite al dueño crear 
 
 ## Estructura Interna (FCIS — ADR-0002)
 
-- **Core (Lógica Pura):** evaluador de permisos extendido — dado `(operador, rol asignado, puerto de Feature invocado, pipeline/institutional_tag)`, decide conceder o denegar. Extiende la función pura de `agentic-mcp-gateway`/ADR-0123 con el insumo de rol; resolución de si una capacidad está en la matriz del rol. Segunda función pura, invocada antes de comprometer cualquier cambio de matriz/asignación: dado el catálogo de roles y asignaciones vigente más el cambio propuesto, calcula si el resultado deja ≥1 operador con la capacidad "gestionar operadores y roles" — invariante "último admin en pie".
+- **Core (Lógica Pura):** evaluador de permisos extendido — dado `(operador, rol asignado, puerto de Feature, objeto, entorno y contexto de riesgo)`, decide conceder o denegar. El pipeline, si existe, solo es contexto. Extiende el evaluador de `agentic-mcp-gateway`/ADR-0123 con el insumo de rol; resolución de si una capacidad está en la matriz del rol. Segunda función pura, invocada antes de comprometer cualquier cambio de matriz/asignación: dado el catálogo de roles y asignaciones vigente más el cambio propuesto, calcula si el resultado deja ≥1 operador con la capacidad "gestionar operadores y roles" — invariante "último admin en pie".
 - **Shell (Infraestructura):** persistencia central del catálogo de roles/matrices y de asignaciones operador↔rol (Cabina de Mando), caché local con `ROLE_CACHE_TTL` para operación offline, verificación de la cuota de cuentas hijas contra `plan-tier-quota`, envío/recepción de comandos de cascada de autoridad vía el relé genérico.
-- **Frontera Pública:** puerto de evaluación de permisos que cualquier módulo/feature puede consultar antes de aceptar una llamada de un operador con rol asignado — mismo punto de consulta que ya usa ADR-0123, con un insumo más.
+- **Frontera Pública:** puerto de evaluación de permisos que cualquier Feature puede consultar antes de aceptar una llamada de un operador con rol asignado — mismo punto de consulta que ya usa ADR-0123, con un insumo más.
 
 ## Ciclo de Vida de la Feature — Operator Roles
 

@@ -1,0 +1,8 @@
+# Drasus Engine configuration for the local Codex context provider.
+
+[features]
+hooks = true
+
+[mcp_servers.drasus_context]
+command = "sh"
+args = ["-c", "exec python3 \"$(git rev-parse --show-toplevel)/.agents/context-runtime/server.py\""]

@@ -466,7 +466,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
     * Si el objetivo tiene `institutional_tag = Live`, la llamada se rechaza salvo que `PRODUCTION_OVERRIDE` esté activo en ese momento.
     * Toda llamada (concedida o rechazada) queda auditada con su procedencia agente (`agent_session_id`) y el `institutional_tag` evaluado.
 *   **Entrada:** Llamada MCP entrante con pipeline `manage`, `institutional_tag` del portafolio objetivo, estado de `PRODUCTION_OVERRIDE`.
-*   **Salida:** Resultado de la operación enrutado al agente, o rechazo con motivo, + registro de auditoría de procedencia.
+*   **Salida:** Resultado de la operación enrutado al agente, o rechazo con motivo, + registro de auditoría de procedencia + transición confirmada y actividad visible para la proyección de estado en la interfaz cuando la operación muta estado.
 
 ### **TTR-036: Integración del Aporte Fundamental en Ponderación de Portafolio (Exposure Map + Indicator Projector)**
 *   **Descripción:** TTR de Integración (ADR-0118): consume el [`asset-exposure-map`](../features/asset-exposure-map.md) y el [`fundamental-indicator-projector`](../features/fundamental-indicator-projector.md) vía sus `public_interface` para ponderar riesgo/exposición del portafolio según la concentración de eventos fundamentales relevantes sobre sus activos.

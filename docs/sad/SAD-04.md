@@ -3,10 +3,10 @@
 ### 4.1 Nivel 1: Contexto
 ```
     ┌───────────────────────────┐   ┌───────────────────────────┐
-    │       Flutter UI          │   │  Agente LLM (Claude, etc.) │
-    │ (Dart + Impeller Engine)  │   │  Cliente MCP — Cabina Dual │
+    │       Tauri/React UI      │   │       Agente LLM externo    │
+    │  (host desktop + React)   │   │  Cliente MCP — Cabina Dual │
     └────────┬──────────────────┘   └────────┬──────────────────┘
-             │ (Local: FFI / Remoto: gRPC)    │ (MCP, vía Agentic
+             │ (gRPC autenticado local/remoto) │ (MCP, vía Agentic
              │                                │  Gateway — ADR-0123)
              └───────────────┬────────────────┘
     ┌────────────────────────▼──────────┐      ┌─────────────────────────┐
@@ -21,7 +21,7 @@
     └───────────────────────────┘
 ```
 
-**Tercer cliente — Agente LLM vía MCP (Cabina Dual, ADR-0123):** igual que Flutter, es un Shell-cliente más sobre la misma `public_interface`. No reemplaza al cliente humano: el usuario decide en cada momento si opera la interfaz o delega en el agente. Sus permisos por defecto se gradúan por riesgo de pipeline (abiertos en descubrimiento/simulación, bloqueados en producción real salvo activación explícita) — el detalle vive en [`agentic-mcp-gateway.md`](../features/agentic-mcp-gateway.md).
+**Tercer cliente — Agente LLM vía MCP (Cabina Dual, ADR-0123):** igual que Tauri/React, es un cliente Shell sobre los mismos puertos públicos de las Features. No reemplaza al cliente humano: el usuario decide si opera la interfaz o delega en el agente. Sus permisos se evalúan por rol, puerto, objeto, entorno, contexto de riesgo y delegación vigente; el pipeline no concede capacidad. La actividad durable se proyecta en todas las superficies autorizadas sin automatización de mouse/DOM (ADR-0166).
 
 ### 4.2 Nivel 2: Contenedores (Features Hexagonales + Presets de Pipeline)
 
@@ -45,7 +45,7 @@ raíz del proyecto
 │   ├── presets/                    # Crates de cableado — CERO lógica
 │   │   └── standard-pipeline/      # Preset recomendado (los 8 pasos)
 │   ├── app/                        # Binario + entry point
-│   ├── bridge/                     # FFI flutter_rust_bridge
+│   ├── bridge/                     # Host Tauri + contratos Protobuf/gRPC
 │   └── nautilus_compat/            # Anticorruption layer (NautilusTrader)
 └── migrations/                     # Migraciones SQLx centralizadas (ADR-0006)
 ```
@@ -102,4 +102,3 @@ crates/features/<dominio>/<feature>/
 Cada feature crate es independiente — compila y se testea aislada. El preset `standard-pipeline` agrupa features en el orden recomendado del pipeline sin añadir lógica propia. Los módulos como dueños runtime no existen: las features se conectan directamente en el Canvas [Forge/Reactor] por sus puertos tipados.
 
 ---
-

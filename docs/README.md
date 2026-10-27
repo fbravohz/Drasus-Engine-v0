@@ -2,6 +2,8 @@
 
 Este es el punto de entrada central a la arquitectura y especificación de Drasus Engine. El sistema está diseñado como un **Monolito Modular** siguiendo el patrón **FCIS** (Functional Core / Imperative Shell).
 
+> **Migración de UI:** ADR-0165 gobierna toda decisión de interfaz y transporte: Tauri 2 + React/TypeScript sobre contratos gRPC. Las menciones Flutter/FFI que sobreviven dentro de especificaciones de features son historial de la superficie retirada; se reescriben por slice al implementar la nueva UI, nunca se reutilizan como instrucciones.
+
 ---
 
 ## 🏗️ Módulos (Presets de Composición — ADR-0137)
@@ -34,7 +36,7 @@ Las features son **unidades hexagonales autónomas** (ADR-0137): cada una expone
 | [**adaptive-volume-indicators**](./features/adaptive-volume-indicators.md) | Esta suite de indicadores avanzados se aleja de los promedios estáticos para adaptarse a la volatilidad y liquidez del mercado. Incluye indicadores... | ingest, generate |
 | [**advanced-trade-management**](./features/advanced-trade-management.md) | Es el **gestor operativo base de transacciones**. Implementa reglas tradicionales de control de órdenes que permiten estructurar operaciones... | execute, manage |
 | [**adversarial-noise-agent**](./features/adversarial-noise-agent.md) | El "Adversarial Noise Agent" o Red Team AI es el gran villano del auditor de robustez. Es un componente que ejecuta **Data Perturbation**... | validate |
-| [**agentic-mcp-gateway**](./features/agentic-mcp-gateway.md) | Expone la `public_interface` de los 8 módulos a un agente LLM externo vía MCP (Cabina Dual, ADR-0123), con permisos graduados: abierto en descubrimiento/simulación, condicionado por `institutional_tag` en gestión, bloqueado por defecto en producción real. | Todos |
+| [**agentic-mcp-gateway**](./features/agentic-mcp-gateway.md) | Expone las `public_interface` de las Features a un agente LLM externo vía MCP (Cabina Dual, ADR-0123). Cada llamada se evalúa por rol, puerto, objeto, entorno, riesgo contextual y delegación vigente; sus mutaciones se proyectan de forma recuperable en Tauri/React. | Todos |
 | [**algorithmic-bars**](./features/algorithmic-bars.md) | Es un procesador de datos de mercado que transforma el flujo de ticks en barras basadas en eventos de precio o volumen, en lugar de intervalos de... | ingest |
 | [**alpha-decoupling**](./features/alpha-decoupling.md) | Aisla el rendimiento puro de la estrategia (Alpha) eliminando el efecto inercial del mercado general (Beta). Resuelve el problema de falsos... | manage, validate |
 | [**alpha-harvesting-gateway**](./features/alpha-harvesting-gateway.md) | Es un portal de ingesta (Gateway) que permite recibir, desencriptar y refinar estrategias anonimizadas provenientes de la mente colectiva (o peers)... | generate |
@@ -84,7 +86,7 @@ Las features son **unidades hexagonales autónomas** (ADR-0137): cada una expone
 | [**federated-portfolio**](./features/federated-portfolio.md) | El **Federated Portfolio** es una arquitectura avanzada que permite la coexistencia y coordinación de múltiples portafolios independientes y... | manage |
 | [**fit-to-portfolio-search**](./features/fit-to-portfolio-search.md) | Inyección del estado del portafolio vivo como una presión restrictiva en el motor evolutivo (NSGA-II). Resuelve el problema de generar cientos de... | manage |
 | [**formula-canvas**](./features/formula-canvas.md) | Lienzo de Fórmulas: motor de expresiones único para crear símbolos sintéticos, indicadores custom, señales y riesgo por fórmula matemática libre, con catálogo abierto e invariante de causalidad (ADR-0161). | ingest, generate, validate |
-| [**flutter-packaging-manager**](./features/flutter-packaging-manager.md) | El **Manejador de Empaquetado de Flutter FFI** orquesta el ciclo de vida del binario congelado de Rust (backend + assets frontend) utilizando... | execute |
+| [**desktop-packaging-manager**](./features/desktop-packaging-manager.md) | Empaqueta el Core Rust y la aplicación Tauri/React, con ciclo de vida local gRPC autenticado y distribución nativa por plataforma. | execute |
 | [**fractional-differencer**](./features/fractional-differencer.md) | El **Fractional Differencer** es una herramienta de procesamiento de series temporales que permite transformar una serie no-estacionaria (como los... | ingest, generate |
 | [**fragility-gradient-auditor**](./features/fragility-gradient-auditor.md) | La Auditoría de Gradiente de Fragilidad Descendente es la evolución (New Era) del clásico análisis de varianza/mediana. | validate, feedback |
 | [**fundamental-event-store**](./features/fundamental-event-store.md) | Almacén PIT de eventos fundamentales (macro, resultados, política monetaria): ingesta el hecho crudo con linaje y lo versiona vintage/as-of (first-print + revisiones) sin look-ahead (ADR-0126/0127). | ingest |
@@ -142,7 +144,7 @@ Las features son **unidades hexagonales autónomas** (ADR-0137): cada una expone
 | [**robustness-score-aggregator**](./features/robustness-score-aggregator.md) | El agregador de score de robustez es el motor de consolidación que reemplaza el viejo enfoque binario de "Descarte Inmediato". Toma los 5 resultados... | validate, execute, feedback |
 | [**robustness-verdict-engine**](./features/robustness-verdict-engine.md) | El Robustness Verdict Engine es un motor de interpretación semántica que convierte los resultados crudos del guantelete de robustez en un veredicto... | validate, feedback |
 | [**rule-ablation**](./features/rule-ablation.md) | La Ablación de Reglas es una técnica de simplificación y validación de robustez que consiste en desactivar sistemáticamente componentes lógicos de... | validate |
-| [**secure-updater**](./features/secure-updater.md) | El actualizador seguro gestiona el ciclo de vida de las actualizaciones de software del núcleo binario de Rust y la interfaz gráfica de Flutter,... | Todos |
+| [**secure-updater**](./features/secure-updater.md) | El actualizador seguro gestiona el ciclo de vida de las actualizaciones del Core Rust y la aplicación de escritorio Tauri/React,... | Todos |
 | [**signal-correlation-analyzer**](./features/signal-correlation-analyzer.md) | Calcula matrices de correlación entre señales (señal vs señal) y entre señales y factores de mercado. Proporciona auditoría visual de... | feedback |
 | [**signal-topology**](./features/signal-topology.md) | Topología de Fuentes y Destinos: una estrategia lee señales de N símbolos × N timeframes (propios/ajenos/sintéticos) y ejecuta en N destinos, sin "mercado principal", con conocibilidad por reloj y riesgo agregado (ADR-0158). | generate, validate, execute |
 | [**slippage-models**](./features/slippage-models.md) | Es el componente que inyecta "realismo institucional" a las ejecuciones. Se apalanca en los modelos de impacto de **NautilusTrader** (ADR-0013) para... | validate, execute |
@@ -248,7 +250,7 @@ Proyectos de investigación avanzada y alta complejidad.
 | [**symbolic-signal-discovery**](./moonshots/symbolic-signal-discovery.md) | Descubrimiento simbólico de señales alpha |
 | [**quantum-portfolio-solver**](./moonshots/quantum-portfolio-solver.md) | Explora el uso de algoritmos de Computación Cuántica para resolver problemas de optimización combinatoria complejos, como la selección de activos y... |
 | [**saas-cloud-engine**](./moonshots/saas-cloud-engine.md) | Arquitectura y orquestación masiva para despliegue Cloud/VPS de alta densidad |
-| [**saas-gateway**](./moonshots/saas-gateway.md) | El Gateway central de acceso regula los flujos de comunicación externa en la nube entre los Thin Clients Flutter local y el clúster de ejecución or... |
+| [**saas-gateway**](./moonshots/saas-gateway.md) | El Gateway central de acceso regula los flujos de comunicación externa entre clientes delgados y el clúster de ejecución del usuario... |
 | [**shared-capital-pool**](./moonshots/shared-capital-pool.md) | El Shared Capital Pool es un módulo de investigación y desarrollo diseñado para permitir que múltiples portafolios federados ej. Portafolio A y Por... |
 | [**shield-netting-translator**](./moonshots/shield-netting-translator.md) | El traductor de compensación es una capa intermedia que actúa como envoltorio de set algorítmicos para compactar operaciones subyacentes de cobertu... |
 | [**simulador-adversarial**](./moonshots/simulador-adversarial.md) | Es un motor de simulación alternativo que, en lugar de evaluar una estrategia contra datos históricos estáticos del mercado, crea y modela un Libro... |
@@ -288,7 +290,7 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0016**](./adr/ADR-0016.md) | Local-First Processing & External Overlays |
 | [**ADR-0017**](./adr/ADR-0017.md) | Simulación de Alta Fidelidad Institutional |
 | [**ADR-0018**](./adr/ADR-0018.md) | Taxonomía y Topología del Pipeline (Los 8 Módulos) |
-| [**ADR-0019**](./adr/ADR-0019.md) | ~~Interoperabilidad Frontend-Backend (FFI/gRPC)~~ ⚠️ Superado por ADR-0029 |
+| [**ADR-0019**](./adr/ADR-0019.md) | ~~Interoperabilidad Frontend-Backend (FFI/gRPC)~~ ⚠️ Superado por ADR-0165 |
 | [**ADR-0020**](./adr/ADR-0020.md) | Principio de Inundación de Fundaciones V2 (Foundation Inundation) |
 | [**ADR-0021**](./adr/ADR-0021.md) | ~~Modelo de Decisión Dual (Autopilot con Veto)~~ ⚠️ Superado por ADR-0010 |
 | [**ADR-0022**](./adr/ADR-0022.md) | Pipeline No-Lineal (DAG Multiflujal) |
@@ -298,7 +300,7 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0026**](./adr/ADR-0026.md) | Shadow Watchdog & Heartbeat |
 | [**ADR-0027**](./adr/ADR-0027.md) | Event Sourcing & Inventory Reconstruction |
 | [**ADR-0028**](./adr/ADR-0028.md) | ZUI Fractal Navigation (Orchestrator/Strategy Inspector) |
-| [**ADR-0029**](./adr/ADR-0029.md) | Patrón Todo en Uno (Rust + Flutter FFI) |
+| [**ADR-0029**](./adr/ADR-0029.md) | ~~Patrón Todo en Uno (Rust + Flutter FFI)~~ ⚠️ Superado por ADR-0165 |
 | [**ADR-0030**](./adr/ADR-0030.md) | Persistencia Soberana "Zero-Docker" |
 | [**ADR-0031**](./adr/ADR-0031.md) | Inteligencia Artificial Híbrida (Hybrid Genesis Engine) |
 | [**ADR-0032**](./adr/ADR-0032.md) | Estándares de Hardware Soberano (Single Machine Sovereignty) |
@@ -373,7 +375,7 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0101**](./adr/ADR-0101.md) | Transpilación Basada en Plantillas Tera para Modelos AST |
 | [**ADR-0102**](./adr/ADR-0102.md) | Anonimización Criptográfica local-first en Collective Intelligence |
 | [**ADR-0103**](./adr/ADR-0103.md) | Filosofía Dual y Sandboxing en el Sistema de Plugins Institucionales |
-| [**ADR-0104**](./adr/ADR-0104.md) | Traducción de Características y Pila del Roadmap Acelerado a Rust/Flutter Core |
+| [**ADR-0104**](./adr/ADR-0104.md) | Traducción de Características y Pila del Roadmap Acelerado a Rust/Flutter Core · UI enmendada por ADR-0165 |
 | [**ADR-0105**](./adr/ADR-0105.md) | Estrategia de Datos (100% Polars Nativo en Rust) |
 | [**ADR-0106**](./adr/ADR-0106.md) | Paradigma de Interfaz de Usuario y Dashboards Visuales de Alta Precisión |
 | [**ADR-0107**](./adr/ADR-0107.md) | Integración Nativa con NautilusTrader v2 (Crates Rust, Sin Python, Sin Fork) |
@@ -392,7 +394,7 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0120**](./adr/ADR-0120.md) | Modos de Acompañamiento de Implementación (Autónomo / Mentor / Revisión) — Selección por el Usuario, Persistida en la Orden de Trabajo |
 | [**ADR-0121**](./adr/ADR-0121.md) | Comentarios de Código en Español — Identificadores en Inglés se Mantienen |
 | [**ADR-0122**](./adr/ADR-0122.md) | Cuarto Modo de Acompañamiento "Docente" + Protocolo de Lecciones Compartido (`docs/lessons/`) |
-| [**ADR-0123**](./adr/ADR-0123.md) | Cabina Dual — Acceso Agéntico vía MCP con Permisos Graduados por Riesgo de Pipeline |
+| [**ADR-0123**](./adr/ADR-0123.md) | Cabina Dual — Acceso Agéntico vía MCP con Permisos por Feature, Objeto y Riesgo Contextual |
 | [**ADR-0124**](./adr/ADR-0124.md) | Lecciones Organizadas por Story/Task, no por Tema — Corrige esa Regla de ADR-0122 |
 | [**ADR-0125**](./adr/ADR-0125.md) | Frontera Determinista de Datos Fundamentales — Event Study + Surprise como Métodos Canónicos; Extracción NLP Fuera del Núcleo |
 | [**ADR-0126**](./adr/ADR-0126.md) | Sourcing y Soberanía de Datos Fundamentales — Hecho Crudo Externo, Scoring 100% Propio |
@@ -400,14 +402,16 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0128**](./adr/ADR-0128.md) | Relevancia Evento→Activo y Normalización por Instrumento — Mapa de Exposición Determinista |
 | [**ADR-0129**](./adr/ADR-0129.md) | Entradas Concurrentes No Bloqueantes por Defecto + De-duplicación de Señal |
 | [**ADR-0130**](./adr/ADR-0130.md) | Frecuencia/Horizonte de Operación como Objetivo de Generación + Agnosticismo de Temporalidad |
-| [**ADR-0131**](./adr/ADR-0131.md) | Flutter como Framework de Frontend — Rechazo Razonado de Qt, iced, slint y egui |
+| [**ADR-0131**](./adr/ADR-0131.md) | ~~Flutter como Framework de Frontend~~ ⚠️ Superado por ADR-0165 |
 | [**ADR-0132**](./adr/ADR-0132.md) | Rust como Lenguaje del Núcleo — Rechazo Razonado de C++/Qt Total |
 | [**ADR-0133**](./adr/ADR-0133.md) | Pirámide de Pruebas Canónica + Fuzzing Obligatorio en Fronteras Externas |
 | [**ADR-0134**](./adr/ADR-0134.md) | Matriz de Plataformas de Despliegue (Desktop Nativo + Mobile/Web Cliente Delgado) y Detección de Terminación del Padre Portátil |
 | [**ADR-0135**](./adr/ADR-0135.md) | Sección `## Cáscara Visual` Obligatoria en Features con Superficie — UI-Designer como Etapa 0.5 |
 | [**ADR-0136**](./adr/ADR-0136.md) | Arquitectura Visual Unificada — Dashboard + Canvas [Forge/Reactor] · supersede ADR-0028 |
 | [**ADR-0137**](./adr/ADR-0137.md) | Feature como Unidad Hexagonal Autónoma con Puertos Tipados — Módulos como Composiciones Preset |
-| [**ADR-0138**](./adr/ADR-0138.md) | Design System Centralization en UI — ThemeExtension + Librería de Componentes Funcional Neutral |
+| [**ADR-0138**](./adr/ADR-0138.md) | ~~Design System Centralization en UI — ThemeExtension + Librería de Componentes Flutter~~ ⚠️ Superado por ADR-0165 |
+| [**ADR-0165**](./adr/ADR-0165.md) | Cliente de Escritorio Tauri + React y Frontera gRPC Local — decisión vigente de UI/transporte |
+| [**ADR-0166**](./adr/ADR-0166.md) | Operaciones Observables y Recuperables — actividad compartida, recuperación, concurrencia y delegación agéntica |
 | [**ADR-0139**](./adr/ADR-0139.md) | Principio Rector General — Single Source of Truth para Contratos Reusables |
 | [**ADR-0140**](./adr/ADR-0140.md) | Opciones Financieras — Diferimiento al Post-MVP con Puerta Abierta |
 | [**ADR-0141**](./adr/ADR-0141.md) | Modelado Relacional Soberano — Tipos canónicos, STRICT, UUIDv7, índices, integridad SQLite↔Parquet |
@@ -457,62 +461,32 @@ Documentos de estrategia societaria del propietario — no son arquitectura téc
 
 - [**SAD.md**](./SAD.md) — Documento de Arquitectura de Software (Visión General).
 - [**ADR.md**](./ADR.md) — Decisiones Arquitectónicas (Registro de decisiones inmutables).
-- [**REPOSITORY-OWNERSHIP.md**](./REPOSITORY-OWNERSHIP.md) — Matriz de propiedad entre `Drasus-Engine` y `Drasus-Context`.
 - [**templates/TEMPLATES.md**](./templates/TEMPLATES.md) — Índice de plantillas (ADR, SAD, Feature, TTR) + reglas transversales para nuevas especificaciones.
 
 ---
 
-## 🔧 Estructura de Configuración (`.claude/` + `.agents/`)
+## 🔧 Contexto de agentes
 
-La carpeta `.claude/` alberga únicamente los skills (frontmatter de descubrimiento) y la configuración del entorno Claude Code. La carpeta `.agents/` alberga documents, knowledge, memory, plans y state — el contenido reutilizable por otros tipos de agente — más el cuerpo completo de cada skill.
+El contexto de agentes vive en este repositorio. `.agents/` contiene la capa activa de Codex y `.codex/` su configuración nativa. `AGENTS.md` sigue siendo el mapa específico de Drasus Engine.
 
 ### Carpetas Principales
 
 | Carpeta | Descripción |
 |---------|-------------|
-| [**.claude/skills/**](./../.claude/skills/) | Frontmatter de descubrimiento (`name`/`description`/`model`) de cada skill; el cuerpo completo vive en `.agents/skills/` |
-| [**.agents/skills/**](./../.agents/skills/) | Contenido completo (system prompt) de cada skill |
-| [**.agents/documents/**](./../.agents/documents/) | Workspace de documentación temporal y sesiones activas |
-| [**.agents/knowledge/**](./../.agents/knowledge/) | Base de conocimiento obligatoria (`governance.md`), gobierna a todos los skills |
-| [**.agents/memory/**](./../.agents/memory/) | Memoria persistente entre sesiones (índice `MEMORY.md` + un hecho por archivo) |
-| [**.agents/state/**](./../.agents/state/) | Estado persistente entre sesiones (Progress) |
-| [**.agents/plans/**](./../.agents/plans/) | Planes de ejecución y arquitectura guardados |
-| [**.claude/worktrees/**](./../.claude/worktrees/) | Worktrees aislados de Git para trabajo concurrente |
+| [**.agents/skills/**](./../.agents/skills/) | Flujos operativos activos de Codex |
+| [**.agents/knowledge/**](./../.agents/knowledge/) | Contratos y mapas mínimos para cada flujo |
+| [**.agents/context-runtime/**](./../.agents/context-runtime/) | Catálogo y proveedor local de contexto |
+| [**.agents/legacy/**](./../.agents/legacy/) | Contexto anterior y árbol recuperado, solo como evidencia histórica |
+| [**.codex/**](./../.codex/) | Configuración y hooks nativos de Codex |
 
 ### Skills Disponibles
 
-| Skill | Rol | Descripción |
+| Skill | Flujo | Descripción |
 |-------|-----|-------------|
-| [**architect**](./../.claude/skills/architect/SKILL.md) | Arquitecto Senior | Procesa, filtra y distribuye información técnica y de negocio. No desarrollador. |
-| [**bridge-engineer**](./../.claude/skills/bridge-engineer/SKILL.md) | Ingeniero de Puentes | Diseña contratos de comunicación gRPC entre Rust y clientes Tauri/React |
-| [**partner**](./../.claude/skills/partner/SKILL.md) | Co-Founder & Socio | Análisis estratégico, visión CEO & Quant, sinergias operativas |
-| [**qa-engineer**](./../.claude/skills/qa-engineer/SKILL.md) | QA Engineer | Valida código para garantizar calidad, estabilidad y especificaciones |
-| [**quant-engineer**](./../.claude/skills/quant-engineer/SKILL.md) | Quant Engineer | Dueño de corrección estadística y financiera. Audita matemática y sesgos |
-| [**refactoring-engineer**](./../.claude/skills/refactoring-engineer/SKILL.md) | Refactoring Engineer | Optimiza estructura de código y resuelve deuda técnica |
-| [**rust-engineer**](./../.claude/skills/rust-engineer/SKILL.md) | Rust Engineer | Lógica pesada, algoritmos cuantitativos, bases de datos (100% Rust puro) |
-| [**social-strategist**](./../.claude/skills/social-strategist/SKILL.md) | Social Strategist | Estrategia digital y orquestación de contenido para Drasus Engine |
-| [**tech-lead**](./../.claude/skills/tech-lead/SKILL.md) | Tech Lead | Lee docs/ y toma iniciativa autónoma de desarrollo, despachando a Ingenieros |
-| [**ui-designer**](./../.claude/skills/ui-designer/SKILL.md) | UI Designer | Define y audita la superficie visual Tauri/React de cada feature |
-
-`governance` no es un skill invocable: es la base de conocimiento de lectura obligatoria en [`.agents/knowledge/governance.md`](./../.agents/knowledge/governance.md), gobierna a todos los skills de la tabla anterior.
-
-### Estado Persistente
-
-| Carpeta | Descripción |
-|---------|-------------|
-| [**state/tech-lead/**](./../.agents/state/tech-lead/) | Progreso y estado del Tech Lead (PROGRESS.md) |
-| [**state/social-strategist/**](./../.agents/state/social-strategist/) | Progreso y estado del Social Strategist (PROGRESS.md) |
-
-### Documentos Temporales
-
-| Carpeta | Descripción |
-|---------|-------------|
-| [**documents/tmp/**](./../.agents/documents/tmp/) | Workspace temporal de sesiones |
-| [**documents/social-strategist/**](./../.agents/documents/social-strategist/) | Documentos de estrategia social |
-
-### Configuración
-
-| Archivo | Descripción |
-|---------|-------------|
-| [**settings.json**](./../.claude/settings.json) | Configuración global de Claude Code (proyecto) |
-| [**settings.local.json**](./../.claude/settings.local.json) | Configuración local del usuario (no commitear) |
+| [**drasus-dispatch**](./../.agents/skills/drasus-dispatch/SKILL.md) | Clasificación | Determina flujo, riesgo y contexto antes de editar. |
+| [**drasus-plan**](./../.agents/skills/drasus-plan/SKILL.md) | Planificación | Delimita un cambio con fuentes y validación. |
+| [**drasus-implement**](./../.agents/skills/drasus-implement/SKILL.md) | Implementación | Ejecuta cambios de producto aprobados. |
+| [**drasus-integrate**](./../.agents/skills/drasus-integrate/SKILL.md) | Integración | Coordina contratos, puentes y límites de generación. |
+| [**drasus-verify**](./../.agents/skills/drasus-verify/SKILL.md) | Verificación | Recoge evidencia de pruebas y de los límites afectados. |
+| [**drasus-review**](./../.agents/skills/drasus-review/SKILL.md) | Revisión | Audita intención, diferencias y evidencia. |
+| [**drasus-context**](./../.agents/skills/drasus-context/SKILL.md) | Contexto | Mantiene la capa de Codex y su entrega de contexto. |

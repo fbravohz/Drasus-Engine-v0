@@ -1,9 +1,9 @@
 # Async Job Executor — Patrón Asincrónico de Operaciones Costosas
 
 **Carpeta:** `./features/async-job-executor/`  
-**Estado:** 🟡 Parcial — núcleo durable + recuperación tras crash (gate EPIC-0) implementados y probados; TTR-007 (integración con módulos costosos) secuenciado a EPIC-2+.  
+**Estado:** 🟡 Parcial — núcleo durable + recuperación tras crash (criterio EPIC-0) implementados y probados; TTR-007 (integración con Features costosas) secuenciado a EPIC-2+.
 **Última actualización:** 2026-06-12  
-**Decisión Arquitectónica Asociada:** ADR-0011 (Operaciones Asincrónicas)
+**Decisión Arquitectónica Asociada:** ADR-0011 (Operaciones Asincrónicas), ADR-0165 (Tauri/React + gRPC), ADR-0166 (Operaciones Observables)
 
 > 🟡 **Parcial** 2026-06-12 · Orden [STORY-005](../execution/STORY-005-async-job-executor.md) · TTR-001..006 implementados (cola Tokio+SQLite, worker pool, persistencia `jobs`/`job_results` append-only, **recuperación en startup**, progreso, cancelación). **Gate EPIC-0 demostrado:** test de recuperación tras crash sobre DB en archivo (`jobs_survive_simulated_crash_and_are_recovered_on_restart`). Auditado Tech-Lead: 62 tests verdes, clippy `-D warnings` limpio, cobertura workspace 90.80%. Pendiente: TTR-007 (integración con `generate`/`validate`/etc.) a EPIC-2+; cobertura del worker pool concurrente se completa con cargas reales.
 
@@ -15,7 +15,7 @@ Async Job Executor implementa un patrón de tres fases para ejecutar operaciones
 
 **Problema:** Backtesting masivo puede tardar minutos/horas. Si ejecuta sincrónico, usuario está bloqueado, no puede hacer nada más.
 
-**Solución:** Operación se envía a un job queue. Sistema la procesa en background. Usuario obtiene UUID y puede consultar progreso en cualquier momento. Cuando termina, usuario obtiene resultados.
+**Solución:** La Feature dueña solicita un job durable y conserva su `operation_id`. El sistema lo procesa en segundo plano y publica estados por stream gRPC recuperable; cualquier cliente autorizado puede reconstruir el progreso tras reconectarse. Al terminar, consulta el resultado por el puerto de la Feature dueña.
 
 **Resultado observable:** Usuario dispara job costoso, interfaz sigue responsiva, puede monitorear progreso, obtiene resultados cuando estén listos.
 
@@ -33,32 +33,22 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 
 ## Comportamientos Observables
 
-- [ ] Usuario solicita backtest de estrategia (operación costosa):
-  ```
-  POST /api/backtest/submit
-  { "strategy_id": 123, "date_range": "2024-01-01:2024-12-31" }
-  ```
-  → Sistema crea registro en tabla `jobs` (`state=QUEUED`, `uuid=abc-123`)
-  → Responde inmediatamente: `{ "job_uuid": "abc-123", "state": "QUEUED" }`
+- [ ] Usuario o agente autorizado solicita un backtest de estrategia (operación costosa):
+  → La Feature crea una operación identificable y un job durable (`state=QUEUED`)
+  → La respuesta gRPC incluye `operation_id`, `job_id` y código de estado
   → Usuario no está bloqueado
 
-- [ ] Usuario consulta estado del job mientras se ejecuta:
-  ```
-  GET /api/jobs/abc-123/status
-  ```
-  → Retorna: `{ "state": "RUNNING", "progress": 45, "estimated_time_remaining": "2 minutes" }`
-  → Usuario puede consultar múltiples veces sin bloqueos
+- [ ] Un cliente autorizado observa el job mientras se ejecuta:
+  → Recibe snapshot inicial más cambios ordenados de estado/progreso por gRPC
+  → Tras reconexión, reanuda desde su posición o pide snapshot; deduplica cambios sin ejecutar de nuevo el job
 
 - [ ] Job completa exitosamente:
   - Estado cambia a `COMPLETED`
   - Resultados se guardan en tabla `job_results` (append-only, nunca se modifican)
   - Usuario obtiene: `{ "state": "COMPLETED", "result_uuid": "xyz-456" }`
 
-- [ ] Usuario obtiene resultados de job completado:
-  ```
-  GET /api/jobs/abc-123/result
-  ```
-  → Retorna: `{ "metrics": {...}, "cagr": 0.25, "sharpe": 2.1, ... }`
+- [ ] Un cliente autorizado obtiene resultados de job completado:
+  → Consulta el resultado por la frontera pública de la Feature dueña
   → Resultado es inmutable (snapshot de cuando completó)
 
 - [ ] Job falla (ej: error de datos):
@@ -66,11 +56,8 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
   - Mensaje de error se guarda: "Invalid date range: start > end"
   - Usuario obtiene: `{ "state": "FAILED", "error": "Invalid date range: ..." }`
 
-- [ ] Usuario cancela un job en progreso:
-  ```
-  POST /api/jobs/abc-123/cancel
-  ```
-  → Sistema marca job como `CANCELLED`
+- [ ] Usuario o agente autorizado cancela un job en progreso:
+  → Sistema valida la capacidad vigente y marca el job como `CANCELLED` en una frontera segura de cancelación
   → Worker actual detiene ejecución gracefully
   → Estado retorna: `{ "state": "CANCELLED" }`
 
@@ -99,6 +86,8 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 - **NUNCA un job QUEUED permanece indefinidamente.** Timeout configurable (default: sin límite, pero recomendado 1 hora).
 - **NUNCA se olvidan jobs después de crash.** Recuperación automática en startup.
 - **NUNCA un job retorna resultado parcial.** Es TODO exitoso o TODO fallido (atómico).
+- **NUNCA** se acepta una cancelación, reintento o modificación de un job sin validar identidad, rol, puerto de Feature, objeto y versión esperada cuando aplique.
+- **NUNCA** un stream gRPC es la única fuente de estado: la operación y el job deben poder reconstruirse desde almacenamiento durable.
 
 ---
 
@@ -118,28 +107,28 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 ## Ciclo de Vida de la Feature
 
 ### Entrada
-- **Quién llama:** Módulos costosos (generate, validate, manage, incubate, feedback)
-- **Qué recibe:** Request de job (tipo de operación, parámetros, usuario_id)
+- **Quién llama:** Features costosas (generate, validate, manage, incubate, feedback) a través de sus puertos públicos.
+- **Qué recibe:** Solicitud con tipo de operación, parámetros seguros, actor/origen, `operation_id`, clave de idempotencia y expectativa de versión cuando aplique.
 
 ### Proceso
 
 #### Fase 1: Disparo (Submit)
-1. Sistema crea registro en tabla `jobs`: uuid, user_id, job_type, parameters, state=QUEUED, created_at
+1. Sistema crea registro en tabla `jobs` ligado a `operation_id`: identificador, actor/origen, tipo, parámetros seguros, estado `QUEUED` y timestamp.
 2. Job entra a `tokio.Queue` (in-memory)
-3. Sistema retorna UUID inmediatamente
+3. Sistema retorna identidad estable de operación y job inmediatamente, sin texto de interfaz.
 
-#### Fase 2: Monitoreo (Poll)
+#### Fase 2: Monitoreo (Stream recuperable)
 1. Worker thread toma job de queue cuando hay capacity
 2. Worker cambia estado a RUNNING, inicializa progreso=0
-3. Usuario consulta endpoint `/api/jobs/{uuid}/status` periódicamente
-4. Retorna: estado, progreso (0-100%), estimación de tiempo restante
+3. Clientes autorizados reciben snapshot y cambios por stream gRPC; pueden reanudar desde posición conocida.
+4. Cada cambio entrega estado, progreso (0-100%) y estimación; la interfaz localiza los códigos.
 5. Worker actualiza progreso cada `progress_interval` segundos
 
 #### Fase 3: Recuperación (Fetch)
 1. Job completa (exitoso o con error)
 2. Estado cambia a COMPLETED o FAILED
 3. Resultado se guarda en tabla `job_results` (append-only)
-4. Usuario consulta endpoint `/api/jobs/{uuid}/result`
+4. Cliente autorizado consulta el resultado por el puerto público de la Feature dueña.
 5. Retorna resultado inmutable + timestamp de finalización
 
 ### Salida
@@ -161,16 +150,16 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 **Qué hace:** Crear JobExecutor que maneja jobs en memoria (rápido) + SQLite (durabilidad).
 
 **Entrada:**
-- Request de job: `JobRequest(job_type, parameters, user_id)`
+- Request de job: tipo, parámetros seguros, actor/origen, `operation_id` y clave de idempotencia.
 
 **Salida:**
 - UUID único del job
-- Job guardado en tabla `jobs`
+- Job guardado en tabla `jobs` y ligado a la operación durable
 - Job encolado en `tokio.Queue`
 
 **Reglas de Negocio:**
 - UUID debe ser único e irrepetible (usar uuid.uuid4())
-- Job se guarda ANTES de retornar UUID (garantía de persistencia)
+- Job, transición de operación y auditoría se guardan antes de retornar sus identidades (garantía de persistencia)
 - Queue en memoria para velocidad, disco para durabilidad
 
 **Precondiciones:**
@@ -215,7 +204,7 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 **Qué hace:** Tabla `jobs` y tabla `job_results` que guardan jobs y resultados.
 
 **Entrada:**
-- Job object (uuid, user_id, type, parameters, state, progress, timestamps)
+- Job object (id, `operation_id`, actor/origen, tipo, parámetros seguros, estado, progreso, timestamps)
 - Result object (job_uuid, result_data, error_message, completed_at)
 
 **Salida:**
@@ -250,7 +239,7 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 **Reglas de Negocio:**
 - QUEUED jobs se recuperan directamente
 - RUNNING jobs: cambiar a QUEUED (asumir que no completó, porque si completó estaría en COMPLETED)
-- Registrar en audit: "JOB_RECOVERED_AT_STARTUP: job_uuid=..., previous_state=..."
+- Registrar en auditoría un código de recuperación y la referencia del job, sin texto de interfaz ni parámetros sensibles.
 
 **Precondiciones:**
 - SQLite disponible
@@ -271,7 +260,7 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 - Callback de progreso: `on_progress(percent: float, elapsed_seconds: float)`
 
 **Salida:**
-- Estado actualizado: `{ progress: 45, estimated_remaining: 120 }`
+- Estado durable actualizado con progreso y estimación; evento ordenado para el stream recuperable.
 
 **Reglas de Negocio:**
 - Progreso es 0-100%
@@ -282,7 +271,7 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 - Job ejecutándose
 
 **Postcondiciones:**
-- Usuario puede consultar progreso en cualquier momento
+- Cliente autorizado puede reconstruir progreso en cualquier momento
 
 ---
 
@@ -313,24 +302,24 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 
 ---
 
-### **TTR-ASYNC-EXECUTOR-007: Integrar con Módulos Costosos (generate, validate, manage, etc.)**
+### **TTR-ASYNC-EXECUTOR-007: Integrar con Features Costosas (generate, validate, manage, etc.)**
 
-**Qué hace:** Cada módulo costoso usa JobExecutor en lugar de ejecutar sincrónico.
+**Qué hace:** Cada Feature costosa usa JobExecutor en lugar de ejecutar sincrónico.
 
 **Entrada:**
-- Módulo que necesita ejecutar operación costosa
+- Feature que necesita ejecutar operación costosa
 
 **Salida:**
 - Job UUID retornado al usuario
 
 **Reglas de Negocio:**
-- Módulo no ejecuta lógica directamente, la delega a job
-- Módulo recibe callback que reporta progreso
-- Módulo puede ser cancelado por usuario
+- La Feature no ejecuta lógica costosa en la llamada inicial; la delega a job
+- La Feature recibe progreso ligado a `operation_id` y publica estado durable
+- El job puede cancelarse por un actor todavía autorizado, respetando sus fronteras seguras
 
 **Precondiciones:**
 - JobExecutor inicializado
-- Módulo refactorizado para usar async pattern
+- Feature integrada al patrón asíncrono
 
 **Postcondiciones:**
 - Usuario puede monitorear progreso
@@ -345,7 +334,7 @@ El usuario nunca la ve. La nota como que **la interfaz nunca se congela mientras
 
 | Puerto | ID de tipo | Dirección | Cardinalidad | Descripción |
 |---|---|---|---|---|
-| `job_request_in` | `(interno)` | Input | 1 | Solicitud de encolar un trabajo: `operation_kind`, `params_json`, `user_id`. No es un tipo de canvas; es la firma Rust de la API del executor (Enmienda 2026-06-24 de ADR-0137). |
+| `job_request_in` | `(interno)` | Input | 1 | Solicitud de encolar: `operation_kind`, parámetros seguros, actor/origen, `operation_id`, idempotencia y versión esperada cuando aplique. No es un tipo de canvas; es la firma de la API del executor. |
 | `job_out` | `Job` | Output | 1..N | Job con su ciclo de vida completo (PENDING → RUNNING → DONE / FAILED / CANCELLED). Representa la unidad de trabajo durable gestionada por el executor. |
 
 > **Cardinalidad:** `1` = exactamente uno · `0..1` = opcional · `0..N` = múltiple · `1..N` = al menos uno.

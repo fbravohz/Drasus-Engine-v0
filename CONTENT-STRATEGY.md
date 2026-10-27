@@ -1,6 +1,6 @@
 # CONTENT-STRATEGY.md — Drasus Engine
 
-> **Marco de referencia:** `content-creator.md` (brief original), `.claude/skills/social-strategist/SKILL.md` (motor de ejecución y orquestación de esta estrategia) y `docs/SAD.md` / `docs/ROADMAP.md` (arquitectura y plan de épicas).
+> **Marco de referencia:** `content-creator.md` (brief original), `.agents/skills/social-strategist/SKILL.md` (motor de ejecución y orquestación de esta estrategia) y `docs/SAD.md` / `docs/ROADMAP.md` (arquitectura y plan de épicas).
 > **Objetivo:** Construir autoridad técnica real en el nicho de trading cuantitativo/algorítmico — **en español e inglés** —, con producción visual de nivel QuantumFracture / LeMMiNo / HistoryMarche, **sin depender de mostrar la cara**, sin "vender el sueño" (robots, señales, cursos) — **y arrancando HOY, con 14 commits y un proyecto en EPIC-0 (la fase de cimientos).**
 
 ---
@@ -35,7 +35,7 @@
 2. **La cara es opcional, la voz no.** Autoridad = voz humana consistente + visuales de alto nivel. La cara entra de forma *progresiva* (§4.1), nunca como requisito día 1.
 3. **El B-roll real gana siempre.** IDE con Rust real, `cargo test` en verde, el primer dashboard — eso es mejor que cualquier render genérico. La IA generativa (Manim, Remotion, Runway, Midjourney) es **acelerante**, no sustituto.
 4. **Toda pieza debe defenderse en una sala de Quants.** Si se simplifica, se declara. Esa honestidad ES el diferenciador.
-5. **Pipeline code-first** (Manim + Remotion + ffmpeg + OBS + DaVinci Resolve) da el 80% del valor visual con herramientas que Claude puede generar/automatizar. Adobe/Canva = pulido manual opcional.
+5. **Pipeline code-first** (Manim + Remotion + ffmpeg + OBS + DaVinci Resolve) da el 80% del valor visual con herramientas que el agente puede generar/automatizar. Adobe/Canva = pulido manual opcional.
 6. **🆕 "Pocos commits" no es un problema, es el Episodio 0.** Drasus Engine está en `EPIC-0 (Fundación y Spikes)`, con 14 commits y 5 STORYs cerradas. **La narrativa de "cómo se construye algo riguroso desde absolutamente cero, en público, antes de tocar una sola estrategia" es en sí misma el primer arco de contenido** — y nadie en el nicho hispano lo está haciendo. Ver §1.
 
 ---
@@ -241,13 +241,13 @@ Cada pilar mapea a material que **ya existe** en `docs/SAD.md` / `docs/ADR.md` /
 ## 6. Stack de Herramientas — Pipeline de Producción
 
 ### 6.1 Principio rector
-Priorizamos herramientas **code-first** que Claude Code puede generar/automatizar vía Bash. Herramientas de escritorio (Adobe, Canva) = pulido manual opcional, no bloqueante.
+Priorizamos herramientas **code-first** que el agente puede generar/automatizar vía terminal. Herramientas de escritorio (Adobe, Canva) = pulido manual opcional, no bloqueante.
 
 ### 6.2 Tabla de Herramientas
 
 | Función | Herramienta | Estado | Cómo se opera |
 |---|---|---|---|
-| Guion y research | Claude (este entorno) | ✅ Confirmado | Traduce ADRs/STORYs a guion narrativo |
+| Guion y research | Codex (este entorno) | ✅ Confirmado | Traduce ADRs/STORYs a guion narrativo |
 | Animación matemática/conceptual | **Manim** (Python) | ✅ Confirmado, open source | `manim render scene.py`. Ideal para: fórmulas, hash chains, Pareto fronts (cuando haya datos) |
 | Animación de diagramas/explainers | **Motion Canvas** (TypeScript) | ✅ Confirmado, open source | Alternativa para diagramas de arquitectura/AST |
 | Ensamblaje programático data-driven | **Remotion** (React/TS) | ✅ Confirmado, open source | Lee JSON/CSV exportado de Drasus y renderiza video con datos reales — **clave para Tier 3** |
@@ -264,7 +264,7 @@ Priorizamos herramientas **code-first** que Claude Code puede generar/automatiza
 | 3D avanzado | **Blender** + MCP comunitario | ⚠️ Verificar mantenimiento | No crítico para MVP |
 
 ### 6.3 Sobre los MCPs — Qué confío y qué no
-- **Confío:** Figma Dev Mode MCP (oficial); y que Claude Code opera Manim/Remotion/ffmpeg/Whisper vía Bash sin MCP — son CLIs estándar.
+- **Confío:** Figma Dev Mode MCP (oficial); y que Codex opera Manim/Remotion/ffmpeg/Whisper vía terminal sin MCP — son CLIs estándar.
 - **Verificar antes de depender:** MCP de Blender (comunidad), cualquier "MCP de Canva/After Effects/Premiere" — no confirmado y mantenido a la fecha. No construir el camino crítico sobre estos.
 
 ---
@@ -350,7 +350,7 @@ export const ParetoFront: React.FC = () => {
 
 ## 10. Integración con el Skill `social-strategist` (Motor de Ejecución)
 
-El skill (`.claude/skills/social-strategist/SKILL.md`) es el **punto de entrada único** para aplicar esta estrategia. No hace falta decidir manualmente "¿toca Pulso o Episodio?" — el skill:
+El skill (`.agents/skills/social-strategist/SKILL.md`) es el **punto de entrada único** para aplicar esta estrategia. No hace falta decidir manualmente "¿toca Pulso o Episodio?" — el skill:
 
 1. **Escanea el estado:** `git log`, `docs/execution/` (Historias/Riesgos/Tareas cerradas) y su propio archivo de seguimiento `.agents/state/social-strategist/PROGRESS.md`.
 2. **Calcula masa narrativa** con el mapa Épica → Pilar (§1.4): si 2+ entradas de Pulso sin "graduar" caen en el mismo Pilar ya desbloqueado, propone subir a Episodio.
@@ -367,13 +367,13 @@ El skill (`.claude/skills/social-strategist/SKILL.md`) es el **punto de entrada 
 ```
 0. ESCANEO (nuevo)
    └─ Tras cada cierre de STORY/SPIKE/TASK: /social-strategist genera Tier 1 automáticamente
-   └─ Claude evalúa: ¿esta entrada + el backlog reciente alcanzan masa narrativa para Tier 2/3?
+   └─ El agente evalúa: ¿esta entrada + el backlog reciente alcanzan masa narrativa para Tier 2/3?
 
 1. SELECCIÓN DE TEMA
-   └─ Si hay masa narrativa → Claude propone ángulo (Pilar A-G) según mapa de desbloqueo (§1.4)
+   └─ Si hay masa narrativa → el agente propone ángulo (Pilar A-G) según mapa de desbloqueo (§1.4)
 
 2. GUION
-   └─ Claude redacta guion minuto a minuto (formato §7.1 / §8.1)
+   └─ El agente redacta guion minuto a minuto (formato §7.1 / §8.1)
    └─ Usuario ajusta tono/anécdotas personales
 
 3. GENERACIÓN DE ASSETS (paralelo)

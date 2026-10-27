@@ -126,7 +126,7 @@ Cada ADR vive en su propio archivo bajo [`adr/`](./adr/). Para leer un ADR concr
 | [ADR-0120](./adr/ADR-0120.md) | Modos de Acompañamiento de Implementación (Autónomo / Mentor / Revisión) — Selección por el Usuario, Persistida en la Orden de Trabajo |
 | [ADR-0121](./adr/ADR-0121.md) | Comentarios de Código en Español — Identificadores en Inglés se Mantienen |
 | [ADR-0122](./adr/ADR-0122.md) | Cuarto Modo de Acompañamiento "Docente" + Protocolo de Lecciones Compartido (`docs/lessons/`) |
-| [ADR-0123](./adr/ADR-0123.md) | Cabina Dual — Acceso Agéntico vía MCP con Permisos Graduados por Riesgo de Pipeline |
+| [ADR-0123](./adr/ADR-0123.md) | Cabina Dual — Acceso Agéntico vía MCP con Permisos por Feature, Objeto y Riesgo Contextual |
 | [ADR-0124](./adr/ADR-0124.md) | Lecciones Organizadas por Story/Task, no por Tema — Corrige esa Regla de ADR-0122 |
 | [ADR-0125](./adr/ADR-0125.md) | Frontera Determinista de Datos Fundamentales — Event Study + Surprise como Métodos Canónicos; Extracción NLP Fuera del Núcleo |
 | [ADR-0126](./adr/ADR-0126.md) | Sourcing y Soberanía de Datos Fundamentales — Hecho Crudo Externo, Scoring 100% Propio |
@@ -167,7 +167,8 @@ Cada ADR vive en su propio archivo bajo [`adr/`](./adr/). Para leer un ADR concr
 | [ADR-0161](./adr/ADR-0161.md) | Motor de Expresiones Compartido y Lienzo Matemático Libre — Un Motor para Símbolos Sintéticos, Indicadores, Señales y Riesgo |
 | [ADR-0162](./adr/ADR-0162.md) | Catálogo de Instrumento × Bróker × Sesión — Activa el Registro `Instrument`, Jerarquía de Tres Niveles con Herencia por `NULL`, Gate de Coherencia de Calendario N×N por Huella, Zona Horaria de Mercado Declarada con Bandera DST · activa ADR-0140, extiende ADR-0154/ADR-0155/ADR-0137 · enmendado 2026-07-25 (`real_volume_unit_declared` en `broker_instrument_terms`) · enmendado 2026-07-26 (reloj de bróker ancla+desplazamiento, `broker_server_clock`, declaración de mapeo por tramo) · corregido 2026-07-27 (`venue_operational_since` → `venue_operational_since_ns`) |
 | [ADR-0163](./adr/ADR-0163.md) | Idempotencia de Reimportación — Resolución de Solape en Particiones Hive-Style por Hash-Check, Política Configurable de Sobrescritura/Omisión y Reescritura Atómica · extiende ADR-0030/ADR-0141/ADR-0154 |
-| [ADR-0164](./adr/ADR-0164.md) | Separación de Repositorios para Código y Contexto de Agentes — `Drasus-Engine` + `Drasus-Context`, submódulo fijado y adaptadores generados |
+| [ADR-0165](./adr/ADR-0165.md) | Cliente de Escritorio Tauri + React y Frontera gRPC Local — reemplaza Flutter/FFI |
+| [ADR-0166](./adr/ADR-0166.md) | Operaciones Observables y Recuperables — Actividad Compartida para Humanos y Agentes |
 | [ADR-0157](./adr/ADR-0157.md) | Visualización de Estrategia — Un Motor de Render, Dos Entradas Separadas (Vista en Vivo / Repetición de Corrida), Invariante de No-Perturbación y Agnosticismo al Tipo de Barra · refresca la feature previa de reproducción, extiende ADR-0136/ADR-0137, hereda ADR-0114/ADR-0027 |
 | [ADR-0158](./adr/ADR-0158.md) | Topología de Fuentes de Señal y Destinos de Ejecución — Estrategias Cross-Market y Cross-Timeframe de Entrada, Alineación por Reloj para Toda Fuente, Riesgo Agregado en Destinos Múltiples · extiende ADR-0114/ADR-0111/ADR-0108/ADR-0151, depende de TASK-059 |
 | [ADR-0159](./adr/ADR-0159.md) | Símbolos Sintéticos por Fórmula — Instrumentos Derivados Deterministas como Fuente de Señal, AST Tipado, Modos Declarado y Evolucionado, Conocibilidad por Eslabón Más Débil · fuente de ADR-0158, extiende ADR-0113/ADR-0020/ADR-0161 |

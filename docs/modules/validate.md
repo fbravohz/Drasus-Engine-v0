@@ -812,7 +812,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
     * `validate` pertenece al grupo de pipelines abiertos por defecto (ADR-0123): un agente conectado vía MCP tiene permiso total sin gate adicional.
     * Toda llamada concedida queda auditada con su procedencia agente (`agent_session_id`).
 *   **Entrada:** Llamada MCP entrante con pipeline `validate`.
-*   **Salida:** Resultado de la operación enrutado al agente + registro de auditoría de procedencia.
+*   **Salida:** Resultado de la operación enrutado al agente + registro de auditoría de procedencia + transición confirmada y actividad visible para la proyección de estado en la interfaz.
 
 ### **TTR-061: Integración del Indicador Fundamental en Backtest (Fundamental Indicator Projector)**
 *   **Descripción:** TTR de Integración (ADR-0118): enchufa el indicador fundamental ya construido en `generate` ([`fundamental-indicator-projector`](../features/fundamental-indicator-projector.md)) vía su `public_interface`, para que el backtest lo consuma como una serie de indicador más, PIT-correcta sobre el histórico de eventos.

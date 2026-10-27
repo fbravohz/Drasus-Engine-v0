@@ -1,6 +1,6 @@
-# Plantilla: Feature (Especificación Completa de Módulo/Feature)
+# Plantilla: Feature (Especificación Completa)
 
-**¿Cuándo usar?** Cuando describes una funcionalidad COMPLETA (módulo, feature). Este es el documento **maestro** que vive en `./features/[feature-name].md`.
+**¿Cuándo usar?** Cuando describes una funcionalidad completa. Este es el documento **maestro** que vive en `./features/[feature-name].md`. Los módulos son presets de composición, no entidades dueñas de lógica ni de puertos.
 
 > Nota de restauración (2026-06-16): esta plantilla usaba numeración `1, 2, 3…` con dos secciones repetidas como "6." y dos como "8." (defecto del monolito original `TEMPLATES.md`). El corpus real de Features (`docs/features/*.md`) nunca siguió esa numeración — usa encabezados con nombre, sin números. Esta plantilla se reescribe para coincidir con el corpus real; los encabezados son los mismos, solo sin los números rotos.
 
@@ -70,7 +70,7 @@ Tabla: Parámetro | Default | Rango | Qué hace | FIJO/CONFIG. Indica qué pará
 
 - **Core (Lógica Pura):** Qué funciones no tocan DB/IO.
 - **Shell (Infraestructura):** Cómo maneja el orquestador la persistencia y eventos.
-- **Frontera Pública:** El contrato para interactuar con otros módulos.
+- **Frontera Pública:** El contrato para interactuar con otras Features, superficies humanas y agentes.
 
 ## Ciclo de Vida de la Feature — [Nombre] (OBLIGATORIO si es componente reutilizable)
 
@@ -95,9 +95,22 @@ Describe entrada → proceso → salida, **sin detalles de implementación**. Ve
 
 ## Cáscara Visual (Thin Shell)
 
-> Autoridad: ADR-0106 · ADR-0136 · ADR-0117 · ADR-0135 · `docs/DESIGN.md` · `docs/DESIGN.md §"Catálogo de Componentes"`
+> Autoridad: ADR-0165 · ADR-0136 · ADR-0117 · ADR-0135 · `docs/DESIGN.md`
 >
 > **Producida por el skill `ui-designer` (Etapa 0.5 del Tech Lead) — NUNCA rellenar a mano sin leer DESIGN.md primero.**
+
+## Operaciones observables y recuperables (OBLIGATORIO si un puerto público muta estado o puede ser invocado por un agente)
+
+Declara, sin inventar rutas ni detalles de transporte:
+
+- el objeto afectado y si exige `row_version`/conflicto explícito;
+- la clave de idempotencia, identidad del actor y la relación con `operation_id`;
+- qué estados/códigos de actividad durable emite y qué presencia efímera, si alguna, usa;
+- el punto seguro de cancelación para trabajo asíncrono y el comportamiento ante revocación;
+- si cruza una frontera externa, cómo conserva la intención durable y evita duplicar o asumir confirmado un efecto remoto;
+- la superficie propia que lo representa o la representación genérica autorizada que muestra la actividad tras reconexión.
+
+La actividad no guarda secretos, parámetros sensibles ni texto suministrado por el agente. Los códigos se localizan en la interfaz. Si la Feature no muta estado ni es invocable por un agente, declara explícitamente que esta sección no aplica. Autoridad: ADR-0166.
 > Si la feature es Plomería (declara "Ventana de Verificación"), escribe solo la nota de Ventana de Verificación Visual y omite el resto.
 
 ### Contexto de superficie (ADR-0136)
@@ -124,8 +137,8 @@ Describe entrada → proceso → salida, **sin detalles de implementación**. Ve
 ### Animaciones Aplicables
 - [ ] Zoom canvas (relacional ↔ interior) · [ ] Clic botón (propagación de luz) · [ ] Hover (glow intensificado) · [ ] Foco input (glow limpio, sin aberración RGB) · [ ] Dropdown (AnimatedSize + chevron) · [ ] Chip parpadeante · [ ] Loader/progreso (glow pulsante) · [ ] Switch (knob deslizante)
 
-### Notas de implementación para el Flutter Engineer
-[Instrucciones específicas: orden de painters, z-index de capas, restricciones de rendimiento]
+### Notas de implementación para Tauri/React
+[Instrucciones específicas: estructura de componentes, contrato gRPC, accesibilidad y restricciones de rendimiento]
 
 ---
 
@@ -156,9 +169,9 @@ Referencia al ADR correspondiente. Omitir si la feature NO tiene decisión arqui
 
 - Qué otras features dependen de esta.
 - Qué la bloquea (ej: otra feature no implementada).
-- **"Consumido por" = accede al puerto, no al esquema (ADR-0003, Regla de Tabla Única):** cuando esta sección (o un campo "Consumido por") lista varios módulos que usan esta Feature, esos módulos la consumen a través de su `public_interface`. La tabla de la Feature se crea UNA SOLA VEZ, en el módulo dueño (el primer consumidor del pipeline, ADR-0118). Los módulos consumidores NO corren su propia migración ni duplican el esquema; un TTR de integración enchufa el puerto, nunca crea una tabla. Si un consumidor necesita datos propios relacionados, los guarda en sus tablas con una referencia al dato de la Feature.
+- **"Consumido por" = accede al puerto, no al esquema (ADR-0003, Regla de Tabla Única):** cuando esta sección (o un campo "Consumido por") lista varios consumidores, acceden a través de la `public_interface` de la Feature. La tabla de la Feature se crea UNA SOLA VEZ, en la Feature dueña. Los presets de composición no corren migraciones ni son dueños de esquema; un TTR de integración enchufa el puerto. Si un consumidor necesita datos propios relacionados, los guarda en sus tablas con una referencia al dato de la Feature.
 - **Contrato de Integración UI (OBLIGATORIO — ADR-0117):** declara una de las dos:
-  - **Superficie propia:** nombre de la pestaña/sección que esta Feature aporta al Panel Operativo Fundacional, y cuál es su Superficie de Verificación Funcional (SVF) bajo el Techo Fijo — el control que dispara la operación real + el resultado real (FFI/gRPC) + el observable persistido visible tras recargar.
+  - **Superficie propia:** nombre de la pestaña/sección que esta Feature aporta al Panel Operativo Fundacional, y cuál es su Superficie de Verificación Funcional (SVF) bajo el Techo Fijo — el control que dispara la operación real + el resultado real por gRPC + el observable persistido visible tras recargar.
   - **Ventana de Verificación (si es Feature de plomería, sin superficie propia):** nombre de la Feature consumidora y de su pestaña/sección, y el observable concreto de ESTA feature (estado, conteo, timestamp, resultado) que debe quedar visible ahí. Esa visibilidad es la prueba de funcionamiento de la plomería — sin ella, la Cáscara Delgada de la Feature consumidora no se considera completa (Gate de Integración, ADR-0117).
 
 ## Regla de Soberanía Técnica (Solo para Módulos)

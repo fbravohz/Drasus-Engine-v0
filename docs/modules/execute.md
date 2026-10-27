@@ -560,7 +560,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
     * `execute` opera exclusivamente con capital y broker reales: ninguna llamada del canal MCP nace con permiso, sin excepción (ADR-0123).
     * Toda llamada se rechaza salvo que `PRODUCTION_OVERRIDE` esté activo en ese momento; el rechazo y la concesión quedan ambos auditados con su procedencia agente (`agent_session_id`).
 *   **Entrada:** Llamada MCP entrante con pipeline `execute`, estado de `PRODUCTION_OVERRIDE`.
-*   **Salida:** Resultado de la operación enrutado al agente, o rechazo, + registro de auditoría de procedencia.
+*   **Salida:** Resultado de la operación enrutado al agente, o rechazo, + registro de auditoría de procedencia + transición confirmada y actividad visible para la proyección de estado en la interfaz cuando la operación muta estado.
 
 ### **TTR-043: Integración del Indicador Fundamental en Tiempo Real (Fundamental Indicator Projector)**
 *   **Descripción:** TTR de Integración (ADR-0118): lee en vivo el indicador fundamental ya construido ([`fundamental-indicator-projector`](../features/fundamental-indicator-projector.md)) vía su `public_interface`, para confirmar o ponderar la decisión de ejecución, sin ejecutar lógica fundamental en el hot-path.

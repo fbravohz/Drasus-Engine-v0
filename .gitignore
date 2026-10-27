@@ -30,8 +30,6 @@
 **/.env.local
 **/.env.*.local
 
-# --- Claude Code (overrides personales, no se versionan) ---
-.claude/settings.local.json
 # .agents/memory/ SÍ se versiona: es conocimiento curado del proyecto,
 # compartido entre sesiones y colaboradores (no un override personal).
 

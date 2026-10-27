@@ -307,7 +307,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
     * `feedback` pertenece al grupo de pipelines abiertos por defecto (ADR-0123): un agente conectado vía MCP tiene permiso total sin gate adicional.
     * Toda llamada concedida queda auditada con su procedencia agente (`agent_session_id`).
 *   **Entrada:** Llamada MCP entrante con pipeline `feedback`.
-*   **Salida:** Resultado de la operación enrutado al agente + registro de auditoría de procedencia.
+*   **Salida:** Resultado de la operación enrutado al agente + registro de auditoría de procedencia + transición confirmada y actividad visible para la proyección de estado en la interfaz.
 
 ---
 

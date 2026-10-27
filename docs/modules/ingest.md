@@ -168,7 +168,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
 - **[`duckdb-sql-engine`](../features/duckdb-sql-engine.md)** — Motor para consultas multihilo sobre Parquet.
 - **[`clock`](../features/clock.md)** — Timestamps deterministas.
 - **[`algorithmic-bars`](../features/algorithmic-bars.md)** — Generación de barras sintéticas por Tick/Volumen/Rango.
-- **[`flutter-packaging-manager`](../features/flutter-packaging-manager.md)** — Gestión de binarios y servicios locales.
+- **[`desktop-packaging-manager`](../features/desktop-packaging-manager.md)** — Gestión del host de escritorio y servicios locales.
 - **[`canvas-navigation`](../features/canvas-navigation.md)** — Exploración visual de datasets masivos.
 - **[`order-flow-microstructure`](../features/order-flow-microstructure.md)** — Enriquecimiento de barras con CVD, OFI y VWAP.
 - **[`fractional-differencer`](../features/fractional-differencer.md)** — Preservación de memoria estadística via diferenciación fraccional (ADR-0064).
@@ -323,7 +323,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
 *   **Postcondición:** Barras disponibles para entrenamiento AI en `generate`.
 
 ### **TTR-015: Inicialización de Entorno Local (Flutter FFI)**
-*   **Descripción:** Utiliza [`flutter-packaging-manager`](../features/flutter-packaging-manager.md) para levantar los servicios de backend y visor necesarios para la ingesta.
+*   **Descripción:** Utiliza [`desktop-packaging-manager`](../features/desktop-packaging-manager.md) para levantar el Core y el visor necesarios para la ingesta.
 *   **Entradas:** Entorno del sistema operativo, variables de entorno.
 *   **Proceso:** Despliega el entorno `Flutter FFI` si es necesario o asegura que los servicios backend estén listos para Ingesta.
 *   **Salidas:** Confirmación de entorno listo.
@@ -398,7 +398,7 @@ Las tablas propias de este módulo (una por feature/TTR, en sus propias migracio
     * `ingest` pertenece al grupo de pipelines abiertos por defecto (ADR-0123): un agente conectado vía MCP tiene permiso total sin gate adicional.
     * Toda llamada concedida queda auditada con su procedencia agente (`agent_session_id`).
 *   **Entrada:** Llamada MCP entrante con pipeline `ingest`.
-*   **Salida:** Resultado de la operación enrutado al agente + registro de auditoría de procedencia.
+*   **Salida:** Resultado de la operación enrutado al agente + registro de auditoría de procedencia + transición confirmada y actividad visible para la proyección de estado en la interfaz.
 
 ### **TTR-023: Orquestación de Ingesta de Eventos Fundamentales (Fundamental Event Store)**
 *   **Descripción:** Invoca a [`fundamental-event-store`](../features/fundamental-event-store.md) para ingestar el hecho crudo de eventos fundamentales (calendario macro, resultados corporativos, política monetaria) desde un proveedor estructurado externo, persistirlo local con linaje y versionarlo PIT (first-print + revisiones).

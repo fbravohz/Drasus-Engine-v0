@@ -266,6 +266,12 @@ Y dos capacidades que resuelven el problema de la caja negra:
 - **El traductor.** Convierte esas cuarenta reglas encadenadas en **un párrafo en español** que cualquiera puede leer. "Compra cuando el precio lleva tres horas subiendo y el volumen es mayor al promedio de la semana, salvo los viernes por la tarde."
 - **El rebobinador.** Puedes tomar cualquier simulación ya terminada, rebobinarla, plantar el cursor en cualquier instante y ver **exactamente** qué veía la estrategia y por qué decidió lo que decidió, en ese segundo.
 
+Si autorizas a un agente a trabajar, también lo ves: la aplicación muestra qué está haciendo, sobre qué objeto y cómo va. No está moviendo el mouse ni fingiendo que usó botones; hace el trabajo real del motor y la interfaz te lo enseña en vivo, incluso si la cierras y vuelves a entrar.
+
+También puedes hacer más grande o más pequeña la letra con `Ctrl++`/`Ctrl+=` y `Ctrl+-`, o volver al tamaño normal con `Ctrl+0`, como en un navegador. Esto no cambia el tamaño del lienzo: solo hace más cómoda la lectura.
+
+Con `Ctrl+Shift+P` abres una lista de acciones disponibles. También puedes buscar, guardar, deshacer cambios y moverte entre vistas con atajos conocidos. Las acciones delicadas piden permiso y confirmación antes de ejecutarse.
+
 **Por qué así.** Porque un sistema que te dice "confía en mí" no se distingue de la superstición. Poder auditar no es un lujo de la interfaz: es la razón de ser del producto.
 
 **En el documento técnico:** `CAP-09`.

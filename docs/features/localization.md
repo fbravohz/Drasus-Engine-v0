@@ -9,7 +9,7 @@
 
 ## ¿Qué es esta feature?
 
-La capa de **localización** de la interfaz: toda cadena visible al usuario se resuelve por su clave a través de esta capa, nunca escrita literal en un widget. Los idiomas base son **español e inglés**; agregar un idioma nuevo es soltar un archivo de recursos, sin tocar código. Usa el mecanismo estándar de Flutter (archivos de recursos por idioma vía `flutter_localizations`/`intl`).
+La capa de **localización** de la interfaz: toda cadena visible al usuario se resuelve por su clave a través de esta capa, nunca escrita literal en un componente. Los idiomas base son **español e inglés**; agregar un idioma nuevo es sumar un recurso de traducción, sin tocar la lógica de negocio. La superficie Tauri/React carga recursos versionados por locale.
 
 **Problema que resuelve:** en GREENFIELD es el único momento barato para fijar esto. Retrofittear internacionalización sobre una UI con cientos de cadenas ya incrustadas es masivo y doloroso. El propietario no quiere software clavado a un idioma; quiere facilidad para sumar idiomas, con español e inglés como principales.
 
@@ -35,17 +35,18 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
 
 - [ ] El usuario cambia el idioma en ajustes y toda la interfaz cambia de inmediato.
 - [ ] Un colaborador agrega un idioma nuevo soltando un archivo de traducción; no toca código.
-- [ ] Un mensaje de error del motor aparece en el idioma del usuario, aunque el núcleo solo emitió un código estable.
+- [ ] Un mensaje de error o actividad de agente aparece en el idioma del usuario, aunque el núcleo solo emitió un código estable.
 - [ ] Fechas, números y moneda se muestran según el locale del usuario; el reloj interno y el almacenamiento siguen en UTC y escala entera.
 
 ---
 
 ## Restricciones
 
-- **NUNCA una cadena visible al usuario se escribe literal en el widget** — siempre se referencia por su clave de localización.
+- **NUNCA una cadena visible al usuario se escribe literal en el componente** — siempre se referencia por su clave de localización.
 - **NUNCA el backend localiza prosa:** el núcleo Rust emite códigos de error/estado estables; solo la UI convierte código → prosa localizada.
 - **SIEMPRE paridad de idiomas base:** una clave nueva nace en español e inglés a la par.
 - **Display ≠ storage:** el formato local afecta solo la presentación; no altera la representación interna (UTC, escala entera).
+- **NUNCA se localiza texto arbitrario del agente:** las actividades y errores llegan como códigos estables más referencias seguras; la UI localiza el código sin ejecutar ni confiar en prosa del agente.
 
 ---
 
@@ -61,7 +62,7 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
 ## Estructura Interna (FCIS — ADR-0002)
 
 - **Core (Lógica Pura):** resolución de clave → cadena según el locale activo; formateo local de fecha/número/moneda.
-- **Shell (Infraestructura):** carga de archivos de recursos por idioma; mapeo de códigos de error del núcleo a claves de UI.
+- **Shell (Infraestructura):** carga recursos de locale de Tauri/React; mapea códigos de error, estado y actividad del Core a claves de UI.
 - **Frontera Pública:** interfaz para resolver una clave y para cambiar el locale activo.
 
 ---
@@ -69,8 +70,8 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
 ## Ciclo de Vida de la Feature — Localización
 
 ### Entrada
-- Clave de cadena (o código de error del núcleo) y el locale activo.
-- Archivos de recursos por idioma.
+- Clave de cadena (o código de error/actividad del Core) y el locale activo.
+- Recursos por idioma.
 
 ### Proceso
 - Resuelve la clave contra el archivo del locale activo; formatea valores locales según el locale.
@@ -92,9 +93,9 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
     - [ ] Cambiar de español a inglés en ajustes traduce toda la interfaz sin reiniciar.
     - [ ] Un archivo de idioma nuevo (ej. portugués) queda disponible sin cambios de código.
 
-### **TTR-002: Mapeo de Códigos de Error del Núcleo a Prosa Localizada**
+### **TTR-002: Mapeo de Códigos del Núcleo a Prosa Localizada**
 *   **¿Cuál es el problema?** Si el backend emitiera prosa, hornearía un idioma en la lógica.
-*   **¿Qué tiene que pasar?** El núcleo Rust emite códigos estables; la UI los mapea a claves y los localiza.
+*   **¿Qué tiene que pasar?** El núcleo Rust emite códigos estables de error, estado o actividad; la UI los mapea a claves y los localiza.
 *   **¿Cómo sé que está hecho?**
     - [ ] Un error de desbordamiento del transformador aparece en el idioma del usuario; el núcleo solo emitió un código.
 
@@ -104,7 +105,7 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
 
 | Puerto | ID de tipo | Dirección | Cardinalidad | Descripción |
 |---|---|---|---|---|
-| `error_code_in` | `Signal` | Input | `0..N` | Códigos de error/estado estables emitidos por el núcleo, a mapear a prosa localizada |
+| `error_code_in` | `Signal` | Input | `0..N` | Códigos estables de error, estado o actividad emitidos por el Core, a mapear a prosa localizada |
 
 > Plomería de UI transversal, sin puerto de dominio propio en el canvas. **Ventana de Verificación:** el selector de idioma en Ajustes; el observable es que toda cadena visible cambia de idioma y un texto de ejemplo se muestra traducido.
 

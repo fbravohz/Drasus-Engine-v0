@@ -1,7 +1,7 @@
 # Audit Log — Registro de Auditoría Inmutable
 
 **Carpeta:** `./features/audit-log/`
-**Estado:** 🟡 Parcial — TTR-001 (registro inmutable append-only + hash chain) implementado. TTR-002 (reconciliación Nautilus) diferido a EPIC-2+.
+**Estado:** 🟡 Parcial — TTR-001 (registro inmutable append-only + hash chain) implementado. La integración atómica con operaciones observables de agente (ADR-0166) queda pendiente junto con TTR-008 a TTR-011 de `agentic-mcp-gateway`. TTR-002 (reconciliación Nautilus) diferido a EPIC-2+.
 **Última actualización:** 2026-06-12
 
 > 🟡 **Parcial** 2026-06-12 · TTR-001 en código (`crates/shared`, migración `0002_audit_log.sql`, triggers append-only + verificación de cadena) · Orden de trabajo [STORY-004](../execution/STORY-004-audit-log.md) · Pendiente: TTR-002 (EPIC-2+).
@@ -12,9 +12,9 @@
 
 El Audit Log es el registro histórico inmutable de todos los eventos significativos del sistema. Cada cambio de estado, cada decisión de trading, cada anomalía detectada queda registrada para siempre.
 
-**Problema:** Si los módulos escriben logs directamente, cada uno usa su propio formato. Los logs se pierden al reiniciar. No hay forma unificada de investigar qué pasó.
+**Problema:** Si las Features escriben logs directamente, cada una usa su propio formato. Los logs se pierden al reiniciar. No hay forma unificada de investigar qué pasó.
 
-**Solución:** El Core nunca escribe logs. En su lugar, dispara eventos al puerto de auditoría injected. El Shell es quien persiste esos eventos de forma inmutable (append-only: solo agregar, nunca borrar ni modificar).
+**Solución:** El Core expresa el hecho de auditoría por el puerto de la Feature; la Shell lo persiste append-only. Cuando el hecho acompaña una mutación, estado de dominio, operación observable y auditoría se comprometen juntos: no hay un efecto confirmado que pueda perder su rastro de auditoría.
 
 **Resultado observable:** Auditoría completa del sistema basada en el **Principio de Inundación de Fundaciones (ADR-0020)**. Cada evento incluye metadatos para cumplimiento institucional (Institutional Compliance) y reconciliación de Nautilus.
 
@@ -34,7 +34,7 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 
 - [ ] Se ejecuta una orden en Execute
   → Dispara evento "ORDER_STATE_CHANGE" con detalles
-  → El evento se registra en Audit Log (timestamp, módulo origen, detalles)
+  → El evento se registra en Audit Log (timestamp, Feature origen, detalles)
   → Incluye: qué cambió de estado, de qué a qué, por qué motivo
 
 - [ ] Se detecta una anomalía en Feedback
@@ -59,6 +59,8 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 - **NUNCA un evento se modifica después de ser grabado.** Inmutable absoluto.
 - **NUNCA se graba información sensible sin encripción.** (Ej: contraseñas, tokens; aunque el Core no debería tener eso)
 - **NUNCA un evento Audit falta campos obligatorios:** timestamp, tipo de acción, tipo de entidad, identificador de entidad, detalles.
+- **NUNCA** se confirma una mutación que requiere auditoría si no puede quedar en el mismo compromiso durable que su evento (ADR-0141).
+- **NUNCA** se persisten secretos, parámetros sensibles o texto no confiable del agente como detalle visible; se guarda procedencia estructurada y referencias seguras.
 
 ---
 
@@ -76,16 +78,16 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 ## Ciclo de Vida de la Feature
 
 ### Entrada
-- **Quién llama:** Todos los módulos del Core — cuando ocurre algo significativo (cambio de estado, detección de anomalía, decisión de usuario)
-- **Qué recibe el puerto:** Un evento estructurado con campos semánticos: tipo de acción, tipo de entidad, identificador de entidad, detalles del evento, timestamp
+- **Quién llama:** Cualquier Feature cuando ocurre algo significativo (cambio de estado, detección de anomalía, decisión de usuario o de agente).
+- **Qué recibe el puerto:** Evento estructurado con tipo de acción, entidad, identificador, detalles seguros, timestamp y —si aplica— `operation_id`, identidad/origen del actor, `correlation_id` y `causation_id`.
 
 ### Proceso
-- **En el Core:** Dispara un evento al puerto de auditoría injected; no espera confirmación (es un fire-and-forget)
-- **En la Shell/persistencia:** Recibe el evento, valida que tenga todos los campos, lo escribe en el log (append-only), no permite modificación
+- **En el Core:** Construye el hecho de auditoría como parte del resultado de la operación; no decide textos de interfaz.
+- **En la Shell/persistencia:** Valida el evento y, si existe una mutación asociada, persiste ambos en la misma transacción. Tras el commit puede difundir la actividad al stream; la difusión no sustituye la persistencia.
 
 ### Salida
 - **Qué produce:** El evento persiste en el Audit Log de forma inmutable
-- **Cuándo:** Inmediatamente (o en batch, según configuración de persistencia)
+- **Cuándo:** En el compromiso de la operación que representa; cualquier optimización posterior no puede romper esa atomicidad.
 
 ### Contextos de Uso
 - **Execute:** Auditoria de cada orden enviada, cada cambio de estado, cada veto de usuario
@@ -93,7 +95,7 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 - **Manage:** Auditoría de cambios de portafolio, rebalanceos, cambios de reglas
 - **Feedback:** Auditoría de anomalías detectadas, intentos de resolución
 - **Withdraw:** Auditoría de retiros de estrategias, cambios de estado
-- **Cualquier módulo:** Cualquier decisión de riesgo o cambio de configuración
+- **Cualquier preset de composición:** Cualquier decisión de riesgo o cambio de configuración, a través de la Feature dueña.
 
 ---
 
@@ -106,7 +108,7 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 *   **Reglas de Negocio:**
     * El `audit_hash` debe calcularse usando el hash de la fila anterior + contenido actual (encadenamiento).
     * Toda entrada DEBE incluir `process_id` y `institutional_tag` (ADR-0020).
-*   **Entrada:** `action_type`, `entity_type`, `entity_id`, `details_json`, `process_id`.
+*   **Entrada:** `action_type`, `entity_type`, `entity_id`, `details_json` seguro, `process_id` y, cuando aplique, `operation_id` + procedencia del actor.
 *   **Salida:** `log_id` (UUID), `audit_hash`.
 *   **Precondición:** Evento validado contra esquema de acción permitido.
 *   **Postcondición:** Registro bloqueado físicamente para edición o borrado.
@@ -130,7 +132,7 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 
 | Puerto | ID de tipo | Dirección | Cardinalidad | Descripción |
 |---|---|---|---|---|
-| `audit_content_in` | `(interno)` | Input | 1 | Payload de auditoría que el llamador entrega: `action_type`, `entity_kind`, `entity_id`, `details_json`, `process_id`. No es un tipo de canvas; es la firma Rust de la API de la feature (Enmienda 2026-06-24 de ADR-0137). |
+| `audit_content_in` | `(interno)` | Input | 1 | Payload de auditoría: `action_type`, `entity_kind`, `entity_id`, detalles seguros, `process_id` y procedencia/operación cuando aplique. No es un tipo de canvas; es la firma de la API de la Feature. |
 | `audit_event_out` | `AuditEvent` | Output | 1..N | Evento auditado persistido de forma inmutable (append-only) con `audit_hash` y `audit_chain_hash`. Representa la salida canónica de la bitácora. |
 
 > **Cardinalidad:** `1` = exactamente uno · `0..1` = opcional · `0..N` = múltiple · `1..N` = al menos uno.
@@ -157,12 +159,14 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 | | `session_id` | Agrupación de runtime (nullable) |
 | | `node_id` | ID del hardware físico (nullable) |
 
-- **Campos propios de la feature (TTR-001):** `action_type`, `entity_type`, `entity_id`, `details_json` — definidos en "Entrada"/"Restricciones" de este documento, no en ADR-0020.
+- **Campos propios de la feature (TTR-001):** `action_type`, `entity_type`, `entity_id`, `details_json` seguro, y referencias estructuradas de operación/origen cuando apliquen — definidos en "Entrada"/"Restricciones" de este documento, no en ADR-0020.
 
 - **Decisión Arquitectónica Asociada:**
     - ADR-0015: Arquitectura de Causalidad (Audit Log como fuente de verdad para Feedback).
     - ADR-0016: Local-First (Soberanía de datos de auditoría).
     - ADR-0020: Inundación de Fundaciones — Perfil D (Ops/Auditoría).
+    - ADR-0141: estado y auditoría atómicos.
+    - ADR-0166: operaciones observables y recuperables para agentes.
 
 ---
 
@@ -171,5 +175,5 @@ El usuario nunca la ve directamente. La nota como que **siempre puede reconstrui
 - [`clock`](../features/clock.md) — para timestamps deterministas de alta precisión.
 
 **Consumido por:**
-- **Todos los Módulos del Pipeline:** Para registro de transiciones de estado y decisiones críticas.
+- **Todas las Features:** Para registrar transiciones de estado y decisiones críticas a través de este puerto.
 - [`feedback`](../modules/feedback.md) — para análisis de causalidad y de causa raíz.

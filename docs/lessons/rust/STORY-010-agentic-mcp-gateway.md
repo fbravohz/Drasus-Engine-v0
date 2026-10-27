@@ -8,7 +8,7 @@
 
 ### 1. El Protocolo MCP y el transporte stdio
 
-**Qué es MCP.** El Model Context Protocol (MCP) es un protocolo estándar creado por Anthropic para que los modelos de lenguaje (LLMs) puedan invocar herramientas externas de forma estructurada. Un cliente MCP (por ejemplo, Claude en Claude Desktop) se conecta a un servidor MCP y le pregunta qué herramientas tiene disponibles; luego puede llamar a cualquiera de ellas con parámetros tipados.
+**Qué es MCP.** El Model Context Protocol (MCP) es un protocolo estándar para que los modelos de lenguaje (LLMs) puedan invocar herramientas externas de forma estructurada. Un cliente MCP (por ejemplo, Codex Desktop) se conecta a un servidor MCP y le pregunta qué herramientas tiene disponibles; luego puede llamar a cualquiera de ellas con parámetros tipados.
 
 **Por qué stdio para EPIC-0.** MCP admite dos transportes: stdio (stdin/stdout) y HTTP+SSE. El transporte stdio es el más simple: el cliente lanza el servidor como un proceso hijo, y la comunicación ocurre a través de los pipes estándar — sin networking, sin TLS, sin autenticación de transporte. Es el modo local de facto y el que todos los clientes MCP soportan de fábrica. HTTP+SSE se reserva para el modo SaaS (EPIC-8+, ADR-0123).
 

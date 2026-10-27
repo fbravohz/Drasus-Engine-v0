@@ -1,13 +1,13 @@
 ## 11. Restricciones de Negocio (Invariantes del Sistema)
 
 ### Validación de Datos (ingest)
-* **Regla:** Ningún dato sin validación puede entrar en un módulo.
+* **Regla:** Ningún dato sin validación puede entrar en una Feature.
 * **Por qué:** Datos malos contaminan toda simulación histórica → estrategias falsas → pérdida de dinero.
-* **Implementación:** Antes de cualquier lectura externa (gRPC/WebSocket, archivo), validar; rechazar si no pasa.
+* **Implementación:** Antes de cualquier lectura externa (gRPC o archivo), validar; rechazar si no pasa.
 * **Consecuencia:** Anomalía registrada en observabilidad; no procesar ese dato.
 
 ### Regímenes de Mercado Incompletos (ingest)
-* **Regla:** "Régimen desconocido" es válido pero explícito; módulos posteriores saben que no hay clasificación.
+* **Regla:** "Régimen desconocido" es válido pero explícito; las Features posteriores saben que no hay clasificación.
 * **Por qué:** Evitar que generar/validar asuman régimen cuando no hay suficiente historial de volatilidad.
 * **Implementación:** Precio con régimen desconocido se guarda; generar puede usarla pero debe registrar advertencia.
 
@@ -59,7 +59,7 @@
 ### Timestamps son INTEGER Nanosegundos UTC (Transversal — ADR-0141)
 * **Regla:** Todo timestamp en SQLite es `INTEGER NOT NULL` en nanosegundos Unix UTC desde epoch. NUNCA `TEXT` (ISO-8601) ni `REAL` (segundos fraccionarios).
 * **Por qué:** Precisión de nanosegundos para datos de mercado de alta frecuencia; operaciones aritméticas directas sin conversión; univocidad de representación.
-* **Implementación:** UTC estricto en toda la pila (Rust → Parquet → DuckDB). La conversión a zona horaria local ocurre solo en Flutter. Los campos `created_at` (tiempo de persistencia) y `event_timestamp_ns` / `bar_timestamp_ns` (tiempo del evento de mercado) tienen nombres distintos y no son intercambiables.
+* **Implementación:** UTC estricto en toda la pila (Rust → Parquet → DuckDB). La conversión a zona horaria local ocurre solo en la superficie Tauri/React. Los campos `created_at` (tiempo de persistencia) y `event_timestamp_ns` / `bar_timestamp_ns` (tiempo del evento de mercado) tienen nombres distintos y no son intercambiables.
 * **Consecuencia:** La confusión de `created_at` con el timestamp del evento introduce look-ahead bias en backtests.
 
 ### Enums son TEXT con CHECK Constraint (Transversal — ADR-0141)
@@ -85,10 +85,33 @@
 * **Consecuencia:** Lo que no se envía (tier de pago) no se puede filtrar ni requerir judicialmente. El consentimiento/ToS versionado es prerrequisito legal del firehose gratuito.
 
 ### Permisos del Agente Graduados por Riesgo de Pipeline (Transversal — ADR-0123)
-* **Regla:** Un agente LLM conectado vía MCP nace con permiso total sobre ingestar/generar/validar/incubar/retroalimentar; sobre gestionar queda condicionado al `institutional_tag` (Demo concede, Live exige el interruptor de producción); sobre ejecutar/retirar nace sin permiso alguno.
+* **Regla:** Un agente LLM conectado vía MCP recibe únicamente las capacidades de su rol explícito por puerto de Feature y objeto. El entorno y el contexto de riesgo pueden exigir una delegación vigente; `execute` y `withdraw` no se conceden por defecto.
 * **Por qué:** Permite delegar el trabajo tedioso de descubrimiento sin abrir por defecto una puerta sin control hacia el capital real.
-* **Implementación:** El interruptor de producción está apagado y oculto por defecto; el propietario lo activa de forma explícita y reversible. En modo SaaS, antes no existe la opción de activarlo sin que el usuario acepte expresamente los términos de riesgo.
-* **Consecuencia:** Toda llamada del agente queda auditada con su procedencia; cerrar el canal MCP no degrada la operación manual desde la interfaz.
+* **Implementación:** La delegación de producción nace desactivada por ausencia, se concede de forma explícita, acotada y reversible. En modo SaaS no puede concederse sin aceptación expresa de los términos de riesgo. Toda mutación concedida recorre la misma interfaz pública y transición de dominio que una acción humana, se persiste con su evidencia y publica el cambio de estado para Tauri/React mediante la frontera gRPC.
+* **Consecuencia:** Toda llamada del agente queda auditada con su procedencia. La interfaz muestra el resultado, progreso, error o rechazo de la acción sin simulación de mouse, DOM o componentes. Si estaba desconectada, reconstruye el estado y el historial al reconectar o recargar. Cerrar el canal MCP no degrada la operación manual desde la interfaz.
+
+### Presencia y actividad agéntica visible (Transversal — ADR-0123)
+* **Regla:** Toda acción agéntica conectada, pendiente, ejecutándose, progresando, completada, fallida o cancelada emite actividad visible con el agente que la inició, el objeto afectado y el estado actual.
+* **Por qué:** El usuario debe poder observar al agente trabajar en tiempo real, como observa a un colaborador en una herramienta colaborativa, sin convertir la interfaz en un teatro de clics simulados.
+* **Implementación:** El Core publica el ciclo de actividad por un stream de estado de la frontera gRPC. Tauri lo entrega a React. La interfaz muestra la actividad en una superficie global y en el objeto afectado, y reconstruye su estado desde el Core después de una desconexión.
+* **Consecuencia:** El usuario ve estados localizados de inicio, cambio confirmado y resultado final. La presencia no contiene lógica de dominio ni sustituye la auditoría.
+
+### Operación observable y recuperable (Transversal — ADR-0166)
+* **Regla:** Toda mutación externa se identifica antes de causar efecto y se autoriza por puerto público de Feature, objeto y operador. El pipeline solo aporta contexto de riesgo; no concede permiso por sí mismo.
+* **Por qué:** Las Features se conectan fuera de los presets. Un permiso ligado solo a un pipeline permitiría o bloquearía acciones equivocadas cuando el usuario compone otro flujo.
+* **Implementación:** La operación conserva identidad del agente, sesión, Feature, puerto, objeto, correlación, idempotencia y versión esperada. La Shell confirma en una transacción el cambio de dominio, la auditoría y el evento durable de actividad; el stream publica únicamente después.
+* **Consecuencia:** Reintentar no duplica una mutación, una colisión devuelve conflicto explícito y una recarga recupera el mismo estado confirmado.
+
+### Delegación, revocación y presencia (Transversal — ADR-0166)
+* **Regla:** Delegar producción es una autorización revocable del propietario, limitada por cuenta, agente, puerto, objeto y vencimiento. La presencia viva tiene vencimiento renovable; la actividad histórica permanece durable.
+* **Por qué:** Un interruptor global puede autorizar al agente equivocado o quedar activo más allá de la intención del propietario. Una conexión perdida tampoco puede mostrarse indefinidamente como trabajo en curso.
+* **Implementación:** La autorización se revalida antes de cada compromiso de estado. Si un rol o delegación se revoca, se bloquean compromisos posteriores. Los trabajos de cálculo conservan evidencia si ya empezó, pero no promueven ni mutan sin autorización vigente.
+* **Consecuencia:** El usuario distingue conectado, en curso, confirmado, revocado y estado desconocido, sin confundir presencia con prueba de una mutación.
+
+### Proyección localizada y segura (Transversal — ADR-0160, ADR-0166)
+* **Regla:** El Core emite códigos estables de actividad y error; Tauri/React los convierte en prosa localizada. Los textos de ejemplo no son cadenas incrustadas y los datos sensibles o no confiables del agente no aparecen crudos en actividad ni auditoría.
+* **Por qué:** La interfaz debe conservar español e inglés sin trasladar localización o datos peligrosos al Core.
+* **Implementación:** Cada evento publica códigos, referencias de Feature/objeto y resúmenes permitidos. La interfaz resuelve la frase y muestra una representación genérica si aún no reconoce un tipo de actividad.
+* **Consecuencia:** Un cliente antiguo conserva coherencia ante eventos nuevos y el usuario ve el mismo significado sin exponer secretos, parámetros sensibles o texto inyectado.
 
 ---
-

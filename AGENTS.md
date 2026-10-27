@@ -33,8 +33,7 @@ Reglas:
 ## 3. Fuentes y rutas
 
 - `docs/README.md` es el índice completo para localizar módulos, Features, ADRs, SAD, producto, roadmap, plantillas y lecciones. No dupliques ese índice aquí.
-- Detalle operativo: `.agents/skills/<rol>/ROLE.md`, `.agents/knowledge/README.md` y el contexto `drasus_context` según `.agents/context-runtime/catalog.json`.
-- `governance.md` y `hard-prohibitions.md` son obligatorios; consulta `critical-domain-reasoning.md` antes de cerrar reglas cuantitativas, estadísticas, cripto, fiscales o legales. Declara las lecturas y reglas aplicadas según `GOVERNANCE-1.5`; los reportes van a `.agents/sessions/`.
+- Detalle operativo: `.agents/skills/<workflow>/SKILL.md`, `.agents/knowledge/` y el contexto `drasus_context` según `.agents/context-runtime/workflows.json`.
 
 ## 4. Recuperación eficiente de contexto
 
@@ -45,7 +44,6 @@ Reglas:
 
 ## 5. Governance, memoria y comunicación
 
-- La memoria automática está desactivada en `.codex/settings.local.json`. No escribas nuevas entradas en `.agents/memory/`; los archivos existentes no se modifican. Los aprendizajes persistentes van al documento de dominio que los consume.
-- `governance.md` gobierna anti-alucinación, herramientas, cierre, persistencia, doc-first y provider bypass; `hard-prohibitions.md` contiene las prohibiciones absolutas. Ambos prevalecen sobre este mapa; la instrucción explícita del usuario en el turno actual gana.
+- Las skills activas y el contrato de contexto gobiernan el despacho, las herramientas, el cierre y la persistencia. La instrucción explícita del usuario en el turno actual gana.
 - No inventes nombres, rutas ni snippets. Prosa en español; identificadores en inglés; comentarios de código en español.
-- Habla al propietario a nivel CEO: claro, directo y con vocabulario normal de negocio/tech. Lidera con impacto y decisión; deja el detalle técnico para cuando aporte valor.
+- Habla al propietario a nivel CEO: claro, directo y con vocabulario de negocio/tech. Lidera con impacto y decisión; deja el detalle técnico para cuando aporte valor.

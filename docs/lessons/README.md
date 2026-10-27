@@ -15,7 +15,5 @@ Esta carpeta no documenta el proyecto: documenta lo que el usuario aprende mient
 | Carpeta | Ingeniero(s) que escriben aquí | Dominio |
 |---|---|---|
 | [`rust/`](./rust/) | `rust-engineer`, `refactoring-engineer` | Lenguaje Rust, Cargo, build/release |
-| [`dart-flutter/`](./dart-flutter/) | `flutter-engineer` | Dart, Flutter, Impeller, `CustomPainter` |
-| [`ffi-grpc/`](./ffi-grpc/) | `bridge-engineer` | FFI (`flutter_rust_bridge`), Arrow, Protobuf, gRPC |
 | [`quant/`](./quant/) | `quant-engineer` | Estadística, matemática financiera, sesgos |
 | [`testing/`](./testing/) | `qa-engineer` | Patrones de prueba (unitaria, propiedad, oráculo, SLA) |

@@ -10,8 +10,8 @@
 
 ## 1. Cómo leer este ROADMAP
 
-- **Unidad de entrega = un módulo completo (ADR-0118).** Cada fase libera el 100% del **núcleo** de su módulo, no una selección de piezas. La fuente de verdad de qué TTRs componen un módulo es su tabla "TTRs Etiquetados por Fase" dentro del propio `docs/modules/<módulo>.md`.
-- **Una Feature se construye una sola vez**, en el primer módulo que la usa en el pipeline (`ingest → generate → validate → incubate → manage → execute → feedback → withdraw`). Los módulos posteriores solo la **integran** (enchufan su puerto), no la reconstruyen.
+- **Unidad de entrega = Feature y su slice vertical.** Cada fase libera las Features necesarias, con sus TTRs, contratos y representación verificable; un módulo/preset solo las compone para una experiencia o flujo recomendado.
+- **Una Feature se construye una sola vez**, en su propio dominio. Los presets posteriores solo la **integran** (enchufan su puerto), no la reconstruyen ni se convierten en dueños de su esquema o permisos.
 - **La vanidad está fuera del núcleo:** la UI unificada va a EPIC-8 (ADR-0117) y el R&D no validado a `moonshots/`/EPIC-9+ (ADR-0103). Por eso "módulo completo" no obliga a construir adornos antes de llegar al dinero.
 - **Vocabulario:** los identificadores internos (`EPIC-n`, `STORY-###`, `TTR`, `ADR-XXXX`) están traducidos según `.agents/knowledge/writing-efficiency.md` (`WRITING-EFFICIENCY-3`). Aquí: **EPIC = fase/gran bloque**, **STORY = trabajo con código**, **SPIKE = investigación de un riesgo técnico**, **TASK = trabajo sin código**.
 
@@ -66,13 +66,13 @@ Cada ficha enlaza a la tabla de TTRs del módulo (fuente de verdad del alcance) 
 
 **Objetivo:** esqueleto del workspace hexagonal (ADR-0137) compilando, con las fundaciones anti-retrabajo (ADR-0020) y los 6 gates de viabilidad resueltos.
 
-**Alcance:** workspace Cargo hexagonal (ADR-0137): `shared` (catálogo de tipos + plomería de infraestructura), `crates/features/<dominio>/` (un crate hexagonal por feature de dominio — vacío al cierre de EPIC-0, se puebla desde EPIC-1), `presets/` (cableado sin lógica), `app` (binario) y `bridge` (FFI). Las 6 features de Fundación viven en `shared` como infraestructura crosscutting bendecida (ADR-0137 enmienda 2026-06-23), no como crates propios. Migración 0001 con la tabla ancla `foundation_master_fields` (catálogo de 25 campos, ADR-0020); features transversales de plomería [`clock`](./features/clock.md), [`audit-log`](./features/audit-log.md), [`telemetry`](./features/telemetry.md), [`async-job-executor`](./features/async-job-executor.md) (ADR-0011), [`worker-isolation-orchestrator`](./features/worker-isolation-orchestrator.md), [`agentic-mcp-gateway`](./features/agentic-mcp-gateway.md) (núcleo del servidor MCP + evaluador de permisos, ADR-0123); CLI con Clap + binario raíz `app` (SAD §4.2); Panel Operativo Fundacional (SPIKE-006/ADR-0117), cuyo Banco de Verificación se formaliza como [`verification-bench`](./features/verification-bench.md) y gate permanente de cierre (ADR-0152).
+**Alcance:** workspace Cargo hexagonal (ADR-0137): `shared` (catálogo de tipos + plomería de infraestructura), `crates/features/<dominio>/` (un crate hexagonal por feature de dominio), `presets/` (cableado sin lógica) y `app` (binario). Las 6 features de Fundación viven en `shared` como infraestructura crosscutting bendecida (ADR-0137), no como crates propios. La antigua superficie Flutter/FFI fue retirada; su reemplazo Tauri/React + gRPC se gobierna por ADR-0165 y se reconstruye por slices verticales.
 
 > **Nota de secuenciación (ADR-0118):** la recuperación post-crash que EPIC-0 exige (job que sobrevive a un cierre y se recupera <10s) la cubre [`async-job-executor`](./features/async-job-executor.md). La feature [`crash-recovery`](./features/crash-recovery.md) (reconciliación de una sesión de trading en vivo contra el bróker, ADR-0027) **no** es de Fundación: pertenece a `execute`/EPIC-5, porque necesita el conector de bróker y el Event Store que no existen hasta entonces.
 >
-> **Nota de secuenciación (ADR-0123):** el núcleo de [`agentic-mcp-gateway`](./features/agentic-mcp-gateway.md) (servidor MCP + evaluador de permisos para `ingest`/`generate`/`validate`/`incubate`/`feedback`, abiertos por defecto) se construye en EPIC-0 como el resto de la plomería transversal. El permiso condicionado por `institutional_tag` sobre `manage` y el bloqueo de `execute`/`withdraw` se activan naturalmente cuando esos módulos existen (EPIC-5/6) — no requieren trabajo adicional, son la misma evaluación de permisos aplicada a fronteras que aún no existían. El flujo de aceptación de términos de riesgo en modo SaaS depende de `saas-gateway` y llega con EPIC-9+.
+> **Nota de secuenciación (ADR-0123/ADR-0166):** el núcleo de [`agentic-mcp-gateway`](./features/agentic-mcp-gateway.md) (servidor MCP + evaluador de permisos por puerto de Feature y objeto) se construye en EPIC-0 como el resto de la plomería transversal. La autorización de `manage`, `execute` y `withdraw` se habilita con las Features y objetos correspondientes; se reevalúa por rol, entorno, riesgo contextual y delegación vigente, no por el preset de pipeline. La proyección recuperable, presencia compartida, identidad/idempotencia, reanudación de stream, revocación, vínculo con jobs, filtrado por lectura e idempotencia de efectos externos (TTR-006 a TTR-013) acompañan cada frontera de Feature cuando esté disponible. El flujo de aceptación de términos de riesgo en modo SaaS depende de `saas-gateway` y llega con EPIC-9+.
 
-**Criterio de salida:** `cargo test` verde en el esqueleto; la migración 0001 aplica los 25 campos; un job asíncrono sobrevive a un `kill -9` y se recupera; los 6 gates SPIKE tienen veredicto en ADR y, de los que aplican a Fundación, su residual está ejercido y verificable en EPIC-0 — smoke de compilación para SPIKE-001 (NautilusTrader) y SPIKE-006 (`flutter_rust_bridge`), erradicación grep-verificable para SPIKE-002 (`tch`/`libtorch`) y SPIKE-003 (`pysr`/`python`); la medición de desempeño del motor (SPIKE-004) se ejerce en EPIC-2 y la validación del LLM/Verdict Engine (SPIKE-005) en EPIC-8, porque esos motores no existen en Fundación (ver §6); el Panel Operativo Fundacional muestra en vivo clock, cola de trabajos y bitácora de auditoría (primera Cáscara Delgada, ADR-0117).
+**Criterio histórico de salida:** el esqueleto Rust, migración 0001 y los gates de Fundación quedaron verificados. SPIKE-006 sobre Flutter/FFI se retira y se reemplaza por un bootstrap Tauri/React + gRPC con health check, sesión local y prueba de cierre ordenado antes de reanudar SVFs (ADR-0165).
 
 **Estado de las entregas de EPIC-0:**
 
@@ -87,9 +87,9 @@ Cada ficha enlaza a la tabla de TTRs del módulo (fuente de verdad del alcance) 
 | STORY-008 — `worker-isolation-orchestrator` | terminado | [STORY-008](./execution/STORY-008-worker-isolation-orchestrator.md) |
 | TASK-011 — Enmienda ADR-0003: tabla única por feature + TTRs de integración vs construcción | ✅ terminado | [TASK-011](./execution/TASK-011-persistencia-reutilizacion-feature.md) |
 | STORY-009 — CLI Clap + binario raíz `app` | ✅ terminado | [Orden](./execution/STORY-009-cli-app.md) |
-| STORY-010 — `agentic-mcp-gateway` (núcleo MCP + evaluador de permisos) | 🟡 parcial (TTR-001 UI + TTR-004 SaaS → futuras épicas) | [Orden](./execution/STORY-010-agentic-mcp-gateway.md) |
+| STORY-010 — `agentic-mcp-gateway` (núcleo MCP + evaluador de permisos) | 🟡 parcial (TTR-001 UI + TTR-004 SaaS + TTR-006..013: proyección, presencia, idempotencia, recuperación, revocación, jobs, filtrado de lectura y efectos externos → futuras épicas) | [Orden](./execution/STORY-010-agentic-mcp-gateway.md) |
 | STORY-014 — Smoke test NautilusTrader v2 crates (cierra SPIKE-001) | ✅ terminado | [Orden](./execution/STORY-014-nautilus-smoke-test.md) |
-| STORY-015 — Panel Operativo Fundacional (cierra SPIKE-006, primera Cáscara Delgada Flutter) | ✅ terminado | [Orden](./execution/STORY-015-panel-operativo-fundacional.md) |
+| STORY-015 — Panel Operativo Fundacional (histórico Flutter/FFI; superficie retirada) | archivado por ADR-0165 | [Orden](./execution/STORY-015-panel-operativo-fundacional.md) |
 | STORY-016 — Tema dinámico (énfasis + paleta + panel de ajustes) | ✅ terminado (color de fuente entregado por STORY-020) | [Orden](./execution/STORY-016-drasus-theme.md) |
 | STORY-017 — Cáscara del Tablero (Bento + registro de widgets) | 🟡 parcial (widgets reales → por épica) | [Orden](./execution/STORY-017-dashboard-shell.md) |
 | STORY-018 — Cáscara del Lienzo (DAG interactivo + lista de features) | 🟡 parcial (nodos reales → por épica) | [Orden](./execution/STORY-018-canvas-shell.md) |
@@ -275,7 +275,7 @@ Los 6 gates ya tienen veredicto documentado como ADR. En EPIC-0 solo resta la va
 | SPIKE-003 | PySR "en Rust" | ADR-0113 (erradicado; simbólico nativo en NSGA-II) | ✅ cerrado para EPIC-0 (erradicación verificada: `pysr`/`python` ausentes del workspace, grep 2026-06-23; el simbólico nativo se construye en EPIC-3) |
 | SPIKE-004 | Motor de backtest dual | ADR-0114 (Express híbrido + Event-Driven) | veredicto en ADR; **validación de desempeño diferida a EPIC-2** (es su criterio de salida — el motor no existe en EPIC-0) |
 | SPIKE-005 | Ollama/LLM local | ADR-0115 (Verdict Engine determinista; LLM opcional) | veredicto en ADR; **validación residual diferida a EPIC-8** (el Verdict Engine/LLM no existe en EPIC-0) |
-| SPIKE-006 | `flutter_rust_bridge` a escala | ADR-0116 + ADR-0117 (Panel Operativo Fundacional) | ✅ cerrado (STORY-015, `flutter build linux` verde, QA APTO 2026-06-21) |
+| SPIKE-006 | Bootstrap Tauri/React + gRPC | ADR-0165 | pendiente: reemplaza el veredicto Flutter/FFI retirado |
 
 ---
 

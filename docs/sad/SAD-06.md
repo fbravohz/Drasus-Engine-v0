@@ -41,7 +41,7 @@ El sistema se organiza en **dos superficies**:
 
 **Pipeline de Ejemplo: Flujo Completo a través de Puertos**
 ```
-Cliente (FFI/gRPC)
+Cliente (gRPC)
     │
     ├─► DataPort.ingest(symbol="BTC", start=2020-01-01) 
     │      → "job_id=12345" (asincrónico)
@@ -108,12 +108,14 @@ Módulo withdraw: Retiro controlado ──► Archivo definitivo, fin de ciclo �
 
 La interfaz gráfica de Drasus Engine se diseña sobre un paradigma responsivo y de ultra-bajo retardo visual:
 
-*   **Entrega Progresiva por Feature — Cáscara Delgada (ADR-0117):** ninguno de los componentes listados abajo espera a EPIC-8. Cada uno se entrega progresivamente, como Cáscara Delgada, dentro de la misma Story que implementa su Feature correspondiente, acotado por un Techo Fijo: un control que dispara la operación real vía `public_interface`, una visualización del resultado real (FFI/gRPC) y un observable persistido visible tras recargar. Las Features sin superficie propia ("plomería") declaran su Ventana de Verificación en la Feature consumidora que sí tiene Cáscara Delgada. Todas las piezas viven en un único shell compartido — el Panel Operativo Fundacional (nacido en EPIC-0/SPIKE-006) — al que EPIC-8 aplica la integración Canvas [Forge/Reactor] (ADR-0136) y el pulido visual.
-*   **Banco de Pruebas — Gate Permanente de Definición de Terminado (ADR-0152):** dentro del Panel Operativo Fundacional, el "Banco de Verificación" que ADR-0117 nombra se formaliza como harness genérico ([`verification-bench`](../features/verification-bench.md)): selector de feature en lista lateral (punto de extensión único) y panel de detalle en tres zonas — input JSON editable (izquierda), botón de envío (centro), respuesta real del backend por FFI con validación visual de forma del input, Válido/Inválido + razón (derecha). Es la gemela gráfica de `drasus verify` (Canal #2, ADR-0142): despacha a la misma `public_interface`, nunca reimplementa lógica. A partir de ADR-0152, ninguna Feature con superficie propia cierra Etapa 5 (QA) sin su conexión individual aquí — el gate paga, entre otras, la deuda de verificación gráfica de los 14 cimientos del substrato de monetización (ADR-0144 y siguientes), hoy solo verificables por CLI.
-*   **Visualización High Precision (Impeller nativo):** Renderizado en GPU de alto rendimiento para interactuar con cientos de miles de puntos de datos sin congelamientos de UI. El lienzo se reserva para la representación de la topología del grafo.
+*   **Entrega Progresiva por Feature — Cáscara Delgada (ADR-0117/0165):** cada superficie se entrega con su Feature: control que dispara la operación real, resultado real por gRPC y observable persistido tras recargar. Las Features de plomería declaran su Ventana de Verificación en una superficie consumidora. La nueva UI Tauri/React se construye desde cero; no hereda el Panel Flutter retirado.
+*   **Banco de Pruebas — Gate Permanente de Definición de Terminado (ADR-0152):** el `verification-bench` mantiene selector de feature, input, envío y respuesta real del backend, ahora a través de gRPC. Es la gemela gráfica de `drasus verify` y nunca reimplementa lógica.
+*   **Visualización de alta precisión:** cada superficie escoge DOM/SVG/Canvas/WebGL según su volumen e interacción, con downsampling y backpressure en Rust y una degradación accesible declarada.
+*   **Escala tipográfica global:** la interfaz ajusta el tamaño de letra con `Ctrl++`/`Ctrl+=` para aumentar, `Ctrl+-` para reducir y `Ctrl+0` para restaurar el valor base, como en navegadores, VS Code y Codex. El comportamiento cubre Dashboard, Canvas, paneles inspectores, diálogos y menús; reacomoda el contenido sin recortes y no altera el zoom de cámara del Canvas.
+*   **Atajos de escritorio:** la paleta de comandos (`Ctrl+Shift+P`), apertura rápida (`Ctrl+P`), búsqueda (`Ctrl+F`/`Ctrl+Shift+F`), guardado (`Ctrl+S`), deshacer/rehacer (`Ctrl+Z`/`Ctrl+Y`), cancelación (`Esc`), ayuda (`F1`/`Ctrl+Shift+?`) y vistas recientes (`Ctrl+Tab`) son globales. `0`, `Home`, `+`, `-`, `Espacio` más arrastre, `Ctrl+C`/`Ctrl+V` y `Delete` solo operan sobre el Canvas cuando tiene el foco. Las acciones sensibles exigen permisos, confirmación y auditoría desde la paleta.
 *   **Micro-Backtest Node Preview:** Visualizador integrado en los nodos del Inspector Panel de una Strategy. Permite la visualización de curvas de equidad reducidas y métricas clave precargadas desde SQLite local, con invalidación visual y regeneración asíncrona manual ante la edición de parámetros.
 *   **Repetición de Corrida y Vista en Vivo (ADR-0157):** la Repetición de Corrida ofrece un selector de rango temporal y slider interactivo para navegación rápida sobre una corrida terminada, con inspector de barra al pasar el cursor (OHLCV + cálculo de cada indicador, estilo StrategyQuant X); realiza consultas optimizadas con DuckDB mediante partition pruning sobre el data lake en Parquet (<200ms). La Vista en Vivo observa una estrategia operando durante la simulación, estilo MetaTrader 5, sin frenar a la flota headless. Ambas comparten motor de render y son agnósticas al tipo de barra.
-*   **UMAP Scatter Visualizer:** Scatter plot 2D/3D interactivo en Flutter nativo (CustomPainter/GPU) para identificar clústeres de robustez mediante reducción de dimensionalidad UMAP, con soporte de brushing (lasso) para drill-down directo de estrategias.
+*   **UMAP Scatter Visualizer:** Scatter plot 2D/3D interactivo para identificar clústeres de robustez mediante reducción UMAP, con brushing para drill-down directo y una implementación de render elegida por presupuesto de datos.
 *   **Toxicity Purifier UI:** Panel interactivo para la purga masiva de clústeres de estrategias tóxicas detectadas por PCA. Permite previsualizar el impacto, realizar soft-delete por lote con firma en el log de auditoría y rollbacks mediante snapshots automatizados.
 *   **Efficiency & Incubation Dashboard:** Monitoreo y control del Cono de Silencio y métricas clave de incubación.
 *   **Data Manager UI:** Interfaz que incorpora el asistente de importación (Import Wizard) y el mapa cromático de calidad de datos.
@@ -126,4 +128,3 @@ La interfaz gráfica de Drasus Engine se diseña sobre un paradigma responsivo y
 *   **Workflow Configurators:** Diseñador visual de pipelines automatizados (Visual Workflow Builder) y selectores dinámicos de universos accionarios (Visual StockPicker Configurator).
 
 ---
-
