@@ -15,5 +15,6 @@ Esta carpeta no documenta el proyecto: documenta lo que el usuario aprende mient
 | Carpeta | Ingeniero(s) que escriben aquí | Dominio |
 |---|---|---|
 | [`rust/`](./rust/) | `rust-engineer`, `refactoring-engineer` | Lenguaje Rust, Cargo, build/release |
+| `ffi-grpc/` | `bridge-engineer` | Integración de contratos Protobuf/gRPC, adaptadores Tauri y streams |
 | [`quant/`](./quant/) | `quant-engineer` | Estadística, matemática financiera, sesgos |
 | [`testing/`](./testing/) | `qa-engineer` | Patrones de prueba (unitaria, propiedad, oráculo, SLA) |

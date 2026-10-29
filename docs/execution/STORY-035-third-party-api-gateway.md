@@ -6,18 +6,18 @@
 | **Tipo** | Story (código — octavo cimiento del substrato de pricing/SaaS) |
 | **Épica (Fase)** | Cimientos de Monetización (transversal, greenfield) |
 | **Sprint** | substrato-monetizacion |
-| **Estado** | 🟡 En curso (Core auth + rate-limit + esquema + puertos; servidor gRPC/tonic, mTLS y protos diferidos) |
+| **Estado** | 🟡 En curso (Core auth + rate-limit + esquema de persistencia + puertos; contrato Protobuf, servidor gRPC y mTLS diferidos) |
 | **Creada** | 2026-07-05 |
 | **Feature** | [`third-party-api-gateway`](../features/third-party-api-gateway.md) |
-| **ADRs** | ADR-0144 (cimiento #8) · ADR-0142 (gRPC/CLI) · ADR-0093 (seguridad — credencial nunca en claro) · ADR-0137 (puertos) · ADR-0141 (append-only + row_version) · ADR-0020 (Perfil D) |
+| **ADRs** | ADR-0144 (cimiento #8) · ADR-0165 (contrato de transporte) · ADR-0142 (CLI y Spike) · ADR-0093 (seguridad — credencial nunca en claro) · ADR-0137 (puertos) · ADR-0141 (append-only + row_version) · ADR-0020 (Perfil D) |
 
 ## 1. Objetivo llano
 
 Construir la **puerta de entrada autenticada para terceros**: el Core que valida una solicitud externa (autenticación por credencial de API + endpoint habilitado + no revocada) y computa la **ventana de rate-limit**, el esquema (credenciales de API + registro de uso), y los puertos. El gateway **no computa**: delega en los puertos internos respetando el consentimiento (`consent-registry` #5). Convierte cada capacidad interna (certificación, feeds, ruteo) en un producto vendible por API sin reabrir el core.
 
-**Alcance ahora vs. después (ADR-0144 "contratos + auth ahora, servidor después"):**
+**Alcance de esta Story:** Core, autenticación y esquema de persistencia ahora; contrato Protobuf y servidor público después, conforme a ADR-0165 y al Spike de ADR-0142.
 - **Ahora (esta Story):** Core (validación de solicitud + ventana de rate-limit + gate de consentimiento) + esquema (`api_credentials` mutable + `api_usage_records` append-only) + consumo real de `consent_out` de #5 + puertos `api_request_in`/`api_response_out` + CLI verify.
-- **Después (diferidos):** el **servidor gRPC (tonic, ADR-0142)** — no existe en el workspace; el **mTLS** (transporte); los **protos por dominio** (`.proto`); la **delegación real** a todos los puertos internos (certificación #7, feeds #9, ruteo `execute`).
+- **Después (diferidos):** el **contrato Protobuf y servidor gRPC** (fuente en ADR-0165, implementación tras Spike de ADR-0142); el **mTLS** (transporte); la **delegación real** a todos los puertos internos (certificación #7, feeds #9, ruteo `execute`).
 
 ## 2. Agentes y Modo de Acompañamiento (ADR-0120/0122)
 
@@ -39,13 +39,13 @@ Docente: conceptos nuevos — autenticación por hash de credencial (nunca en cl
 - **El gateway NO computa (feature §Restricciones):** valida + rate-limita + verifica consentimiento + registra uso, y **decide delegar**; la delegación real a los puertos internos (#7 report, #9 feeds, `execute`) es futura. Modela la **decisión de delegación** (a qué puerto interno iría) + un `ThirdPartyResponse` resultante; no cablees todos los puertos internos.
 - **Perfil ADR-0020:** Perfil D — Grupo I + II (`owner_id`, `access_token_id`) + IV (`node_id`). `api_credentials` con `row_version` (mutable); `api_usage_records` con `event_sequence_id` (append-only).
 - **Puertos (ADR-0137):** `api_request_in ← ThirdPartyRequest` (Input 0..N), `api_response_out → ThirdPartyResponse` (Output 0..N). Bajo `public_interface::third_party_api_gateway`.
-- **Servidor gRPC/tonic + mTLS + protos diferidos:** no existe tonic en el workspace; NO lo agregues. El Core y el esquema son el contrato; el servidor es adaptador posterior.
+- **Servidor gRPC + mTLS + contrato Protobuf diferidos:** no los agregues dentro de esta Story. Los puertos Rust son el contrato del dominio y ADR-0165 fija Protobuf para el transporte; la implementación queda para un slice posterior al Spike de ADR-0142.
 
 ## 4. Instrucciones de despacho (prompt exacto)
 
-> Eres el **Rust-Engineer** en **Modo Docente**. Lee primero: `CLAUDE.md`, `.claude/skills/base/SKILL.md`, `.claude/skills/rust-engineer/SKILL.md` (§4 atomicidad de ledgers), esta Orden, la feature `docs/features/third-party-api-gateway.md`, el patrón **append atómico** `crates/shared/src/persistence/enriched_domain_events.rs`, el patrón **`row_version` mutable** `crates/shared/src/persistence/central_identity.rs`, cómo `consent-registry` (#5) expone su veredicto en `public_interface`/`orchestrator::consent_registry`, y los ADR-0144, ADR-0142, ADR-0093, ADR-0137, ADR-0141, ADR-0020. Declara que los leíste.
+> Eres el **Rust-Engineer** en **Modo Docente**. Lee primero: `CLAUDE.md`, `.claude/skills/base/SKILL.md`, `.claude/skills/rust-engineer/SKILL.md` (§4 atomicidad de ledgers), esta Orden, la feature `docs/features/third-party-api-gateway.md`, el patrón **append atómico** `crates/shared/src/persistence/enriched_domain_events.rs`, el patrón **`row_version` mutable** `crates/shared/src/persistence/central_identity.rs`, cómo `consent-registry` (#5) expone su veredicto en `public_interface`/`orchestrator::consent_registry`, y los ADR-0144, ADR-0165, ADR-0142, ADR-0093, ADR-0137, ADR-0141, ADR-0020. Declara que los leíste.
 >
-> **Gate de Lectura Pre-Código:** (a) confirma `crates/shared`; (b) copia el patrón append atómico (usage) y el patrón `row_version` (credentials); (c) confirma cómo consumir el veredicto de consentimiento real de #5; (d) confirma que NO agregas tonic ni protos.
+> **Gate de Lectura Pre-Código:** (a) confirma `crates/shared`; (b) copia el patrón append atómico (usage) y el patrón `row_version` (credentials); (c) confirma cómo consumir el veredicto de consentimiento real de #5; (d) confirma que NO implementas el servidor ni el contrato Protobuf en esta Story.
 >
 > **Construye (Core auth + rate-limit + esquema + puertos; servidor gRPC diferido):**
 > 1. **Migración `migrations/0014_api_gateway.sql`** con DOS tablas: (a) `api_credentials` MUTABLE con `row_version` (Grupo I + Perfil D; `credential_hash`, `status CHECK(ACTIVE,REVOKED)`, `rate_limit_per_window`, `window_seconds`, `endpoints_enabled` json_valid); (b) `api_usage_records` APPEND-ONLY (`event_sequence_id UNIQUE` + triggers anti UPDATE/DELETE; `credential_id`, `endpoint`, `outcome CHECK(ALLOWED,RATE_LIMITED,DENIED)`, `audit_chain_hash`). `STRICT`, UUIDv7. Índices apropiados (incl. `(credential_id, created_at)` para la ventana de rate-limit).
@@ -102,7 +102,7 @@ cargo run -p app -- verify third-party-api-gateway --input '{"credential":"sk-de
 
 ## 8. Deudas / diferidos registrados
 
-- **Servidor gRPC (tonic, ADR-0142) + mTLS + protos por dominio:** no existen en el workspace; el Core + esquema son el contrato; el servidor es adaptador posterior. Es el **Canal #3 (Postman/grpcurl)** de `TEST.md`, aún no construido.
+- **Servidor gRPC + mTLS + contrato Protobuf:** pendientes; los puertos Rust son el contrato del dominio y ADR-0165 fija el contrato de transporte. La integración queda para un slice posterior al Spike de ADR-0142. Es el **Canal #3 (Postman/grpcurl)** de `TEST.md`, aún no construido.
 - **Delegación real a los puertos internos:** certificación (#7), feeds (#9), ruteo (`execute`/EPIC-5); ahora se modela la decisión de delegación.
 - **Ventana de Verificación (Canal #1):** panel de administración de API → tanda de UI final (DEBT-005).
 - **Huecos de cobertura del QA → DEBT-011:** la ruta de reintento del append (`is_transient_write_conflict`/`WriteContention`) no la ejercita ninguna prueba (WAL+`busy_timeout` hace esperar, no fallar); `revoke` no asevera su `audit_hash` recalculado. No bloqueante (la propiedad crítica de no-pérdida sí está probada).

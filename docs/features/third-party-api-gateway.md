@@ -1,15 +1,15 @@
 # Third-Party API Gateway
 
-> 🟡 **Parcial** 2026-07-06 · Orden de trabajo [STORY-035](../execution/STORY-035-third-party-api-gateway.md) · Cimiento local completo: dos tablas (migración `0014`) — `api_credentials` **MUTABLE** (`row_version`, concurrencia optimista → `VersionConflict`, `credential_hash` SHA-256 nunca en claro ADR-0093, `status` ACTIVE/REVOKED con `CHECK`) y `api_usage_records` **APPEND-ONLY atómica** (`event_sequence_id UNIQUE` + triggers anti UPDATE/DELETE, `BEGIN IMMEDIATE` + reintento + `WriteContention`). Core `domain/third_party_api_gateway.rs` (`hash_api_credential`, `authenticate` con revocación-gana-primero, `compute_rate_limit` de borde exacto `<`, `decide_gateway_outcome` de cuatro puertas, hashes de auditoría encadenados). Orquestador `handle_gateway_request` que consume el `consent_out` **REAL** de #5 (`resolve_consent_verdict`, default-deny GDPR) — nunca un stub. Puerto `api_request_in`/`api_response_out`, CLI `verify third-party-api-gateway`. Crate `crates/shared`. QA APTO (mutación: 45 cazados, huecos no bloqueantes → DEBT-011). Pendiente: servidor gRPC público (tonic/mTLS/protos = Canal #3, ADR-0142, diferido al ROADMAP) y delegación real a los puertos internos (#7 report, #9 feeds, `execute`).
+> 🟡 **Parcial** 2026-07-06 · Orden de trabajo [STORY-035](../execution/STORY-035-third-party-api-gateway.md) · Cimiento local completo: dos tablas (migración `0014`) — `api_credentials` **MUTABLE** (`row_version`, concurrencia optimista → `VersionConflict`, `credential_hash` SHA-256 nunca en claro ADR-0093, `status` ACTIVE/REVOKED con `CHECK`) y `api_usage_records` **APPEND-ONLY atómica** (`event_sequence_id UNIQUE` + triggers anti UPDATE/DELETE, `BEGIN IMMEDIATE` + reintento + `WriteContention`). Core `domain/third_party_api_gateway.rs` (`hash_api_credential`, `authenticate` con revocación-gana-primero, `compute_rate_limit` de borde exacto `<`, `decide_gateway_outcome` de cuatro puertas, hashes de auditoría encadenados). Orquestador `handle_gateway_request` que consume el `consent_out` **REAL** de #5 (`resolve_consent_verdict`, default-deny GDPR) — nunca un stub. Puerto `api_request_in`/`api_response_out`, CLI `verify third-party-api-gateway`. Crate `crates/shared`. QA APTO (mutación: 45 cazados, huecos no bloqueantes → DEBT-011). Pendiente: esquema Protobuf, servidor gRPC público (autenticación mTLS/credencial de API) y delegación real a los puertos internos (#7 report, #9 feeds, `execute`); fuente de transporte ADR-0165, implementación diferida al ROADMAP.
 
 **Carpeta:** `./features/third-party-api-gateway/`
-**Estado:** 🟡 Parcial (puerto + esquema + auth/rate-limit/consentimiento local completos; servidor gRPC público y delegación real diferidos)
+**Estado:** 🟡 Parcial (puerto + esquema de persistencia + auth/rate-limit/consentimiento local completos; esquema Protobuf, servidor gRPC público y delegación real diferidos)
 **Última actualización:** 2026-07-06
-**Decisión Arquitectónica Asociada:** ADR-0144 (cimiento #8) · ADR-0142 (gRPC/CLI) · ADR-0093 (seguridad)
+**Decisión Arquitectónica Asociada:** ADR-0144 (cimiento #8) · ADR-0165 (contrato gRPC) · ADR-0142 (CLI y Spike de implementación) · ADR-0093 (seguridad)
 
 ## ¿Qué es esta feature?
 
-La capa gRPC **pública** que permite a sistemas externos consumir Drasus: certificar estrategias, leer feeds de datos agregados, o rutear ejecución. Extiende el gRPC ya planificado (ADR-0142) añadiendo **autenticación y limitación de tasa**. Ahora se entregan los **contratos (protos por dominio) + auth**; el servidor público es un adaptador posterior.
+La capa gRPC **pública** permite a sistemas externos consumir Drasus: certificar estrategias, leer feeds de datos agregados o rutear ejecución. Sigue el contrato de transporte Protobuf de ADR-0165 y añade **autenticación y limitación de tasa**. El cimiento local de autenticación y rate-limit ya existe; el esquema Protobuf y el servidor público permanecen pendientes.
 
 - **Problema:** cada producto que se vende a terceros (Execution-as-a-Service, feeds, certificación) necesita una puerta de entrada autenticada y con control de abuso. Sin contrato común, cada uno inventa el suyo.
 - **Comportamiento observable:** un tercero autenticado invoca un endpoint y recibe la respuesta del motor, con su uso medido y limitado.
@@ -53,8 +53,8 @@ Así, cada capacidad que Drasus construye para sí mismo se puede vender tambié
 ## Estructura Interna (FCIS — ADR-0002)
 
 - **Core (Lógica Pura):** validación de la solicitud, cómputo de la ventana de rate-limit.
-- **Shell (Infraestructura):** servidor gRPC (tonic, ADR-0142), autenticación mTLS, delegación a los puertos internos, registro de uso.
-- **Frontera Pública:** los protos por dominio (contratos públicos) — el contrato externo de todo el ecosistema.
+- **Shell (Infraestructura):** servidor gRPC conforme a ADR-0165, autenticación mTLS y credencial de API, delegación a los puertos internos y registro de uso.
+- **Frontera Pública:** esquema Protobuf de los servicios públicos, mapeado a los puertos Rust del dominio.
 
 ## Ciclo de Vida de la Feature — Third-Party API Gateway
 
@@ -69,7 +69,7 @@ La respuesta del puerto interno + el registro de uso de esa credencial.
 
 ## Tareas (TTRs)
 
-- **TTR-001:** Protos por dominio de los endpoints públicos (contrato).
+- **TTR-001:** Implementar el esquema Protobuf de los endpoints públicos conforme a ADR-0165.
 - **TTR-002:** Autenticación mTLS + credencial de API y rate-limit (Core: ventana).
 - **TTR-003:** Delegación a los puertos internos respetando consentimiento.
 
@@ -96,6 +96,6 @@ Tabla de credenciales de API + registro de uso (append-only) con Grupo I + Perfi
 ## Dependencias y Bloqueantes
 
 - **Distinción de `saas-gateway` / `saas-cloud-engine` (moonshots):** NO confundir. El `saas-gateway` es el ingreso del cliente headless del **propio usuario** hacia su clúster de ejecución (auth/RBAC/rate-limit para su sesión, modo `SaaSCloudEngine` de ADR-0033). Esta feature (`third-party-api-gateway`) es la **API pública para terceros externos** (fondos, plataformas, bots) que consumen certificación/feeds/ejecución de Drasus. Ambos usan gRPC + auth + rate-limit, pero el sujeto y el propósito son distintos.
-- **Depende de:** gRPC (ADR-0142), `central-identity`, `consent-registry`, `institutional-report-engine`, `data-aggregation`.
+- **Depende de:** transporte gRPC (ADR-0165), implementación y CLI de verificación (ADR-0142), `central-identity`, `consent-registry`, `institutional-report-engine`, `data-aggregation`.
 - **Bloquea a:** los productos vendidos por API (Execution-as-a-Service, feeds, certificación externa).
 - **Contrato de Integración UI (ADR-0117) — Ventana de Verificación:** su observable (credenciales activas + conteo de solicitudes) queda visible en un panel de administración de API en ajustes; hasta entonces, deuda de integración registrada.

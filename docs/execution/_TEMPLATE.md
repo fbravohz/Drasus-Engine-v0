@@ -17,9 +17,9 @@
 | **Creada** | YYYY-MM-DD |
 | **Completada** | YYYY-MM-DD |
 
-> Para tickets con un solo Agente, basta con **Responsable** arriba. Para tickets multi-agente (ej. Quant + Rust + Flutter), la tabla de §3 es la fuente de verdad: un Agente, una fila, su propio Modo.
+> La tabla «Agentes y Modo de Acompañamiento» es la fuente de verdad para los participantes y sus modos. Toda Story incluye también a QA.
 
-## 0. Resumen ejecutivo
+## 0. Resumen de la Orden
 
 > Escrito por el Tech-Lead al crear la Orden. Responde tres preguntas en lenguaje llano, sin códigos internos:
 > - **Qué problema resuelve** este ticket (una frase).
@@ -41,18 +41,19 @@ Enlaces a las unidades de especificación que gobiernan este trabajo:
 <qué logra este trabajo, en lenguaje de negocio>
 
 ## 3. Agentes y Modo de Acompañamiento (ADR-0120)
-> Declara aquí TODOS los Agentes que participan en este ticket (uno o varios — ej. Quant-Engineer + Rust-Engineer + Flutter-Engineer) y, por cada uno, su Modo. El Modo se lee SOLO de esta tabla: cuando el usuario invoque el skill del Agente (`/rust-engineer`, `/flutter-engineer`, etc.) pasándole esta Orden, el Agente busca su fila aquí — nunca se le indica el Modo por chat. Si una fila no declara Modo, el Agente asume **Autónomo** (ADR-0120).
+> Declara una fila por agente participante y su modo. Cada agente lee su fila en esta Orden; sin modo declarado, asume **Autónomo**. El modo no reduce los criterios ni la validación.
 
 | Agente | Etapa del pipeline | Depende de | Modo |
 |---|---|---|---|
-| <Rust-Engineer / Flutter-Engineer / Bridge-Engineer / QA-Engineer / Quant-Engineer / Refactoring-Engineer> | Etapa <n> | <agente del que depende, o "ninguno"> | Autónomo \| Mentor \| Revisión |
-| **QA-Engineer** | **Etapa 5 — gate obligatorio** | **Rust/Flutter/Bridge-Engineer** | **Autónomo** |
+| <Rust-Engineer / Frontend-Engineer / Bridge-Engineer / Quant-Engineer / Refactoring-Engineer> | Etapa <n> | <agente del que depende, o "ninguno"> | Autónomo \| Mentor \| Docente \| Revisión |
+| **QA-Engineer** | **Etapa 5 — obligatoria en toda Story** | **Entregas que audita** | **Autónomo**, salvo declaración distinta |
 
-> **Nota:** el QA-Engineer es fila obligatoria en toda Story de código desde EPIC-0. No puede omitirse. Su Modo por defecto es Autónomo (revisa el código y los tests sin que el usuario intervenga). El Tech-Lead despacha el QA después de que el ingeniero implementador entregue, y NO cierra el ticket hasta recibir veredicto APTO del QA.
+> En toda Story, QA revisa cada entrega aplicable y el conjunto final, sin excepción por fase o capa. La Story no se cierra sin `APTO` de QA sobre el alcance completo. Las pruebas concretas se activan según sus propios criterios de aplicación, conforme a ADR-0133. En otras Órdenes, conserva la fila de QA cuando corresponda a su alcance o criterios.
 
 **Significado de cada Modo** (contrato completo en `<agente>/SKILL.md` §"Modos de Acompañamiento"):
 - **Autónomo:** el Agente implementa y entrega código + pruebas terminadas. El usuario solo audita el resultado.
 - **Mentor:** el usuario teclea. El Agente explica el concepto y dicta el fragmento EXACTO a escribir, bloque por bloque, verificando cada bloque antes de avanzar al siguiente.
+- **Docente:** el Agente implementa un bloque, explica sus decisiones desde cero y responde preguntas antes de avanzar.
 - **Revisión:** el usuario entrega código ya escrito por su cuenta. El Agente audita y explica el porqué de cada corrección, sin dictar la solución de antemano.
 
 ## 4. Instrucciones de despacho por agente (la spec ejecutable)
@@ -63,13 +64,14 @@ Enlaces a las unidades de especificación que gobiernan este trabajo:
 <prompt completo dado al agente>
 ```
 
-**Plan de Implementación / Revisión** (lo llena el Agente al ser invocado, según su Modo declarado en §3):
+**Plan de Implementación / Revisión** (lo llena el Agente al ser invocado, según su modo en «Agentes y Modo de Acompañamiento»):
 <Modo Mentor → secuencia concepto → fragmento exacto a teclear → punto de verificación, bloque por bloque. Modo Revisión → checklist de auditoría aplicado y veredicto por bloque. Modo Autónomo → resumen de lo implementado.>
 
-<Repetir el bloque "4.n" por cada Agente declarado en §3.>
+<Repetir el bloque de despacho por cada agente declarado en «Agentes y Modo de Acompañamiento».>
 
 ## 5. Criterio de aceptación (cada criterio ↔ su prueba)
 > Regla de proceso: ningún criterio se da por cumplido sin una prueba nombrada que lo ejerza. El ingeniero entrega ya en verde; el Tech-Lead reproduce y verifica cobertura del criterio (no solo "tests verdes").
+> Si solo el propietario puede ejecutar un criterio, incluye en «Comandos de validación» el recorrido exacto, el resultado esperado y las trampas conocidas.
 
 | # | Criterio verificable | Prueba que lo demuestra |
 |---|---|---|
@@ -77,6 +79,7 @@ Enlaces a las unidades de especificación que gobiernan este trabajo:
 | 2 | <condición verificable 2> | `<nombre_del_test>` |
 
 ## 6. Comandos de validación (para el usuario — copy/paste)
+> Sustituye los ejemplos por los comandos y entradas reales de esta Orden. Incluye pasos manuales cuando sean necesarios.
 ```bash
 # comandos exactos para reproducir y validar por tu cuenta
 cargo test -p <crate>
@@ -85,20 +88,38 @@ cargo llvm-cov --workspace --summary-only          # % de cobertura de líneas
 ```
 
 ## 7. Registro de ejecución (bitácora cronológica)
-- YYYY-MM-DD · <agente/modelo> · <APROBADO / RECHAZADO> · <evidencia de la auditoría del Tech-Lead>
+> Registra el trabajo del responsable y cada invocación de subagente, directa o anidada, incluidos reintentos y continuaciones. Anota encargo, agente/modelo, etapa, resultado real, evidencia, bloqueos y siguiente paso. Si una invocación no produjo resultado, indícalo; no lo inventes. Pide a quien delegue que informe sus invocaciones anidadas y resultados.
+>
+> Registra cada veredicto de QA con su alcance y evidencia. Un `APTO` parcial no certifica el conjunto; si hay cambios posteriores, QA verifica su impacto antes del cierre. Distingue el veredicto de QA, el del Filtro de mutación cuando aplique y la aceptación final del Tech Lead.
+>
+> Al terminar la iteración, registra los errores, su causa raíz, el filtro que los detectó o dejó pasar y la mejora propuesta; si no hubo hallazgos, déjalo explícito.
+
+| Fecha | Etapa y responsable o subagente/modelo | Encargo | Resultado y estado | Evidencia, bloqueo o siguiente paso |
+|---|---|---|---|---|
+| YYYY-MM-DD | <etapa · agente/modelo> | <objetivo> | <resultado o sin resultado> | <enlace o pendiente> |
 
 ## 8. Pendientes derivados / decisiones
-- <pendientes que salieron de este trabajo, con su destino (otra Orden, escalamiento, etc.)>
+- <pendiente o bloqueo · impacto · responsable · siguiente paso · destino: Orden, Roadmap o deuda>
 
 ---
 
 ## 9. Cierre ejecutivo (para el usuario — CEO)
 
-> Escrito por el Tech-Lead al CERRAR la Story, justo antes de proponer commits —
-> nunca al abrirla (eso es §0: intención de entrada, no resultado de cierre).
-> **Es el ÚNICO texto que se imprime en el chat como mensaje final de cierre** de
-> esta Story. Antes de escribirla, lee `.agents/knowledge/brief.md` (única vez
-> que se consulta) y aplica el "Formato de Reporte al CEO" definido en
-> `.agents/skills/tech-lead/SKILL.md`.
+> Al finalizar o pausar una iteración, redacta este bloque desde «Registro de ejecución» y «Pendientes derivados / decisiones». Resume toda la iteración en lenguaje llano: trabajo y resultados verificados, cada invocación y su resultado, bloqueos, impacto y siguiente paso. Incluye las invocaciones fallidas, interrumpidas o sin resultado; si no hubo subagentes, indícalo.
+>
+> Conserva el formato de la skill Tech Lead. En el cierre de una Story, copia este bloque sin cambios como mensaje final y usa 🟢 solo si está completa y QA emitió `APTO`. En las demás Órdenes, usa 🟢 cuando sus criterios aplicables estén cumplidos. Usa 🟡 para parcial o decisión pendiente y 🔴 para bloqueo. Si no hay decisión pendiente, escribe `Ninguna.` en «INPUT REQUERIDO DEL CEO».
 
-<Bloque ESTADO / PROGRESO MACRO / FRICCIONES Y DEUDA / INPUT REQUERIDO DEL CEO aquí.>
+```text
+ESTADO: 🟢 COMPLETADO | 🟡 PARCIAL O REQUIERE DECISIÓN | 🔴 BLOQUEADO
+
+PROGRESO MACRO:
+- <resultado general verificado de toda la iteración y veredicto de QA, si aplica>
+- <una viñeta por invocación de subagente: encargo y resultado; o Sin invocaciones.>
+- <siguiente paso y responsable, o Ninguno.>
+
+FRICCIONES Y DEUDA:
+- <bloqueos o deuda y su impacto; omitir esta sección si no hay ninguno>
+
+INPUT REQUERIDO DEL CEO:
+- <decisión o insumo concreto, o Ninguna.>
+```

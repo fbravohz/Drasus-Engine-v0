@@ -188,7 +188,7 @@ Las features son **unidades hexagonales autónomas** (ADR-0137): cada una expone
 | [**consent-registry**](./features/consent-registry.md) | Registro versionado y fechado de aceptación de ToS con opt-out granular; columna vertebral legal del firehose gratuito y de la venta de datos (ADR-0143/0144, cimiento #5). | Cabina de Mando / substrato |
 | [**enriched-domain-events**](./features/enriched-domain-events.md) | Instrumentación temprana: eventos inmutables ricos sobre el bus (orden con fricción, backtest, régimen, drawdown…); raíz del substrato de monetización (ADR-0144, cimiento #6). | Todos / substrato |
 | [**institutional-report-engine**](./features/institutional-report-engine.md) | Puerto que convierte resultados del guantelete en reportes institucionales firmados y trazables; habilita stress test, validación, certificación, análisis de drawdown (ADR-0144, cimiento #7). | validate, feedback / substrato |
-| [**third-party-api-gateway**](./features/third-party-api-gateway.md) | Capa gRPC pública con autenticación y rate-limit que expone certificación, feeds y ejecución a terceros; extiende ADR-0142 (ADR-0144, cimiento #8). | Cabina de Mando / substrato |
+| [**third-party-api-gateway**](./features/third-party-api-gateway.md) | Capa gRPC pública con autenticación y rate-limit para certificación, feeds y ejecución a terceros; transporte bajo ADR-0165 (ADR-0144, cimiento #8). | Cabina de Mando / substrato |
 | [**data-aggregation**](./features/data-aggregation.md) | Anonimiza (privacidad diferencial + hash) y agrega datos de ejecución consentidos en índices vendibles (sentimiento, régimen, fricción, correlación); ADR-0102/0144, cimiento #9. | Cabina de Mando / substrato |
 | [**verified-account-registry**](./features/verified-account-registry.md) | Cuentas Verificadas Drasus (análogo a myFXbook / MT5 Signals): unifica N cuentas de trading bajo una identidad, con atestación soberana (hash chain de ejecución propia) + read-only al bróker, y track record publicable opt-in independiente del tier (ADR-0145, cimiento #10). | Cabina de Mando / substrato |
 | [**instance-continuity**](./features/instance-continuity.md) | Respaldo cifrado client-side de la DB local + maestro itinerante (relevo de custodia entre máquinas activadas de la misma cuenta, sin dos escritores a la vez); promovida del moonshot `encrypted-local-backup` (ADR-0146, cimiento #11). | Cabina de Mando / substrato |
@@ -410,12 +410,12 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0136**](./adr/ADR-0136.md) | Arquitectura Visual Unificada — Dashboard + Canvas [Forge/Reactor] · supersede ADR-0028 |
 | [**ADR-0137**](./adr/ADR-0137.md) | Feature como Unidad Hexagonal Autónoma con Puertos Tipados — Módulos como Composiciones Preset |
 | [**ADR-0138**](./adr/ADR-0138.md) | ~~Design System Centralization en UI — ThemeExtension + Librería de Componentes Flutter~~ ⚠️ Superado por ADR-0165 |
-| [**ADR-0165**](./adr/ADR-0165.md) | Cliente de Escritorio Tauri + React y Frontera gRPC Local — decisión vigente de UI/transporte |
+| [**ADR-0165**](./adr/ADR-0165.md) | Cliente Tauri + React; puertos Rust para dominio y Protobuf para transporte gRPC — decisión vigente de UI/transporte |
 | [**ADR-0166**](./adr/ADR-0166.md) | Operaciones Observables y Recuperables — actividad compartida, recuperación, concurrencia y delegación agéntica |
 | [**ADR-0139**](./adr/ADR-0139.md) | Principio Rector General — Single Source of Truth para Contratos Reusables |
 | [**ADR-0140**](./adr/ADR-0140.md) | Opciones Financieras — Diferimiento al Post-MVP con Puerta Abierta |
 | [**ADR-0141**](./adr/ADR-0141.md) | Modelado Relacional Soberano — Tipos canónicos, STRICT, UUIDv7, índices, integridad SQLite↔Parquet |
-| [**ADR-0142**](./adr/ADR-0142.md) | Harness de Verificación sin UI — Canal #2: CLI First (`drasus verify`), gRPC Planificado |
+| [**ADR-0142**](./adr/ADR-0142.md) | Harness de Verificación sin UI — CLI First (`drasus verify`); implementación gRPC pendiente bajo ADR-0165 |
 | [**ADR-0143**](./adr/ADR-0143.md) | Modelo de Tres Planos + Soberanía Condicionada por Tier — Derogación de Zero-Telemetry, Cabina de Mando Central |
 | [**ADR-0144**](./adr/ADR-0144.md) | Substrato de Monetización — Nueve Cimientos como Puertos y Esquema (adaptadores después) |
 | [**ADR-0145**](./adr/ADR-0145.md) | Pilar de Cuentas Verificadas Drasus — atestación soberana + read-only al bróker + registro multi-cuenta (cimiento #10) + track record publicable; enmienda ADR-0143, acota ADR-0001 al monolito |
