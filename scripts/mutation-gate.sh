@@ -6,6 +6,7 @@
 #   scripts/mutation-gate.sh <crate> [jobs]
 #   scripts/mutation-gate.sh hybrid-data-transformer
 #   scripts/mutation-gate.sh sovereign-data-fetcher 4
+#   Requiere jq para validar los resultados de cargo-mutants.
 #
 # Por qué existe este script en vez de escribir el comando a mano:
 #
@@ -38,20 +39,23 @@ CRATE="${1:?Uso: scripts/mutation-gate.sh <crate> [jobs]}"
 JOBS="${2:-2}"
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# Base en disco real. Se deriva de $HOME para no clavar la ruta de un usuario.
-MUTANTS_BASE="${HOME}/.cache/drasus-mutants"
-RUN_DIR="${MUTANTS_BASE}/${CRATE}"
+# Permite aislar la evidencia; por defecto usa el caché local del usuario.
+MUTANTS_BASE="${DRASUS_MUTANTS_BASE:-${HOME}/.cache/drasus-mutants}"
 
-mkdir -p "${MUTANTS_BASE}/tmp" "${RUN_DIR}"
+mkdir -p "${MUTANTS_BASE}/tmp"
 
 # Comprobación explícita: si la base cayera en tmpfs, abortamos con un mensaje
 # que explica el problema, en vez de dejar que el enlazador muera sin contexto.
 FS_TYPE="$(df --output=fstype "${MUTANTS_BASE}" | tail -1 | tr -d ' ')"
 if [[ "${FS_TYPE}" == "tmpfs" ]]; then
+    echo "GATE NO APTO"
     echo "ABORTADO: ${MUTANTS_BASE} está en tmpfs (RAM), no en disco real." >&2
     echo "El enlazado de Polars agotaría la memoria y moriría con Bus error." >&2
     exit 2
 fi
+
+# Cada corrida tiene evidencia propia; un resultado anterior no puede aprobarla.
+RUN_DIR="$(mktemp -d "${MUTANTS_BASE}/${CRATE}.XXXXXXXX")"
 
 echo "── Gate de mutación · crate '${CRATE}' · ${JOBS} trabajos en paralelo ──"
 echo "   Temporales en: ${MUTANTS_BASE}/tmp  (${FS_TYPE})"
@@ -69,17 +73,68 @@ MUTANTS_EXIT=$?
 set -e
 
 MISSED_FILE="${RUN_DIR}/mutants.out/missed.txt"
-MISSED_COUNT=0
-[[ -f "${MISSED_FILE}" ]] && MISSED_COUNT="$(wc -l < "${MISSED_FILE}" | tr -d ' ')"
+OUTCOMES_FILE="${RUN_DIR}/mutants.out/outcomes.json"
 
 echo
 echo "──────────────────────────────────────────────────────────────"
-if [[ "${MISSED_COUNT}" -eq 0 ]]; then
-    echo "GATE APTO · 0 supervivientes en '${CRATE}'"
+if [[ "${MUTANTS_EXIT}" -ne 0 && "${MUTANTS_EXIT}" -ne 2 && "${MUTANTS_EXIT}" -ne 3 ]]; then
+    echo "GATE NO APTO"
+    echo "cargo mutants falló con código ${MUTANTS_EXIT}"
+    exit 1
+fi
+
+if [[ ! -s "${OUTCOMES_FILE}" || ! -f "${MISSED_FILE}" ]]; then
+    echo "GATE NO APTO"
+    echo "Resultados incompletos (código ${MUTANTS_EXIT})"
+    exit 1
+fi
+
+if ! command -v jq >/dev/null 2>&1 || ! jq -e '
+    type == "object" and (.end_time | type == "string") and
+    (.outcomes | type == "array") and
+    any(.outcomes[]; .scenario == "Baseline" and .summary == "Success") and
+    ([.total_mutants, .missed, .caught, .timeout, .unviable] | all(type == "number")) and
+    (.total_mutants == (.missed + .caught + .timeout + .unviable)) and
+    ((.outcomes | length) == (.total_mutants + 1))
+' "${OUTCOMES_FILE}" >/dev/null 2>&1; then
+    echo "GATE NO APTO"
+    echo "Resultados JSON inválidos o incompletos; verifica que jq esté instalado."
+    exit 1
+fi
+
+if ! jq -e '.total_mutants > 0' "${OUTCOMES_FILE}" >/dev/null; then
+    echo "GATE NO APTO"
+    echo "No se generaron mutantes; no hay evidencia de cobertura."
+    exit 1
+fi
+
+if [[ "${MUTANTS_EXIT}" -eq 3 ]] && { [[ ! -s "${RUN_DIR}/mutants.out/timeout.txt" ]] || ! jq -e '.timeout > 0' "${OUTCOMES_FILE}" >/dev/null; }; then
+    echo "GATE NO APTO"
+    echo "El código 3 no tiene evidencia de timeout."
+    exit 1
+fi
+
+MISSED_COUNT="$(awk 'END { print NR }' "${MISSED_FILE}")"
+if ! jq -e --argjson listed "${MISSED_COUNT}" '.missed == $listed' "${OUTCOMES_FILE}" >/dev/null; then
+    echo "GATE NO APTO"
+    echo "La lista de supervivientes no coincide con los resultados JSON."
+    exit 1
+fi
+
+if [[ "${MUTANTS_EXIT}" -eq 2 && ! -s "${MISSED_FILE}" ]]; then
+    echo "GATE NO APTO"
+    echo "cargo mutants reportó supervivientes sin detalle (código 2)"
+    exit 1
+fi
+
+if [[ ! -s "${MISSED_FILE}" ]]; then
+    echo "GATE APTO"
+    echo "0 supervivientes en '${CRATE}'"
     exit 0
 fi
 
-echo "GATE NO APTO · ${MISSED_COUNT} supervivientes en '${CRATE}':"
+echo "GATE NO APTO"
+echo "${MISSED_COUNT} supervivientes en '${CRATE}':"
 echo
 sed "s|crates/[^ ]*/src/||; s| in [0-9].*||" "${MISSED_FILE}"
 echo
