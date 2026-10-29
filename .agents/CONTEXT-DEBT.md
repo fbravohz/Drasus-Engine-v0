@@ -26,7 +26,7 @@
 | CONTEXT-DEBT-006 | 🟡 Baja | IDs de ítem que reutilizan el ID del bloque padre en `commenting-policy.md` y `partner/SKILL.md` | ✅ Pagada | [detalle](./debt/CONTEXT-DEBT-006.md) |
 | CONTEXT-DEBT-007 | 🟠 Media | Etapas de `tech-lead/SKILL.md` mal numeradas — bloque obligatorio sin número entre Etapa 6 y 7; revisión completa pendiente | ✅ Pagada | [detalle](./debt/CONTEXT-DEBT-007.md) |
 | CONTEXT-DEBT-008 | 🟡 Baja | `qa-engineer/SKILL.md` en formato legacy — sin bloque `-FV`, rutas sin wikilink, lenguaje de bitácora (avisos blandos del hook) | ✅ Pagada | [detalle](./debt/CONTEXT-DEBT-008.md) |
-| CONTEXT-DEBT-009 | 🟡 Baja | `brief.md` referencia secciones de la Orden de Trabajo con el numeral `§N`, notación baneada — falta criterio de reemplazo | Abierta | [detalle](./debt/CONTEXT-DEBT-009.md) |
+| CONTEXT-DEBT-009 | 🟡 Baja | `brief.md` retirado y plantilla corregida; quedan referencias posicionales en Órdenes existentes | 🟠 Parcial | [detalle](./debt/CONTEXT-DEBT-009.md) |
 | CONTEXT-DEBT-010 | 🟡 Baja | Citas huérfanas a sub-IDs de `CONTEXT-ENGINEER` retirados por el aligeramiento de formato del skill (7 archivos) | Abierta | [detalle](./debt/CONTEXT-DEBT-010.md) |
 | CONTEXT-DEBT-011 | 🟠 Media | `hard-prohibitions.md` declarado `SIEMPRE` sin ningún paso que fuerce su lectura, en 14 skills y 16 stubs | ✅ Pagada | [detalle](./debt/CONTEXT-DEBT-011.md) |
 | CONTEXT-DEBT-012 | 🟡 Baja | Cita huérfana a sub-ID de `TECH-LEAD` retirado por la migración al formato ligero del skill (1 archivo) | Abierta | [detalle](./debt/CONTEXT-DEBT-012.md) |

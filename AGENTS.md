@@ -98,7 +98,7 @@ Redacta cada regla para que se entienda en una lectura, conserve la información
 
 ## Arquitectura y límites del proyecto
 
-1. **Stack:** usa Rust para core y backend, React/TypeScript dentro de Tauri 2 para UI y gRPC en modo headless. No introduzcas Python ni FastAPI en el diseño. Los bindings/contratos se generan desde Rust; no dupliques DTOs a mano.
+1. **Stack:** usa Rust para core y backend, React/TypeScript dentro de Tauri 2 para UI y gRPC para escritorio local y headless. No introduzcas Python ni FastAPI en el diseño. Las Features definen sus puertos tipados en Rust (ADR-0137: Feature como Unidad Hexagonal Autónoma con Puertos Tipados); en la frontera gRPC, Protobuf es la fuente del contrato de transporte y los tipos TypeScript se generan o adaptan desde ahí (ADR-0165: Cliente de Escritorio Tauri + React y Frontera gRPC Local). No dupliques DTOs a mano.
 2. **Diseño:** aplica Functional Core / Imperative Shell y arquitectura hexagonal (ADR-0137): la lógica vive en features con puertos tipados; los módulos solo componen y una feature depende solo de `shared`, no de otra feature.
 3. **Límites de datos:** cada dueño expone puertos; no accedas a tablas ajenas fuera de su interfaz pública. La excepción de infraestructura transversal en `shared` y sus criterios vigentes se definen en ADR-0137.
 4. **Ejecución y privacidad:** UI delgada; motor independiente, Local-First, Zero-Docker, gRPC autenticado y checkpoints reanudables. El core se ejecuta en hardware del usuario. La cabina central autentica, licencia, agrega e ingiere telemetría, pero no computa trabajo del usuario; las credenciales de bróker e IPs de operaciones nunca salen del entorno. El portal central es `../drasus-portal/`.
