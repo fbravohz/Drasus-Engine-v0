@@ -32,11 +32,11 @@ Los ledgers siguen `AGENTS.md`, Ledgers append-only: una sola transacción `BEGI
 
 ## UI
 
-Si la entrega toca componentes, revisa el 100% de los afectados, sin muestreo, contra `docs/DESIGN.md`, ADR-0165 y la Cáscara Visual. Comprueba tokens semánticos sin valores visuales copiados, contraste en temas aplicables, propagación del acento y estados. Distingue color de dato/estado de decoración estructural; las excepciones requieren motivo explícito.
+Si la entrega toca componentes, revisa el 100% de los afectados, sin muestreo, contra `docs/DESIGN.yaml`, ADR-0165 y la Cáscara Visual. Comprueba tokens semánticos sin valores visuales copiados, contraste en temas aplicables, propagación del acento y estados. Distingue color de dato/estado de decoración estructural; las excepciones requieren motivo explícito.
 
 Busca estado sin reinicio, timers/listeners sin limpieza, gestos mal acotados y hover/foco persistentes. Verifica tipos reales de contratos generados, límites y streams del Bridge; React no calcula finanzas. En código matemático exige fórmula y propiedad del oráculo comentadas.
 
-Exige capturas reales del ciclo completo aplicable —default, hover, focus, pressed, disabled, loading, error, empty—; un estado omitido requiere justificación. Capturas ausentes, área interactiva <48 × 48 px o contraste inferior a 4.5:1 normal / 3:1 grande, icono o control son bloqueantes. Verifica teclado, escala, atajos y ventana mínima según `DESIGN.md`.
+Exige capturas reales del ciclo completo aplicable —default, hover, focus, pressed, disabled, loading, error, empty—; un estado omitido requiere justificación. Capturas ausentes, área interactiva <48 × 48 px o contraste inferior a 4.5:1 normal / 3:1 grande, icono o control son bloqueantes. Verifica teclado, escala, atajos y ventana mínima según `DESIGN.yaml`.
 
 ## Release y alcance por fase
 
