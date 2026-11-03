@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Drasus — Comparativa de referencias</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, "Segoe UI", "Noto Sans", sans-serif; background: #111213; color: #f5f5f5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    button { font: inherit; }
+    button:focus-visible { outline: 3px solid #dcecff; outline-offset: 4px; }
+    [hidden] { display: none !important; }
+    .comparison { max-width: 1760px; margin: 0 auto; padding: 24px 20px 48px; }
+    .comparison-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 20px; margin: 0 auto 20px; max-width: 1660px; }
+    .comparison-header h1 { margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -.03em; }
+    .comparison-header p { max-width: 720px; margin: 6px 0 0; color: #adb2b5; font-size: 12px; line-height: 1.5; }
+    .switcher { display: flex; gap: 7px; padding: 5px; border: 1px solid #363a3d; border-radius: 13px; background: #1b1d1e; }
+    .switcher button { padding: 10px 15px; border: 0; border-radius: 9px; background: transparent; color: #c2c6c9; cursor: pointer; }
+    .switcher button[aria-pressed="true"] { background: #f1f3f4; color: #111; }
+    .caption { max-width: 1660px; margin: 14px auto 0; color: #aeb5b7; font-size: 12px; line-height: 1.55; }
+    .icon { width: 19px; height: 19px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .icon.solid { fill: currentColor; stroke: none; }
+    .artboard { position: relative; overflow: hidden; margin: auto; color: #f5f5f5; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+    .subtle { color: #a6a6a8; }
+    .positive { color: #64d99b; }
+    .negative { color: #ff7474; }
+    .warning { color: #f1cb73; }
+    .mono-number { font-variant-numeric: tabular-nums; }
+
+    /* Referencia 1: panel con navegación lateral y tres tarjetas inferiores. */
+    .reference-one { display: grid; grid-template-columns: 72px minmax(0,1fr); gap: 8px; width: min(100%, 1280px); min-height: 860px; padding: 9px; border: 10px solid #494949; border-radius: 51px; background: radial-gradient(ellipse at 66% -20%,rgba(255,255,255,.08),transparent 45%), linear-gradient(145deg,transparent 30%,rgba(255,255,255,.025) 45%,transparent 58%),#050505; }
+    .one-rail { display: flex; flex-direction: column; align-items: center; gap: 17px; padding: 17px 7px 15px; border: 1px solid #29292c; border-radius: 39px; background: linear-gradient(180deg,#0e0f10,#101114 76%,#0b0c0d); color: #c1c3c5; }
+    .one-logo { display: grid; place-items: center; width: 37px; height: 44px; margin-bottom: 91px; color: #f3f3f3; }
+    .one-logo svg { width: 36px; height: 36px; }
+    .one-nav { display: grid; place-items: center; width: 45px; height: 45px; border-radius: 15px; }
+    .one-nav.active { color: #08090a; background: linear-gradient(160deg,#fff 0%,#f8f8f8 68%,#ececed 100%); box-shadow: inset 0 1px 1px rgba(255,255,255,.95), inset 0 -1px 1px rgba(0,0,0,.09), 0 3px 8px rgba(0,0,0,.55); }
+    .one-nav .icon { width: 18px; height: 18px; }
+    .one-rail-spacer { flex: 1; }
+    .one-content { min-width: 0; padding: 12px 13px 12px 2px; }
+    .one-header { display: flex; align-items: center; gap: 12px; min-height: 57px; margin: 0 4px 15px 20px; }
+    .one-header h2 { flex: 1; margin: 0; font-size: 26px; font-weight: 540; letter-spacing: -.03em; }
+    .one-search, .one-profile, .one-bell { display: flex; align-items: center; min-height: 43px; border: 1px solid #202124; background: linear-gradient(155deg,#242529 0%,#18191c 37%,#101113 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 1px rgba(0,0,0,.72), 0 3px 8px rgba(0,0,0,.35); }
+    .one-search { width: 220px; gap: 10px; padding: 0 15px; border-radius: 28px; color: #8f9297; font-size: 12px; }
+    .one-search .icon { width: 15px; height: 15px; }
+    .one-profile { gap: 9px; width: 224px; padding: 3px 12px 3px 4px; border-radius: 28px; }
+    .avatar { display: grid; place-items: center; flex: 0 0 auto; width: 34px; height: 34px; border: 2px solid #c5c9cb; border-radius: 50%; background: linear-gradient(145deg,#6d8588,#303740); color: #f3f5f4; font-size: 10px; font-weight: 700; }
+    .profile-text { min-width: 0; flex: 1; font-size: 12px; line-height: 1.25; }
+    .profile-text small { display: block; overflow: hidden; color: #9c9da0; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+    .one-bell { position: relative; justify-content: center; width: 43px; border-radius: 50%; }
+    .one-bell:after { position: absolute; top: 9px; right: 10px; width: 5px; height: 5px; border-radius: 50%; background: #ed7777; content: ""; }
+    .one-panel { border: 1px solid rgba(255,255,255,.045); border-radius: 23px; background: radial-gradient(ellipse at 18% 0%,rgba(255,255,255,.025),transparent 45%), linear-gradient(145deg,rgba(33,33,33,.97),rgba(20,20,20,.985)); box-shadow: inset 0 1px rgba(255,255,255,.045), 0 5px 18px rgba(0,0,0,.20); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .one-top { display: grid; grid-template-columns: minmax(0,2.5fr) minmax(270px,1fr); min-height: 400px; }
+    .revenue { min-width: 0; padding: 20px 20px 19px; }
+    .one-title-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .one-title-row h3 { margin: 0; font-size: 20px; font-weight: 520; letter-spacing: -.02em; }
+    .period-picker { display: flex; align-items: center; gap: 0; min-height: 42px; padding: 3px; border: 1px solid #1b1c1e; border-radius: 999px; background: linear-gradient(155deg,#292a2d 0%,#1a1b1e 35%,#111214 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 1px 0 0 rgba(255,255,255,.12), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.36); }
+    .period-picker span { padding: 8px 12px; border-radius: 999px; color: #cacacc; font-size: 12px; line-height: 1; white-space: nowrap; }
+    .period-picker .selected { background: linear-gradient(180deg,#fff 0%,#f9f9f9 75%,#e9e9e9 100%); color: #111; box-shadow: inset 0 1px 0 #fff, inset 0 -1px 1px rgba(0,0,0,.10), 0 2px 4px rgba(0,0,0,.50); }
+    .round-icon { display: grid; place-items: center; flex: 0 0 auto; width: 37px; height: 37px; border: 1px solid #303136; border-radius: 50%; background: linear-gradient(145deg,#1b1c1f,#101113); color: #e1e1e3; }
+    .round-icon .icon { width: 15px; height: 15px; }
+    .reference-one .round-icon { width: 40px; height: 40px; border: 1px solid #17181a; background: linear-gradient(150deg,#28292c 0%,#17181a 39%,#0e0f11 100%); color: #f0f0f1; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.48); }
+    .reference-one .round-icon .icon { width: 16px; height: 16px; }
+    .chevron-left { transform: rotate(180deg); }
+    .revenue-number { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; margin-top: 19px; }
+    .revenue-number strong { font-size: 35px; font-weight: 500; letter-spacing: -.04em; }
+    .pill { display: inline-flex; align-items: center; padding: 5px 9px; border-radius: 20px; font-size: 10px; white-space: nowrap; }
+    .pill.good { background: linear-gradient(155deg,#57d999,#36b875); color: #fff; box-shadow: inset 0 1px rgba(255,255,255,.24), inset 0 -1px rgba(0,0,0,.12), 0 2px 5px rgba(0,0,0,.22); }
+    .revenue-number small { color: #b1b1b3; font-size: 10px; }
+    .bar-chart { display: grid; grid-template-columns: 42px minmax(0,1fr); height: 260px; margin-top: 23px; }
+    .chart-axis { display: flex; flex-direction: column; justify-content: space-between; padding: 0 0 26px; color: #a6a8ab; font-size: 12px; }
+    .chart-bars { display: flex; justify-content: space-around; align-items: end; gap: 8px; padding: 0 0 26px; }
+    .bar-column { position: relative; flex: 1 1 0; max-width: 52px; height: var(--height); min-width: 17px; border: 1px solid #323337; border-radius: 16px 16px 11px 11px; background: repeating-linear-gradient(132deg,#191a1c 0,#191a1c 2px,#1e1f21 3px,#151618 5px); box-shadow: inset 0 1px #353639; }
+    .bar-column:before { position: absolute; top: 8px; left: 25%; right: 25%; height: 4px; border-radius: 3px; background: #a9aaac; content: ""; }
+    .bar-column span { position: absolute; left: 50%; bottom: -25px; transform: translateX(-50%); color: #aeb0b2; font-size: 11px; white-space: nowrap; }
+    .bar-column.active { border-color: #fff; background: #f4f5f5; box-shadow: none; }
+    .bar-column.active:before { display: none; }
+    .bar-column.active b { position: absolute; top: -1px; left: 0; right: 0; padding: 8px 0; border: 1px solid #dfe1e1; border-radius: 16px; background: #fff; color: #176d42; font-size: 10px; text-align: center; }
+    .bar-column.active em { position: absolute; bottom: 9px; left: 0; right: 0; color: #17191a; font-size: 10px; font-style: normal; text-align: center; }
+    .calendar { margin: 4px; padding: 19px 18px; border: 1px solid rgba(255,255,255,.055); border-radius: 22px; background: radial-gradient(ellipse at 20% 0%,rgba(255,255,255,.025),transparent 45%), linear-gradient(145deg,rgba(35,35,35,.97),rgba(21,21,21,.985)); box-shadow: inset 0 1px rgba(255,255,255,.045); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+    .calendar-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; font-weight: 550; }
+    .calendar-title .round-icon { width: 34px; height: 34px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 20px; }
+    .calendar-grid span { display: grid; place-items: center; aspect-ratio: 1; min-width: 0; border: 1px solid rgba(255,255,255,.025); border-radius: 8px; background: linear-gradient(155deg,#252629 0%,#1c1d20 40%,#141518 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 1px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.30); color: #ededee; font-size: 11px; }
+    .calendar-grid .weekday { border: 0; background: none; box-shadow: none; color: #a9aaad; font-size: 10px; }
+    .calendar-grid .blank { background: repeating-linear-gradient(132deg,#1e1f21 0,#1e1f21 4px,#292a2c 5px,#292a2c 8px); }
+    .calendar-grid .current { border-color: #e3e3e4; background: linear-gradient(160deg,#fff,#f1f1f1); color: #111; box-shadow: inset 0 1px #fff, inset 0 -1px 1px rgba(0,0,0,.09), 0 2px 5px rgba(0,0,0,.40); }
+    .calendar-total { display: flex; align-items: center; gap: 10px; margin-top: 18px; padding: 8px 10px; border: 1px solid #303135; border-radius: 17px; background: #151618; }
+    .calendar-total strong { font-size: 30px; font-weight: 500; letter-spacing: -.05em; }
+    .calendar-total small { align-self: start; margin-top: 5px; color: #5dcd90; font-size: 10px; }
+    .one-bottom { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 9px; margin-top: 9px; }
+    .one-card { min-height: 338px; padding: 18px 19px; }
+    .one-card-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+    .one-card-title h3 { margin: 0; font-size: 19px; font-weight: 520; letter-spacing: -.02em; }
+    .spark { color: #fff; }
+    .ai-heading { margin: 19px 0 8px; font-size: 12px; font-weight: 600; }
+    .ai-copy { margin: 0; color: #aeb0b4; font-size: 11px; line-height: 1.47; }
+    .ai-copy a { color: #fff; text-decoration: none; }
+    .ai-small-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; }
+    .ai-small { padding: 13px 11px; border-radius: 14px; background: linear-gradient(150deg,#1c1d1f,#17181a); box-shadow: inset 0 1px rgba(255,255,255,.035), 0 2px 5px rgba(0,0,0,.18); }
+    .ai-small small { display: block; color: #b6b7ba; font-size: 10px; }
+    .ai-small strong { display: inline-block; margin-top: 10px; font-size: 25px; font-weight: 500; }
+    .ai-small .pill { padding: 3px 7px; }
+    .chat-input { display: flex; justify-content: space-between; gap: 8px; margin-top: 15px; padding: 13px 14px; border: 1px solid #1b1c1e; border-radius: 999px; color: #b4b5b7; background: linear-gradient(155deg,#252629,#191a1c 38%,#101113); box-shadow: inset 0 1px rgba(255,255,255,.24), inset 1px 0 rgba(255,255,255,.10), inset 0 -1px 2px rgba(0,0,0,.75), 0 3px 8px rgba(0,0,0,.35); font-size: 10px; }
+    .spending-body { display: flex; align-items: center; gap: 18px; margin-top: 25px; }
+    .donut { position: relative; display: grid; place-items: center; flex: 0 0 auto; width: min(54%,170px); aspect-ratio: 1; border-radius: 50%; background: conic-gradient(#9baec0 0 16%,#82b8e8 16% 27%,#d5dee5 27% 34%,#799aab 34% 56%,#5e87a0 56% 72%,#35383b 72% 100%); transform: rotate(-25deg); }
+    .donut:before { position: absolute; inset: 24%; border-radius: 50%; background: #191a1b; content: ""; }
+    .donut-text { position: relative; transform: rotate(25deg); text-align: center; }
+    .donut-text strong { display: block; font-size: 25px; font-weight: 500; letter-spacing: -.04em; }
+    .donut-text small { color: #afb1b3; font-size: 10px; }
+    .legend { display: grid; gap: 9px; min-width: 0; color: #b5b6b8; font-size: 10px; }
+    .legend span { display: flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .legend i { width: 7px; height: 7px; border-radius: 50%; background: var(--color); }
+    .spending-note { margin-top: 19px; padding: 12px; border-radius: 12px; background: #191a1c; color: #b7b8bb; font-size: 10px; line-height: 1.4; }
+    .score { display: flex; align-items: center; gap: 8px; margin-top: 18px; padding: 10px; border-radius: 12px; background: #1a1b1e; color: #b6b7ba; font-size: 10px; }
+    .score-bar { flex: 1; height: 14px; background: repeating-linear-gradient(90deg,#b5c9d5 0,#b5c9d5 2px,transparent 2px,transparent 4px); }
+    .score b { color: #f1f1f2; }
+    .invoice-row { display: grid; grid-template-columns: 55px minmax(65px,.8fr) minmax(70px,1fr) auto; align-items: center; gap: 6px; padding: 13px 0; border-bottom: 1px solid #252629; font-size: 10px; }
+    .invoice-row small { display: block; margin-top: 3px; color: #a8aaad; font-size: 9px; }
+    .status-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 12px; background: linear-gradient(155deg,#2a2b2e,#1d1e20); box-shadow: inset 0 1px rgba(255,255,255,.08), 0 2px 4px rgba(0,0,0,.24); color: #d7d7d8; white-space: nowrap; }
+    .status-chip:before { width: 6px; height: 6px; border-radius: 50%; background: currentColor; content: ""; }
+    .status-chip.red { color: #ff7979; }.status-chip.green { color: #64d99b; }.status-chip.yellow { color: #e5c56d; }
+    .one-link { display: inline-block; margin-top: 15px; color: #f5f5f5; font-size: 11px; }
+
+    /* Referencia 2: conserva la composición; el fondo fotográfico se reemplaza por luz blanca. */
+    .reference-two { width: min(100%, 1660px); min-height: 1060px; padding: 26px 29px 0; border: 4px solid #777; border-radius: 43px; background: radial-gradient(ellipse at 28% 32%,rgba(255,255,255,.08),transparent 36%),linear-gradient(139deg,transparent 24%,rgba(255,255,255,.035) 36%,transparent 47%),radial-gradient(ellipse at 8% 68%,rgba(255,255,255,.055),transparent 35%),#090909; }
+    .two-header { display: flex; align-items: center; gap: 52px; min-height: 62px; }
+    .two-brand { margin: 0; color: #f7f7f7; font-size: 33px; font-weight: 700; letter-spacing: .01em; }
+    .two-tabs { display: flex; align-items: center; gap: 5px; }
+    .two-tab { padding: 20px 27px; border: 1px solid #1b1c1e; border-radius: 36px; color: #cacacc; background: linear-gradient(155deg,#292a2d 0%,#1a1b1e 35%,#111214 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 1px 0 0 rgba(255,255,255,.12), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.36); font-size: 14px; white-space: nowrap; }
+    .two-tab.selected { border-color: #e9e9e9; color: #111; background: linear-gradient(180deg,#fff 0%,#f9f9f9 75%,#e9e9e9 100%); box-shadow: inset 0 1px 0 #fff, inset 0 -1px 1px rgba(0,0,0,.10), 0 2px 4px rgba(0,0,0,.50); }
+    .two-header-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+    .two-header-right .round-icon { width: 56px; height: 56px; border: 1px solid #17181a; background: linear-gradient(150deg,#28292c 0%,#17181a 39%,#0e0f11 100%); color: #f0f0f1; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.48); }
+    .two-user { display: flex; align-items: center; gap: 12px; margin-left: 22px; padding: 3px 12px 3px 4px; border: 1px solid #202124; border-radius: 99px; background: linear-gradient(155deg,#242529 0%,#18191c 37%,#101113 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.18), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 1px rgba(0,0,0,.72), 0 3px 8px rgba(0,0,0,.35); white-space: nowrap; }
+    .two-user .avatar { width: 53px; height: 53px; border-color: #c5c9cb; }
+    .two-user strong { display: block; font-size: 18px; font-weight: 500; }
+    .two-user small { display: block; margin-top: 5px; color: #a1a1a4; font-size: 12px; }
+    .two-layout { display: grid; grid-template-columns: minmax(0,2.04fr) minmax(350px,1fr); gap: 16px; margin-top: 48px; }
+    .two-left { display: flex; flex-direction: column; min-width: 0; }
+    .two-background { flex: 1; min-height: 470px; }
+    .two-left-cards { display: grid; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr); gap: 10px; }
+    .two-right { display: grid; align-content: start; gap: 9px; }
+    .two-card { overflow: hidden; border: 1px solid rgba(255,255,255,.025); border-radius: 24px; background: linear-gradient(145deg,rgba(35,36,37,.93),rgba(19,20,21,.96)); box-shadow: inset 0 1px rgba(255,255,255,.035); }
+    .air, .energy { min-height: 400px; padding: 22px 20px; }
+    .two-card-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 19px; font-weight: 500; }
+    .two-card-title small { display: block; margin-top: 11px; color: #b5b4b5; font-size: 14px; font-weight: 400; }
+    .switch-on { position: relative; width: 49px; height: 29px; flex: 0 0 auto; border: 1px solid #e3e3e4; border-radius: 18px; background: linear-gradient(160deg,#fff,#f1f1f1); box-shadow: inset 0 1px #fff, inset 0 -1px 1px rgba(0,0,0,.09), 0 2px 5px rgba(0,0,0,.40); }
+    .switch-on:after { position: absolute; top: 2px; right: 2px; width: 23px; height: 23px; border-radius: 50%; background: linear-gradient(150deg,#28292c 0%,#17181a 39%,#0e0f11 100%); box-shadow: inset 0 1px rgba(255,255,255,.22), 0 2px 4px rgba(0,0,0,.30); content: ""; }
+    .dial { position: relative; width: min(100%,330px); margin: 36px auto 0; text-align: center; }
+    .dial svg { display: block; width: 100%; overflow: visible; }
+    .dial-value { position: absolute; top: 37%; left: 0; right: 0; }
+    .dial-value small { display: block; color: #a7a7aa; font-size: 12px; }
+    .dial-value strong { display: block; margin: 11px 0; font-size: 36px; font-weight: 400; }
+    .dial-end { position: absolute; bottom: 0; display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 10px; color: #b9b9bc; font-size: 13px; }
+    .dial-end span:nth-child(2), .dial-end span:nth-child(3) { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #17181a; border-radius: 50%; background: linear-gradient(150deg,#28292c 0%,#17181a 39%,#0e0f11 100%); color: #f0f0f1; box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.48); font-size: 20px; }
+    .week-pill { padding: 12px 17px; border: 1px solid #1b1c1e; border-radius: 30px; color: #cacacc; background: linear-gradient(155deg,#292a2d 0%,#1a1b1e 35%,#111214 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 1px 0 0 rgba(255,255,255,.12), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.36); font-size: 15px; }
+    .energy-sub { margin-top: 16px; font-size: 20px; font-weight: 600; }
+    .energy-sub small { margin-left: 5px; font-size: 10px; font-weight: 400; }
+    .energy-bars { display: flex; align-items: end; justify-content: space-between; gap: 12px; height: 270px; margin-top: 16px; }
+    .energy-bar { flex: 1; height: var(--height); max-width: 82px; border-radius: 14px 14px 2px 2px; background: linear-gradient(#393a3c,#252628); }
+    .energy-bar.highlight { position: relative; background: linear-gradient(rgba(255,255,255,.65),#fff); }
+    .energy-bar.highlight:before { position: absolute; top: -12px; left: calc(50% - 12px); width: 24px; height: 24px; border: 2px solid #fff; border-radius: 50%; background: #252627; content: ""; }
+    .energy-bar.highlight:after { position: absolute; top: 12px; bottom: 0; left: 50%; width: 2px; background: rgba(255,255,255,.75); content: ""; }
+    .weather { min-height: 475px; padding: 23px 20px 20px; }
+    .weather-head, .music-head { display: flex; align-items: center; gap: 14px; font-size: 22px; }
+    .circle-glyph { display: grid; place-items: center; flex: 0 0 auto; width: 46px; height: 46px; border-radius: 50%; background: #292a2c; color: #c3c4c5; }
+    .weather-main { display: flex; align-items: center; gap: 40px; margin: 22px 42px 24px; }
+    .weather-main strong { font-size: 67px; font-weight: 400; letter-spacing: -.06em; }
+    .moon { width: 76px; height: 76px; fill: #e9f0f2; }
+    .forecast { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; }
+    .forecast-item { min-height: 96px; padding: 12px 11px; border-radius: 18px; background: linear-gradient(145deg,#343537,#232426); }
+    .forecast-top { display: flex; justify-content: space-between; gap: 6px; color: #b7b7b9; font-size: 12px; }
+    .forecast-top b { color: #e7eff2; font-size: 22px; font-weight: 400; }
+    .forecast-item strong { display: block; margin-top: 10px; font-size: 23px; font-weight: 400; }
+    .storm { color: #f1cc76; }
+    .music { min-height: 280px; padding: 22px 20px; }
+    .music-head .song { margin-left: auto; color: #fff; font-size: 15px; }
+    .track { display: flex; align-items: center; gap: 13px; margin-top: 22px; }
+    .album { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 10px; background: linear-gradient(145deg,#7895a5,#303d43); color: #f8f8f8; font-size: 20px; }
+    .track strong { display: block; font-size: 15px; font-weight: 500; }.track small { display: block; margin-top: 5px; color: #aaa; font-size: 12px; }
+    .music-progress { position: relative; height: 8px; margin-top: 27px; border-radius: 6px; background: linear-gradient(155deg,#292a2d,#111214); box-shadow: inset 0 1px rgba(255,255,255,.15), inset 0 -1px 2px rgba(0,0,0,.85); }
+    .music-progress:before { position: absolute; inset: 0 60% 0 0; border-radius: inherit; background: #fff; content: ""; }
+    .music-progress:after { position: absolute; left: 38%; top: -7px; width: 17px; height: 17px; border: 5px solid #fff; border-radius: 50%; background: #1d2021; content: ""; }
+    .music-time { display: flex; justify-content: space-between; margin-top: 8px; color: #b4b4b6; font-size: 11px; }
+    .music-controls { display: flex; justify-content: center; align-items: center; gap: 34px; margin-top: 13px; color: #ebebec; }
+    .music-controls > span:not(.play) { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid #17181a; border-radius: 50%; background: linear-gradient(150deg,#28292c 0%,#17181a 39%,#0e0f11 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.48); }
+    .play { display: grid; place-items: center; width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(160deg,#fff 0%,#f8f8f8 68%,#ececed 100%); box-shadow: inset 0 1px 1px rgba(255,255,255,.95), inset 0 -1px 1px rgba(0,0,0,.09), 0 3px 8px rgba(0,0,0,.55); color: #111; }
+    .dscr { min-height: 145px; padding: 22px 20px; }
+    .dscr-row { display: flex; justify-content: space-between; margin-top: 28px; color: #c5c5c6; font-size: 14px; }
+    .dscr-bar { height: 38px; margin-top: 14px; border-radius: 9px 9px 0 0; background: linear-gradient(90deg,#fff 0%,rgba(255,255,255,.7) 42%,#292b2d 42%); }
+    @media (max-width: 1050px) {
+      .one-header { flex-wrap: wrap; }
+      .one-header h2 { flex-basis: 100%; }
+      .one-search { flex: 1; }
+      .one-top { grid-template-columns: minmax(0,1fr); }
+      .calendar { max-width: none; }
+      .one-bottom { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .two-header { flex-wrap: wrap; gap: 14px; }
+      .two-header-right { margin-left: auto; }
+      .two-layout { grid-template-columns: minmax(0,1fr); }
+      .two-background { min-height: 220px; }
+      .two-right { grid-template-columns: repeat(2,minmax(0,1fr)); }
+      .weather { grid-row: span 2; }
+    }
+    @media (max-width: 660px) {
+      .comparison { padding: 16px 10px 32px; }
+      .switcher { width: 100%; }.switcher button { flex: 1; }
+      .reference-one { grid-template-columns: 45px minmax(0,1fr); gap: 5px; padding: 5px; border-width: 5px; border-radius: 28px; }
+      .one-rail { gap: 8px; padding: 12px 3px; border-radius: 22px; }.one-logo { margin-bottom: 35px; }.one-nav { width: 35px; height: 35px; }
+      .one-content { padding: 9px 5px 5px 0; }.one-header { margin-left: 7px; }.one-profile { width: 160px; }.one-search { min-width: 100%; }
+      .revenue { padding: 16px 12px; }.one-title-row { flex-wrap: wrap; }.period-picker span { padding: 7px 6px; }
+      .bar-chart { height: 220px; grid-template-columns: 28px 1fr; }.chart-bars { gap: 3px; }.bar-column { min-width: 10px; border-radius: 8px; }.bar-column span { font-size: 8px; }
+      .one-bottom { grid-template-columns: 1fr; }.one-card { min-height: auto; }
+      .reference-two { min-height: auto; padding: 18px 13px; border-radius: 25px; }.two-header { gap: 12px; }.two-brand { font-size: 25px; }.two-tabs { flex-wrap: wrap; }.two-tab { padding: 10px 12px; font-size: 11px; }.two-header-right { display: none; }
+      .two-layout { margin-top: 20px; }.two-background { min-height: 100px; }.two-left-cards, .two-right { grid-template-columns: 1fr; }.weather { grid-row: auto; }.air, .energy { min-height: 360px; }
+    }
+    .drasus-preview { width: min(100%, 1280px); margin: auto; }
+    .drasus-preview iframe { display: block; width: 100%; min-height: 900px; height: 1100px; border: 0; }
+    @media (max-width: 780px) { .drasus-preview iframe { height: 2000px; } }
+    @media (max-width: 480px) { .drasus-preview iframe { height: 2600px; } }
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 4.5 4.5"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M5 17h14l-1.5-2V10a5.5 5.5 0 0 0-11 0v5zM10 20h4"/></symbol>
+    <symbol id="i-home" viewBox="0 0 24 24"><path d="m4 10 8-6 8 6v9H4zM9 19v-6h6v6"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h12M8 12h12M8 18h12M4 6h.1M4 12h.1M4 18h.1"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m7 15 4-4 3 3 3-5"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6zM14 3v5h4M9 12h6M9 16h6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l3 2M10 3h4"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><circle cx="6" cy="6" r=".8"/><circle cx="12" cy="6" r=".8"/><circle cx="18" cy="6" r=".8"/><circle cx="6" cy="12" r=".8"/><circle cx="12" cy="12" r=".8"/><circle cx="18" cy="12" r=".8"/><circle cx="6" cy="18" r=".8"/><circle cx="12" cy="18" r=".8"/><circle cx="18" cy="18" r=".8"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><path d="m12 3 2 1 2-.3 1.2 1.7 2 .7.2 2 1.2 1.7-.8 1.9.8 1.9-1.2 1.7-.2 2-2 .7-1.2 1.7-2-.3-2 1-2-1-2 .3-1.2-1.7-2-.7-.2-2-1.2-1.7.8-1.9-.8-1.9 1.2-1.7.2-2 2-.7L8 3.7 10 4z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-exit" viewBox="0 0 24 24"><path d="M10 5H5v14h5M13 8l4 4-4 4M8 12h9"/></symbol>
+    <symbol id="i-filter" viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 19 19 5M9 5h10v10"/></symbol>
+    <symbol id="i-location" viewBox="0 0 24 24"><path d="M19 10c0 5-7 10-7 10S5 15 5 10a7 7 0 0 1 14 0z"/><circle cx="12" cy="10" r="2.5"/></symbol>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M10 17V6l8-2v11M10 8l8-2"/><circle cx="7" cy="17" r="3"/><circle cx="15" cy="15" r="3"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19 16A8 8 0 0 1 8 5a8 8 0 1 0 11 11z"/></symbol>
+    <symbol id="i-send" viewBox="0 0 24 24"><path d="m3 5 18-2-7 18-3-7-8-4zM11 14l10-11"/></symbol>
+  </svg>
+  <main class="comparison">
+    <header class="comparison-header">
+      <div><h1>Comparativa de referencias</h1><p>Dos referencias reconstruidas y una propuesta Drasus. El Dashboard Drasus sigue la composición, distribución, densidad y lenguaje visual de Overview; de NestIQ toma el acabado y los bordes, con mayor transparencia para mostrar el halo continuo en cabecera, superficies y separaciones. Todos los widgets comparten el mismo material base. Los datos son ficticios.</p></div>
+      <div class="switcher" role="group" aria-label="Elegir pantalla">
+        <button type="button" data-view="one" aria-pressed="true">01 · Overview</button>
+        <button type="button" data-view="two" aria-pressed="false">02 · NestIQ</button>
+        <button type="button" data-view="three" aria-pressed="false">03 · Drasus</button>
+      </div>
+    </header>
+
+    <section class="artboard reference-one" data-screen="one" aria-label="Primera referencia: Dashboard con datos ficticios">
+      <aside class="one-rail" aria-hidden="true">
+        <span class="one-logo"><svg viewBox="0 0 40 40"><path fill="#f4f4f4" d="M4 9 18 20 4 31zM36 9 22 20l14 11z"/><path fill="#444" d="m20 3 16 8-16 9-16-9zM20 20l16 9-16 8-16-8z"/></svg></span>
+        <span class="one-nav active"><svg class="icon" viewBox="0 0 24 24"><path d="M3.5 10 12 3.7l8.5 6.3v8.1c0 1.1-.8 1.9-1.9 1.9H5.4c-1.1 0-1.9-.8-1.9-1.9z" fill="#111" stroke="none"/><rect x="10.5" y="13" width="3" height="4" rx=".7" fill="#fff" stroke="none"/></svg></span>
+        <span class="one-nav"><svg class="icon"><use href="#i-list"/></svg></span>
+        <span class="one-nav"><svg class="icon"><use href="#i-chart"/></svg></span>
+        <span class="one-nav"><svg class="icon"><use href="#i-file"/></svg></span>
+        <span class="one-nav"><svg class="icon"><use href="#i-clock"/></svg></span>
+        <span class="one-nav"><svg class="icon"><use href="#i-grid"/></svg></span>
+        <span class="one-nav"><svg class="icon"><use href="#i-settings"/></svg></span>
+        <span class="one-rail-spacer"></span><span class="one-nav"><svg class="icon"><use href="#i-exit"/></svg></span>
+      </aside>
+      <div class="one-content">
+        <div class="one-header"><h2>Overview</h2><span class="one-search"><svg class="icon"><use href="#i-search"/></svg>Search</span><span class="one-profile"><span class="avatar">EP</span><span class="profile-text">Emma Parson<small>emma.parson@example.com</small></span><span>⌄</span></span><span class="one-bell"><svg class="icon"><use href="#i-bell"/></svg></span></div>
+        <div class="one-panel one-top">
+          <section class="revenue">
+            <div class="one-title-row"><h3>Revenue</h3><div style="display:flex;align-items:center;gap:8px"><div class="period-picker"><span>Weekly</span><span>Monthly</span><span class="selected">Yearly</span><span>Range</span></div><span class="round-icon"><svg class="icon"><use href="#i-filter"/></svg></span></div></div>
+            <div class="revenue-number mono-number"><strong>$ 28,165</strong><span class="pill good">▲ 8.3%</span><small>vs 24,280 last period</small></div>
+            <div class="bar-chart" role="img" aria-label="Gráfica decorativa de ingresos ficticios por mes.">
+              <div class="chart-axis" aria-hidden="true"><span>6000</span><span>4500</span><span>3000</span><span>1500</span><span>0</span></div>
+              <div class="chart-bars" aria-hidden="true">
+                <div class="bar-column" style="--height:72%"><span>Jul</span></div><div class="bar-column" style="--height:54%"><span>Aug</span></div><div class="bar-column active" style="--height:60%"><b>▲ +12%</b><em>$1048</em><span>Sep</span></div><div class="bar-column" style="--height:77%"><span>Oct</span></div><div class="bar-column" style="--height:42%"><span>Nov</span></div><div class="bar-column" style="--height:86%"><span>Dec</span></div><div class="bar-column" style="--height:34%"><span>Jan</span></div><div class="bar-column" style="--height:75%"><span>Feb</span></div><div class="bar-column" style="--height:64%"><span>Mar</span></div><div class="bar-column" style="--height:84%"><span>Apr</span></div><div class="bar-column" style="--height:43%"><span>May</span></div><div class="bar-column" style="--height:66%"><span>Jun</span></div>
+              </div>
+            </div>
+          </section>
+          <section class="calendar" aria-label="Calendario ilustrativo">
+            <div class="calendar-title"><span class="round-icon"><svg class="icon chevron-left"><use href="#i-chevron"/></svg></span><span>January, 2026</span><span class="round-icon"><svg class="icon"><use href="#i-chevron"/></svg></span></div>
+            <div class="calendar-grid"><span class="weekday">M</span><span class="weekday">T</span><span class="weekday">W</span><span class="weekday">T</span><span class="weekday">F</span><span class="weekday">S</span><span class="weekday">S</span>
+              <span class="blank"></span><span class="blank"></span><span class="blank"></span><span>1</span><span>2</span><span>3</span><span>4</span>
+              <span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span class="current">11</span>
+              <span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span>
+              <span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span>
+              <span>26</span><span>27</span><span>28</span><span>29</span><span>30</span><span>31</span><span class="blank"></span>
+            </div>
+            <div class="calendar-total"><span class="round-icon"><svg class="icon"><use href="#i-chart"/></svg></span><strong class="mono-number">$1,434</strong><small>▲ 12.4%</small></div>
+          </section>
+        </div>
+        <div class="one-bottom">
+          <section class="one-panel one-card">
+            <div class="one-card-title"><h3><span class="spark">✦</span> How can I help you?</h3><span class="round-icon"><svg class="icon"><use href="#i-arrow"/></svg></span></div>
+            <p class="ai-heading">AI Summary</p><p class="ai-copy">Your financial activity this period remains stable. Revenue shows expected seasonal variation, spending is balanced across key categories, and payment delays are low. <a>Read more</a></p>
+            <div class="ai-small-grid"><div class="ai-small"><small>Spending Trends</small><strong>7</strong> <span class="pill good">Stable</span></div><div class="ai-small"><small>Customer Payments</small><strong>25</strong> <span class="pill good">Processed</span></div></div>
+            <div class="chat-input"><span>Ask me anything...</span><svg class="icon"><use href="#i-send"/></svg></div>
+          </section>
+          <section class="one-panel one-card">
+            <div class="one-card-title"><h3>Spending</h3><span class="period-picker"><span>Last 30 Days⌄</span></span></div>
+            <div class="spending-body"><div class="donut"><div class="donut-text"><strong class="mono-number">$28,165</strong><small>Total</small></div></div><div class="legend"><span><i style="--color:#9baec0"></i>Activity</span><span><i style="--color:#82b8e8"></i>Meals</span><span><i style="--color:#d5dee5"></i>Office supplies</span><span><i style="--color:#799aab"></i>Rewards</span><span><i style="--color:#5e87a0"></i>Internet&amp;Telephone</span><span><i style="--color:#55585b"></i>Other</span></div></div>
+            <p class="spending-note">◉ &nbsp; Most expenses come from Activity and Meals, while Internet&amp;Telephone shows a slight increase.</p>
+          </section>
+          <section class="one-panel one-card">
+            <div class="one-card-title"><h3>Invoices</h3><span class="round-icon">＋</span></div>
+            <div class="score"><span>Payment Score</span><span class="score-bar"></span><b>76</b></div>
+            <div class="invoice-row"><span>Aug 9<small>in 1 week</small></span><span><span class="status-chip red">Unpaid</span></span><span>Leonard Kim</span><strong>$130.00</strong></div>
+            <div class="invoice-row"><span>Aug 24<small>in 2 weeks</small></span><span><span class="status-chip green">Paid</span></span><span>John Smith</span><strong>$150.00</strong></div>
+            <div class="invoice-row"><span>Sep 9<small>in 1 month</small></span><span><span class="status-chip yellow">Pending</span></span><span>Anna Spirid</span><strong>$2080.00</strong></div>
+            <span class="one-link">View all invoices ↗</span>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="artboard reference-two" data-screen="two" aria-label="Segunda referencia: Dashboard con datos ficticios" hidden>
+      <div class="two-header"><p class="two-brand">NestIQ</p><div class="two-tabs" aria-label="Navegación ilustrativa"><span class="two-tab selected">Overview</span><span class="two-tab">Production</span><span class="two-tab">Distribution</span><span class="two-tab">Storage</span></div><div class="two-header-right"><span class="round-icon"><svg class="icon"><use href="#i-search"/></svg></span><span class="round-icon"><svg class="icon"><use href="#i-moon"/></svg></span><span class="round-icon"><svg class="icon"><use href="#i-bell"/></svg></span><span class="two-user"><span class="avatar">DM</span><span><strong>Danial Mohiti</strong><small>Systems Manager</small></span></span></div></div>
+      <div class="two-layout">
+        <div class="two-left">
+          <div class="two-background" aria-label="Fondo oscuro con luz tenue, sin fotografía"></div>
+          <div class="two-left-cards">
+            <section class="two-card air">
+              <div class="two-card-title"><span>Air Conditioner<small>living room</small></span><span class="switch-on" aria-label="Encendido, ilustración"></span></div>
+              <div class="dial"><svg viewBox="0 0 220 190" aria-hidden="true"><path d="M36 165a94 94 0 1 1 148 0" fill="none" stroke="#b4b4b6" stroke-width="1"/><path d="M47 153a81 81 0 1 1 126 0" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-dasharray="2 9"/><path d="M37 73 46 77M46 53 53 59M60 37 66 44" fill="none" stroke="#bbd0d9" stroke-width="2"/></svg><div class="dial-value"><small>Cooling to</small><strong>16.6°</strong><small>Under 12 min</small></div><div class="dial-end"><span>20°</span><span>−</span><span>+</span><span>35°</span></div></div>
+            </section>
+            <section class="two-card energy">
+              <div class="two-card-title"><span>Electricity consumption</span><span class="week-pill">Week ⌄</span></div><div class="energy-sub mono-number">16.4 <small>kwh of clean energy</small></div>
+              <div class="energy-bars" aria-label="Gráfica ilustrativa de consumo"><span class="energy-bar" style="--height:38%"></span><span class="energy-bar" style="--height:24%"></span><span class="energy-bar" style="--height:46%"></span><span class="energy-bar highlight" style="--height:79%"></span><span class="energy-bar" style="--height:39%"></span><span class="energy-bar" style="--height:22%"></span><span class="energy-bar" style="--height:52%"></span></div>
+            </section>
+          </div>
+        </div>
+        <div class="two-right">
+          <section class="two-card weather">
+            <div class="weather-head"><span class="circle-glyph"><svg class="icon"><use href="#i-location"/></svg></span><span>Pendleton, Pendleton</span></div>
+            <div class="weather-main"><strong>+3°</strong><svg class="moon" viewBox="0 0 100 100" aria-label="Luna"><path d="M65 7a40 40 0 1 1-46 65A42 42 0 0 0 65 7z"/></svg></div>
+            <div class="forecast"><div class="forecast-item"><div class="forecast-top">Wed <b>☁</b></div><strong>+16°</strong></div><div class="forecast-item"><div class="forecast-top">Wed <b>☁<span class="storm">ϟ</span></b></div><strong>+12°</strong></div><div class="forecast-item"><div class="forecast-top">Wed <b>☁<span class="storm">ϟ</span></b></div><strong>+15°</strong></div><div class="forecast-item"><div class="forecast-top">Wed <b>☁<span class="storm">ϟ</span></b></div><strong>+18°</strong></div><div class="forecast-item"><div class="forecast-top">Wed <b>☁</b></div><strong>+13°</strong></div><div class="forecast-item"><div class="forecast-top">Wed <b>☁<span class="storm">ϟ</span></b></div><strong>+16°</strong></div></div>
+          </section>
+          <section class="two-card music">
+            <div class="music-head"><span class="circle-glyph"><svg class="icon"><use href="#i-music"/></svg></span><span>Now Playing</span><span class="song">Song</span></div>
+            <div class="track"><span class="album">♫</span><span><strong>HUMNAVA MERE</strong><small>(slowed+reverb)</small></span></div>
+            <div class="music-progress" aria-hidden="true"></div><div class="music-time"><span>02:25</span><span>02:25</span></div><div class="music-controls" aria-hidden="true"><span>◁Ⅰ</span><span class="play">▶</span><span>Ⅰ▷</span></div>
+          </section>
+          <section class="two-card dscr"><div class="two-card-title">DSCR</div><div class="dscr-row"><span>• 156</span><span>Portfolio</span></div><div class="dscr-bar" aria-hidden="true"></div></section>
+        </div>
+      </div>
+    </section>
+    <section class="drasus-preview" data-screen="three" aria-label="Propuesta conceptual de Dashboard de Drasus" hidden>
+      <iframe id="drasus-frame" src="drasus-dashboard.html" title="Dashboard conceptual de Drasus Engine"></iframe>
+    </section>
+    <p class="caption" data-reference-caption>Las pantallas reproducen la organización de las referencias para discutir el aspecto visual. Las cifras son ficticias y no provienen de Drasus; las categorías de la gráfica usan tonos fríos y las alertas conservan colores de estado.</p>
+    <p class="caption" data-drasus-caption hidden>Dirección visual aprobada: Overview define la composición, distribución, densidad, separación y controles del Dashboard; NestIQ aporta el acabado y los bordes de las superficies, con una transparencia uniforme entre widgets para que el halo se perciba también a través de ellos. El campo de luz blanca cruza la interfaz de forma continua, desde la esquina superior derecha hasta la inferior izquierda, detrás de la cabecera, los widgets y las separaciones. La navegación lateral, el perfil completo Geist Sans + Geist Mono y el acento blanco común son la configuración inicial. El catálogo propuesto incluye blanco, rojo, azul, verde, violeta, morado, cian, plata y dorado; blanco es inicial y dorado no equivale a amarillo. Los colores semánticos siguen protegidos. La propuesta usa indicador y texto en navegación, borde y texto para el período, subrayado en la pestaña activa y relleno solo en la acción principal; queda pendiente de validación. Los datos y las opciones de personalización son ejemplos, sin conexión al Core; la legibilidad todavía debe validarse con contenido representativo.</p>
+  </main>
+  <script>
+    const viewButtons = document.querySelectorAll('[data-view]');
+    const screens = document.querySelectorAll('[data-screen]');
+    const drasusFrame = document.querySelector('#drasus-frame');
+    function requestDrasusFrameSize() {
+      if (drasusFrame.offsetWidth) drasusFrame.contentWindow.postMessage({ type: 'drasus-preview-measure' }, '*');
+    }
+    drasusFrame.addEventListener('load', requestDrasusFrameSize);
+    window.addEventListener('resize', requestDrasusFrameSize);
+    window.addEventListener('message', (event) => {
+      if (event.source !== drasusFrame.contentWindow || event.data?.type !== 'drasus-preview-height') return;
+      const height = Number(event.data.height);
+      if (Number.isFinite(height) && height > 0 && height < 10000) drasusFrame.style.height = Math.max(900, Math.ceil(height)) + 'px';
+    });
+    viewButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const selected = button.dataset.view;
+        viewButtons.forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        screens.forEach((screen) => { screen.hidden = screen.dataset.screen !== selected; });
+        document.querySelector('[data-reference-caption]').hidden = selected === 'three';
+        document.querySelector('[data-drasus-caption]').hidden = selected !== 'three';
+        if (selected === 'three') requestAnimationFrame(requestDrasusFrameSize);
+      });
+    });
+  </script>
+</body>
+</html>

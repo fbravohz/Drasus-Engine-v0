@@ -16,11 +16,12 @@ Para cualquier tarea de Drasus, consulta primero `docs/README.md` como índice y
 
 Reglas:
 
-- Si hay dos o más señales de ambigüedad alta, impacto transversal, novedad, riesgo alto o validación end-to-end, usa Astra. Si el diseño está cerrado, usa Sol para complejidad y Luna para lo demás.
-- Usa Astra **antes de codear** para validar arquitectura, datos, contratos, reglas cuantitativas, seguridad y ejecución; úsalo **después** para auditar invariantes, backend/frontend/DB, fugas, riesgo financiero y fallos graves. Entrega evidencia, severidad, corrección y pruebas de cierre.
-- Resuelve el ID real disponible en el host (`gpt-6-astra`, `gpt-5.6-sol`, `gpt-5.6-luna` son ejemplos); usa el máximo nivel soportado y decláralo.
+- **Autoridad del usuario:** solo invoca o selecciona Sol o Astra si el usuario lo pide explícitamente en el turno actual. La matriz, el riesgo, una skill o una regla de auditoría no autorizan su uso por sí solos.
+- **Delegación descendente:** el agente de mayor nivel seleccionado por el usuario puede delegar a Luna cuando esté justificado y autorizado. Un agente de menor nivel no escala a Sol o Astra; solo una petición explícita del usuario permite esa excepción.
+- Las señales de ambigüedad, impacto, novedad, riesgo o validación intensifican el análisis y la evidencia del agente seleccionado; no cambian automáticamente el agente. Para seguridad y tareas críticas, documenta evidencia, severidad, corrección y verificaciones dentro del alcance autorizado.
+- Si el usuario solicita Sol o Astra, resuelve el ID real disponible en el host (`gpt-6-astra`, `gpt-5.6-sol` son ejemplos); usa el máximo nivel soportado y decláralo.
 - El agente debe producir un resultado verificable, no solo un plan. Antes de empezar, declara: `tarea → clasificación → agente/nivel → motivo → escalamiento → subagentes`.
-- Para un barrido amplio, delimita el alcance y delega a Luna solo cuando esté justificado y autorizado. Sol/Astra solo para síntesis arquitectónica o decisiones de dominio, con autorización del usuario o justificación explícita. En entregas críticas: barrido Luna + auditoría Astra. Los subagentes devuelven solo la conclusión y nunca escriben concurrentemente en los mismos archivos.
+- Para un barrido amplio, delimita el alcance y delega a Luna solo cuando esté justificado y autorizado. Los subagentes devuelven solo la conclusión y nunca escriben concurrentemente en los mismos archivos.
 
 ## Skills
 
@@ -42,6 +43,14 @@ Reglas:
 6. No uses MCP para servir recursos estáticos que pueden versionarse junto a la skill ni expongas lectores de archivos o ejecutores arbitrarios.
 7. Para PDF, Excel, DOCX y reportes, usa scripts o herramientas MCP deterministas y valídalos; no dejes que el modelo construya manualmente el resultado.
 8. El harness descubre `SKILL.md` y usa primero `name`/`description`; carga el cuerpo y auxiliares bajo demanda. `AGENTS.md` contiene reglas globales; el detalle condicional vive junto a la skill o en su fuente canónica.
+
+### Dominios de diseño
+
+[ui-ux-designer](.agents/skills/ui-ux-designer/SKILL.md) reúne investigación UX, arquitectura de información, interacción, diseño visual y prototipos, sistema de diseño, contenido UX, accesibilidad, visualización de datos, marca, movimiento y adaptación a ventanas. Consulta solo las guías pertinentes al entregable.
+
+Marca define identidad, voz y tono; el sistema de diseño los expresa en reglas compartidas; contenido UX los aplica al texto y diseño visual a las superficies. Interacción define el cambio de estado; movimiento define su expresión temporal y espacial; adaptación define el reflujo al cambiar la ventana. Accesibilidad revisa todos los dominios; `quant-engineer` valida la exactitud estadística y financiera cuando corresponda.
+
+`docs/DESIGN.yaml` conserva las propiedades estructuradas y su estado para automatización; `docs/DESIGN.md` explica el contexto y la justificación para lectores y entrevistas. Mantén ambos sincronizados: el YAML gobierna los valores estructurados y ninguno debe contradecir al otro. No guardes clases Tailwind ni configuración CSS en estas fichas; la implementación productiva corresponde a `frontend-engineer`.
 
 ## Gobernanza
 
@@ -99,13 +108,16 @@ Redacta cada regla para que se entienda en una lectura, conserve la información
 ## Arquitectura y límites del proyecto
 
 1. **Stack:** usa Rust para core y backend, React/TypeScript dentro de Tauri 2 para UI y gRPC para escritorio local y headless. No introduzcas Python ni FastAPI en el diseño. Las Features definen sus puertos tipados en Rust (ADR-0137: Feature como Unidad Hexagonal Autónoma con Puertos Tipados); en la frontera gRPC, Protobuf es la fuente del contrato de transporte y los tipos TypeScript se generan o adaptan desde ahí (ADR-0165: Cliente de Escritorio Tauri + React y Frontera gRPC Local). No dupliques DTOs a mano.
-2. **Diseño:** aplica Functional Core / Imperative Shell y arquitectura hexagonal (ADR-0137): la lógica vive en features con puertos tipados; los módulos solo componen y una feature depende solo de `shared`, no de otra feature.
+2. **Modularidad, composición y reutilización:** aplica este principio al diseño, frontend y backend. Divide por responsabilidad, define contratos públicos claros y compón piezas a través de ellos. Reutiliza decisiones, patrones y componentes cuando atiendan más de un uso real; no crees abstracciones genéricas sin consumidores concretos.
+   - **Diseño visual:** expresa decisiones compartidas mediante tokens semánticos y patrones de componentes. Registra valores y estados en `docs/DESIGN.yaml`, y el contexto en `docs/DESIGN.md`; no agregues clases Tailwind ni configuración CSS a estas fichas.
+   - **Frontend:** proyecta los tokens aprobados desde una fuente central al tema Tailwind y reutiliza sus clases, variantes y patrones; evita duplicar valores o estilos por pantalla. Construye componentes React con responsabilidad enfocada y APIs explícitas; compón e integra otros componentes mediante sus interfaces públicas, sin depender de su estado interno.
+   - **Backend:** aplica Functional Core / Imperative Shell y arquitectura hexagonal (ADR-0137): la lógica vive en features autónomas con puertos tipados; cada feature depende solo de `shared`, no de otra feature; los módulos solo componen.
 3. **Límites de datos:** cada dueño expone puertos; no accedas a tablas ajenas fuera de su interfaz pública. La excepción de infraestructura transversal en `shared` y sus criterios vigentes se definen en ADR-0137.
 4. **Ejecución y privacidad:** UI delgada; motor independiente, Local-First, Zero-Docker, gRPC autenticado y checkpoints reanudables. El core se ejecuta en hardware del usuario. La cabina central autentica, licencia, agrega e ingiere telemetría, pero no computa trabajo del usuario; las credenciales de bróker e IPs de operaciones nunca salen del entorno. El portal central es `../drasus-portal/`.
 5. **Soberanía por plan:** en el plan gratuito, los datos de trabajo fluyen al proveedor; en el plan de pago al corriente se suprime esa telemetría; si el pago vence, se reactiva. Los detalles canónicos están en ADR-0143 y ADR-0144.
 6. **Invariantes:** ante duda genuina, incluye el campo o capacidad requerida (ADR-0020); `NUNCA` y `SIEMPRE` son invariantes físicos, mientras que umbrales, máximos y mínimos deben ser configurables.
 7. **Fase:** el proyecto está en greenfield hasta el primer release distribuido: el esquema base puede corregirse en sitio. Antes de cambiar esquema consulta los ADR de migraciones. Después del primer release pasa a brownfield y las migraciones son solo hacia adelante (ADR-0006).
-8. **Dirección de UI:** la UI Flutter existente es legado temporal y será eliminada en una sesión futura. Para toda UI nueva o decisión arquitectónica usa React/TypeScript dentro de Tauri; no amplíes Flutter ni lo uses como referencia de diseño. La migración completa y la actualización de sus documentos históricos quedan pendientes de esa sesión.
+8. **Dirección de UI:** Flutter quedó retirado como cliente activo por ADR-0165. No reutilices su implementación ni el catálogo de widgets a medida. Para toda UI nueva usa React/TypeScript dentro de Tauri 2; React comparte componentes cuando el segundo consumidor real lo justifique, según ADR-0139. El Banco de Verificación conserva su función de probar features por separado conforme a ADR-0117/ADR-0152; su UI nueva debe usar Tauri/React y gRPC según ADR-0142/ADR-0165. Las especificaciones Flutter restantes son históricas y deben adaptarse antes de guiar una implementación.
 9. **Portabilidad Rust:** protege toda API específica del sistema operativo y sus pruebas con el `#[cfg(...)]` exacto: `unix` para POSIX, `target_os = "linux"` para `/proc` o `prctl`, `target_os = "macos"` para APIs de macOS y `windows` para Windows. Proporciona una alternativa o un error tipado en los demás targets; no dejes que el símbolo desaparezca para sus llamadores.
 10. **Entrega de UI:** aplica ADR-0117 según las enmiendas de ADR-0165 y ADR-0166. Una feature con superficie entrega en la misma Story su sección en el Banco de Verificación con datos reales por gRPC, su widget de tablero y su nodo Canvas si la infraestructura existe; si no existe, registra la deuda de integración. Una feature de plomería declara la feature consumidora y el observable concreto de su Ventana de Verificación.
 11. **Modelo de datos:** toda migración creada o modificada actualiza en el mismo cambio `docs/data-model/<tabla>.md` y, para una tabla nueva, `docs/DATA-MODEL.md`; contrasta columna, restricción e índice contra la migración real.

@@ -1,0 +1,1757 @@
+
+# ============================================================
+# MASTER APPLICATION DESIGN SYSTEM
+# AI-FILLABLE DESIGN SPECIFICATION
+# ============================================================
+#
+# PURPOSE:
+# Single machine-readable source of truth for Drasus Engine design decisions.
+# docs/DESIGN.md keeps narrative context; synchronize confirmed decisions across both files.
+#
+# WORKFLOW:
+# 1. Agent investigates the project and relevant canonical sources.
+# 2. Agent records verified facts and confirmed owner decisions.
+# 3. Unresolved fields remain null or open questions until research or interview.
+# 4. Implementation derives styling from this specification.
+#
+# CONVENTIONS:
+# null = undecided, awaiting research or decision
+# []   = collection awaiting population
+# {}   = object awaiting population
+#
+# Token leaves use DTCG-inspired $type / $value structure.
+# This YAML is a master specification, not a raw DTCG export.
+#
+# ============================================================
+
+schema:
+  name: application-design-specification
+  version: "1.0.0"
+  template: false
+  language: es
+  status: draft
+  last_updated: "2026-11-02"
+
+# ============================================================
+# 00 — AI AGENT CONTRACT
+# ============================================================
+
+agent:
+  role: "Principal Product Designer + Design Systems Architect"
+
+  objective: >
+    Investigate the application, understand its users,
+    establish a coherent design direction, and maintain
+    this specification with traceable design decisions.
+
+  operating_rules:
+    - Analyze the repository before defining design decisions.
+    - Preserve existing brand decisions unless redesign is requested.
+    - Prefer established conventions over arbitrary novelty.
+    - Never invent user research or business requirements.
+    - Never use visual trends without a functional rationale.
+    - Keep primitive, semantic, and component tokens separate.
+    - Reuse semantic tokens instead of hardcoded values.
+    - Define responsive, interaction, and accessibility behavior.
+    - Record significant decisions and their rationale.
+    - Preserve YAML structure and valid syntax.
+    - Distinguish canon facts, owner preferences, user research, and inference.
+    - Do not mark a property false unless the owner or canon permanently excludes it.
+    - Interview the owner by the requested blocks; keep unresolved fields open.
+    - Do not implement UI unless explicitly requested.
+
+  discovery:
+    inspect:
+      - Project documentation and requirements
+      - Existing application screens
+      - Design assets and brand guidelines
+      - Installed UI libraries
+      - Current styles and design tokens
+      - Existing component architecture
+      - Application routes and navigation
+      - Data models and representative content
+      - Existing accessibility patterns
+      - Screenshots and user-provided references
+
+  decision_priority:
+    - Explicit user requirements
+    - Existing product and brand specifications
+    - Actual repository implementation
+    - Existing design patterns
+    - Accessibility and usability standards
+    - Relevant established design conventions
+    - Agent-proposed design decisions
+
+  completion_policy:
+    fill_resolvable_fields: true
+    preserve_unresolved_as_null: true
+    interview_before_closing_open_product_decisions: true
+    record_assumptions: true
+    record_tradeoffs: true
+    avoid_placeholder_lorem_ipsum: true
+    validate_token_references: true
+    validate_yaml: true
+
+  deliverables:
+    - Completed specification
+    - Unresolved questions
+    - Design decision log
+    - Consistency and accessibility audit
+    - Proposed implementation mapping
+
+# ============================================================
+# 01 — PRODUCT CONTEXT
+# ============================================================
+
+product:
+  identity:
+    name: Drasus Engine
+    description: "Motor de investigación cuantitativa de escritorio que automatiza el ciclo de vida de estrategias de trading algorítmico; el cómputo y la ejecución ocurren en hardware del usuario, y la telemetría depende del plan."
+    category: "Aplicación de escritorio para investigación cuantitativa y trading algorítmico"
+    industry: "Tecnología financiera y trading algorítmico"
+    positioning: "Motor Local-First cuyo Core local conserva dominio, persistencia y ejecución; la UI presenta y controla superficies del producto."
+    maturity: "Greenfield, previo al primer release distribuido."
+
+  objectives:
+    business_goals: []
+    user_goals:
+      - "Construir, configurar e integrar procesos de investigación y trading algorítmico en el Canvas mediante módulos y features compatibles."
+      - "Investigar, generar, evaluar y validar estrategias antes de incubarlas u operarlas."
+      - "Analizar resultados, robustez, portafolios y riesgos durante todo el ciclo de vida de las estrategias."
+      - "Supervisar desde el Dashboard el estado, los resultados y la actividad relevante del Core."
+    primary_value_proposition: "Automatizar el ciclo de vida de estrategias de trading algorítmico, desde la investigación visual en el Canvas hasta la validación y operación, con el cómputo en hardware del usuario."
+    success_metrics: []
+
+  audience:
+    research_status: "Principiantes y expertos son segmentos objetivo confirmados; aún no existen personas ni perfiles validados mediante investigación UX."
+    primary_personas:
+      - "Principiante en trading algorítmico (segmento objetivo expresado por el propietario; no es una persona validada mediante investigación UX)."
+      - "Usuario experto en trading algorítmico o investigación cuantitativa (segmento objetivo confirmado por el propietario; no es una persona validada mediante investigación UX)."
+    secondary_personas: []
+    expertise_level: "Desde principiante hasta experto; dirección confirmada por el propietario, pendiente de investigación UX."
+    accessibility_needs: []
+    user_environments: []
+    device_preferences: []
+
+  experience:
+    definition_status: "Los trabajos recogen capacidades del canon y el alcance confirmado por el propietario; prioridades y recorridos requieren investigación UX."
+    primary_jobs_to_be_done:
+      - "Construir y configurar estrategias o procesos desde el Canvas, con módulos y features compatibles."
+      - "Investigar, generar, evaluar y validar estrategias con el contexto y la procedencia de sus datos."
+      - "Revisar robustez, rendimiento y riesgo antes de incubar u operar estrategias y portafolios."
+      - "Operar estrategias y portafolios con controles de capital y observar su actividad confirmada."
+      - "Monitorear estado, resultados, investigación y riesgos desde el Dashboard de solo lectura."
+      - "Inspeccionar una feature en su contexto y conectarla con otras mediante contratos tipados cuando aplique."
+    critical_user_journeys:
+      - "Entrar al Canvas, elegir un módulo recomendado o componer features compatibles, configurar sus nodos y entender sus entradas y salidas."
+      - "Investigar o generar estrategias, evaluar resultados y revisar robustez antes de incubar u operar."
+      - "Consultar el Dashboard, abrir el contexto correspondiente en el Canvas y auditar la actividad y procedencia relevantes."
+    feature_composition:
+      integration_model: "Las features exponen APIs de dominio mediante puertos tipados para operar sobre entidades del producto; el Canvas conecta contratos compatibles."
+      draggable_feature_node: "Cada feature declarada como nodo presenta sus entradas y salidas y la información, gráfica o contexto pertinente según su contrato. Esto no implica que toda feature requiera un nodo o una gráfica."
+      beginner_support: "Los módulos funcionan como presets para facilitar la composición; el usuario experto puede conectar features compatibles directamente."
+    frequent_tasks: []
+    high_risk_actions: []
+    user_pain_points: []
+
+  platforms:
+    web: null # Cliente web no entregado; se mantiene abierta la posibilidad futura.
+    mobile_web: null # Cliente móvil web no entregado; alcance futuro sin decidir.
+    native_mobile: null # Cliente móvil nativo no entregado; alcance futuro sin decidir.
+    desktop: true # Cliente actual del producto.
+    tablet: null # No hay cliente tablet definido; su adaptación futura no está descartada.
+
+  technical_context:
+    framework: "Tauri 2, React 19, TypeScript y Vite."
+    language: "TypeScript en la cáscara; Rust en el Core y host Tauri."
+    styling_solution: "Tailwind CSS 4 con CSS local para estilos del Dashboard; los valores actuales aún no son tokens canónicos."
+    component_library: "Sin selección. Se explorará el piloto HeroUI v3 frente a shadcn/ui + Radix después de definir tokens; no implica que estén instalados."
+    icon_library: "Sin selección. El Dashboard usa SVG locales mediante Icon; se explorará una biblioteca o sistema compartido."
+    chart_library: null
+    routing: "La cáscara actual monta Dashboard como pantalla raíz; no tiene router."
+    existing_design_system: "docs/DESIGN.yaml es la fuente canónica estructurada; tokens y catálogo de componentes siguen en definición."
+
+  constraints:
+    technical:
+      - "Rust conserva dominio, persistencia y ejecución; la UI Tauri/React presenta datos mediante la frontera gRPC/Protobuf."
+      - "El cliente entregado es de escritorio Tauri y usa el WebView del sistema; pisos de SO, arquitecturas y distribución siguen pendientes en desktop-packaging-manager."
+      - "La cáscara Dashboard actual todavía no está conectada al Core por gRPC."
+    business: []
+    legal: []
+    performance: []
+    accessibility: []
+    browser_support: null # No hay cliente web que requiera matriz de navegadores; la posibilidad de render web sigue abierta.
+
+# ============================================================
+# 02 — DESIGN RESEARCH & EVIDENCE
+# ============================================================
+
+research:
+  repository_audit:
+    status: "Parcial: se contrastaron canon, implementación y recursos; faltan inspección visual final y QA independiente."
+    examined_files:
+      - "AGENTS.md y docs/README.md"
+      - "docs/DESIGN.yaml, docs/adr/ADR-0136.md, docs/adr/ADR-0137.md, docs/adr/ADR-0160.md y docs/adr/ADR-0165.md"
+      - "docs/PRODUCT.md y docs/features/desktop-packaging-manager.md"
+      - "apps/desktop/src/features/dashboard/Dashboard.tsx"
+      - "apps/desktop/src/components/DashboardChrome.tsx, DashboardWidgets.tsx, WidgetCard.tsx y Controls.tsx"
+      - "apps/desktop/src/data/dashboard.ts y apps/desktop/src/localization/"
+      - "apps/desktop/src/styles.css y apps/desktop/package.json"
+      - "docs/design/drasus-dashboard.html"
+    existing_patterns:
+      - "El Dashboard implementado es la superficie oficial actual, compuesto por cinco widgets: resultados, período, investigación, portafolios y riesgo."
+      - "El Canvas es la atracción principal y superficie central de composición según dirección confirmada por el propietario; aún no está implementado en la cáscara actual."
+      - "Los cinco widgets presentan estados vacíos localizados; el encabezado informa que los datos del Core no están disponibles."
+      - "La navegación lateral puede expandirse con hover/foco y fijarse abierta; en ventanas angostas cambia a navegación superior."
+      - "El selector de idioma cambia entre español e inglés durante la sesión; la selección no persiste."
+      - "La cuadrícula usa doce columnas en ventanas amplias y refluye a seis o una columna en los cortes CSS actuales."
+      - "La UI usa componentes React separados, SVG locales y fuentes Geist locales."
+    inconsistencies:
+      - "La composición actual y el orden de widgets son fijos; ADR-0136 y docs/DESIGN.yaml prevén widgets reorganizables y densidad ajustable."
+      - "No hay datos reales ni integración gRPC en la cáscara actual; no se deben presentar sus estados vacíos como métricas del Core."
+      - "El CSS contiene valores directos de color, espacio, radio y tipografía; docs/DESIGN.yaml aún no aprueba tokens de producción."
+      - "Los cortes responsivos están implementados en CSS, pero su medida y comportamiento aún no están validados como reglas canónicas."
+      - "La navegación estrecha implementada solo demuestra reflujo en ventanas de escritorio; no decide la compatibilidad futura con tablet, móvil o web."
+      - "No existe docs/design/comparativa-tipografia.html; la ficha de fuentes conserva JetBrains Mono como referencia, mientras Geist sigue como perfil predeterminado aprobado."
+    reusable_assets:
+      - "Componentes React de navegación, encabezado, botón de icono, tarjeta de widget y estado vacío."
+      - "Fuentes Geist Sans y Geist Mono empaquetadas localmente."
+      - "Iconos SVG locales mediante el componente Icon."
+
+  visual_references:
+    inspiration:
+      - "Overview: composición, distribución, densidad y controles iniciales del Dashboard."
+      - "NestIQ: acabado y bordes de superficies; en Drasus los widgets tienen más transparencia."
+      - "docs/design/comparativa-materiales.html: dirección aprobada con datos ilustrativos; no define valores de tokens de producción."
+      - "Las referencias top1.webp, top2.webp y top3.webp están fuera del repositorio en ../inspiration/ y pueden no estar disponibles para otros colaboradores."
+    competitors: []
+    anti_references: []
+
+  user_research:
+    available_evidence:
+      - "Preferencias y decisiones del propietario documentadas en docs/DESIGN.yaml; no son hallazgos de investigación con usuarios."
+      - "El propietario confirmó Canvas como principal atractivo, audiencia desde principiantes hasta expertos y recorridos más amplios que el monitoreo; esto no sustituye investigación UX."
+    usability_findings: []
+    unverified_assumptions: []
+
+  design_opportunities:
+    usability:
+      - "Definir el flujo para personalizar orden y densidad de widgets, incluida alternativa accesible al arrastre."
+    visual:
+      - "Validar la legibilidad del halo y las superficies translúcidas con datos representativos y tamaños de ventana distintos."
+    accessibility:
+      - "Verificar contraste, foco, teclado, ampliación y anuncios de estado en la ventana Tauri."
+    performance: []
+
+# ============================================================
+# 03 — DESIGN STRATEGY
+# ============================================================
+
+strategy:
+  design_vision: "Hacer del Canvas la superficie central para construir, investigar y conectar capacidades; el Dashboard complementa el ciclo con monitoreo de solo lectura, contexto y navegación."
+
+  principles:
+    primary:
+      - "El Canvas es la superficie principal de composición; el Dashboard es una superficie complementaria de monitoreo y navegación."
+      - "Cada feature expuesta como nodo conserva puertos tipados; sus entradas, salidas, gráficas e información dependen de su contrato y de lo que aplique."
+      - "Componer capacidades por contratos de feature sin acoplar una feature a otra; los módulos sirven como presets, especialmente para facilitar el inicio."
+      - "Separar y reutilizar componentes y tokens; no duplicar decisiones visuales entre consumidores."
+      - "El Dashboard es de solo lectura y no inventa métricas cuando faltan datos."
+    secondary: []
+
+  personality:
+    attributes: [refinado, moderno, tecnológico, pulido, premium]
+    emotional_goals:
+      - "Transmitir control durante la construcción, investigación y operación de sistemas de trading."
+      - "Dar claridad sin sugerir rentabilidad garantizada."
+    perception_goals:
+      - "Sentirse como un centro de mando para el ciclo completo de trading algorítmico."
+      - "Servir tanto a principiantes como a usuarios expertos; esta dirección no está validada por investigación UX."
+
+  visual_direction:
+    style: "Interfaz de escritorio oscura, con superficies translúcidas y un campo de luz blanco continuo."
+    aesthetic_keywords: [oscura, modular, halo, translúcida, discreta]
+    visual_complexity: null
+    visual_density: "La composición inicial conserva la densidad de Overview; escala y valores numéricos pendientes."
+    expressiveness: null
+    contrast_philosophy: "El acento general inicial es blanco; los significados semánticos se preservan y los estados no dependen solo del color. La legibilidad de las superficies sigue por validar."
+    geometry_philosophy: "Widgets con esquinas redondeadas; controles en cápsula o círculo según su función. Los radios exactos no son tokens aprobados."
+    approved_materials:
+      dashboard_widgets: "Superficies translúcidas uniformes con acabado y bordes inspirados en NestIQ; un halo blanco continuo cruza la interfaz en diagonal desde arriba a la derecha hacia abajo a la izquierda."
+      halo_intensity: "La intensidad mostrada en la tercera pantalla de la comparativa está aprobada; los valores numéricos de token siguen pendientes."
+      halo_tone: "Luz blanca sin matiz azul o gris."
+      controls: "Controles oscuros en cápsula o círculo según su función, borde superior luminoso delicado, gradiente y sombra suaves; selección blanca con texto oscuro."
+      validation: "La legibilidad del halo y los materiales con contenido real y tamaños representativos sigue pendiente."
+
+  differentiation:
+    distinctive_elements:
+      - "Canvas nodal como superficie principal para componer procesos de trading algorítmico con features que exponen APIs mediante puertos tipados."
+      - "Módulos predefinidos que orientan a principiantes y composición directa para usuarios expertos."
+      - "Ciclo de producto que abarca investigación, generación, validación, incubación, operación y auditoría."
+    signature_patterns:
+      - "Conectar features mediante puertos tipados en un Canvas único; usar módulos como composiciones reutilizables."
+    competitive_advantages: []
+
+  anti_patterns:
+    visual:
+      - "Asignar materiales distintos a widgets por tipo; el material base debe ser uniforme según docs/DESIGN.yaml."
+    interaction:
+      - "Hacer depender una acción o dato exclusivamente de hover o arrastre."
+    content:
+      - "Mostrar datos de ejemplo como si fueran datos reales del Core."
+      - "Tratar un resultado positivo como evidencia suficiente de que una estrategia está validada."
+
+  decision_criteria:
+    usability_weight: null
+    accessibility_weight: null
+    consistency_weight: null
+    originality_weight: null
+    implementation_cost_weight: null
+
+# ============================================================
+# 04 — BRAND IDENTITY
+# ============================================================
+
+brand:
+  identity:
+    name: "Drasus Engine"
+    tagline: null
+    mission: null
+    values: []
+    archetype: null
+    voice: null
+
+  logo:
+    primary_asset: null
+    secondary_asset: null
+    symbol_asset: null
+    monochrome_asset: null
+    minimum_size: null
+    clear_space: null
+    prohibited_usage: []
+
+  color_identity:
+    primary_hue: "Blanco como acento general inicial; el valor de token está pendiente."
+    secondary_hues: []
+    accent_philosophy: "Un acento común por tema; la configuración inicial usa blanco y cualquier personalización usa opciones predefinidas."
+    accent_options_pending: [rojo, azul, verde, violeta, morado, cian, plata, dorado]
+    customization_constraints: "La exploración de acentos está aplazada; no se permite edición libre de colores. Los colores semánticos y tipos de puerto conservan su significado."
+    color_associations:
+      - "Verde: condición positiva o ganancia."
+      - "Amarillo: alerta que requiere atención."
+      - "Rojo: pérdida, urgencia o error; la urgencia también usa texto e icono."
+      - "Azul: tranquilidad o calma."
+
+  typography_identity:
+    heading_personality: "Geist Sans como familia predeterminada aprobada; personalidad detallada pendiente."
+    body_personality: "Geist Sans como familia predeterminada aprobada; personalidad detallada pendiente."
+    numeric_personality: "Geist Mono como familia predeterminada aprobada; personalidad detallada pendiente."
+
+  imagery:
+    photography_style: false # esta propiedad no aplica: Drasus no usa fotografías de fondo en la aplicación.
+    illustration_style: null
+    iconography_style: "El Dashboard actual usa iconos SVG locales; el sistema de iconografía de producto sigue por definir."
+    graphic_motifs: []
+    asset_treatment: null
+
+  composition:
+    whitespace_philosophy: "La composición y separación iniciales siguen Overview; la escala final de espaciado está pendiente."
+    alignment_philosophy: "Cuadrícula modular tipo bento con jerarquía de widgets definida por el contenido."
+    visual_rhythm: "Un halo blanco cruza en diagonal desde la esquina superior derecha hacia la inferior izquierda y continúa detrás de cabecera, superficies y separaciones."
+
+# ============================================================
+# 05 — TOKEN ARCHITECTURE
+# ============================================================
+
+token_architecture:
+  standard: "DTCG-inspired" # Estructura de esta ficha; no implica adoptar el estándar de intercambio en el proyecto.
+  naming_convention: null
+
+  hierarchy:
+    - primitive
+    - semantic
+    - component
+
+  principles:
+    - Primitive tokens contain foundational values.
+    - Semantic tokens communicate usage and meaning.
+    - Component tokens define component-specific decisions.
+    - Components should consume semantic or component tokens.
+    - Themes override semantics without changing components.
+
+  required_modes:
+    - dark
+
+  supported_token_types:
+    - color
+    - dimension
+    - fontFamily
+    - fontWeight
+    - duration
+    - cubicBezier
+    - shadow
+    - number
+    - typography
+
+# ============================================================
+# 06 — PRIMITIVE DESIGN TOKENS
+# ============================================================
+
+tokens:
+  primitive:
+
+    color:
+      neutral:
+        "0":   { $type: color, $value: null }
+        "50":  { $type: color, $value: null }
+        "100": { $type: color, $value: null }
+        "200": { $type: color, $value: null }
+        "300": { $type: color, $value: null }
+        "400": { $type: color, $value: null }
+        "500": { $type: color, $value: null }
+        "600": { $type: color, $value: null }
+        "700": { $type: color, $value: null }
+        "800": { $type: color, $value: null }
+        "900": { $type: color, $value: null }
+        "950": { $type: color, $value: null }
+        "1000": { $type: color, $value: null }
+
+      brand:
+        "50":  { $type: color, $value: null }
+        "100": { $type: color, $value: null }
+        "200": { $type: color, $value: null }
+        "300": { $type: color, $value: null }
+        "400": { $type: color, $value: null }
+        "500": { $type: color, $value: null }
+        "600": { $type: color, $value: null }
+        "700": { $type: color, $value: null }
+        "800": { $type: color, $value: null }
+        "900": { $type: color, $value: null }
+
+      secondary:
+        "100": { $type: color, $value: null }
+        "300": { $type: color, $value: null }
+        "500": { $type: color, $value: null }
+        "700": { $type: color, $value: null }
+        "900": { $type: color, $value: null }
+
+      functional:
+        success: { $type: color, $value: null }
+        warning: { $type: color, $value: null }
+        danger: { $type: color, $value: null }
+        info: { $type: color, $value: null }
+
+      data_series: []
+
+    font_family:
+      body: { $type: fontFamily, $value: "Geist Sans" }
+      heading: { $type: fontFamily, $value: "Geist Sans" }
+      mono: { $type: fontFamily, $value: "Geist Mono" }
+
+    font_size:
+      "2xs": { $type: dimension, $value: null }
+      xs:    { $type: dimension, $value: null }
+      sm:    { $type: dimension, $value: null }
+      md:    { $type: dimension, $value: null }
+      lg:    { $type: dimension, $value: null }
+      xl:    { $type: dimension, $value: null }
+      "2xl": { $type: dimension, $value: null }
+      "3xl": { $type: dimension, $value: null }
+      "4xl": { $type: dimension, $value: null }
+
+    font_weight:
+      regular:  { $type: fontWeight, $value: null }
+      medium:   { $type: fontWeight, $value: null }
+      semibold: { $type: fontWeight, $value: null }
+      bold:     { $type: fontWeight, $value: null }
+
+    line_height:
+      tight:   { $type: number, $value: null }
+      normal:  { $type: number, $value: null }
+      relaxed: { $type: number, $value: null }
+
+    letter_spacing:
+      tight:  { $type: dimension, $value: null }
+      normal: { $type: dimension, $value: null }
+      wide:   { $type: dimension, $value: null }
+
+    spacing:
+      "0":  { $type: dimension, $value: null }
+      "1":  { $type: dimension, $value: null }
+      "2":  { $type: dimension, $value: null }
+      "3":  { $type: dimension, $value: null }
+      "4":  { $type: dimension, $value: null }
+      "5":  { $type: dimension, $value: null }
+      "6":  { $type: dimension, $value: null }
+      "8":  { $type: dimension, $value: null }
+      "10": { $type: dimension, $value: null }
+      "12": { $type: dimension, $value: null }
+      "16": { $type: dimension, $value: null }
+      "20": { $type: dimension, $value: null }
+      "24": { $type: dimension, $value: null }
+
+    radius:
+      none: { $type: dimension, $value: null }
+      xs:   { $type: dimension, $value: null }
+      sm:   { $type: dimension, $value: null }
+      md:   { $type: dimension, $value: null }
+      lg:   { $type: dimension, $value: null }
+      xl:   { $type: dimension, $value: null }
+      full: { $type: dimension, $value: null }
+
+    border_width:
+      thin:   { $type: dimension, $value: null }
+      medium: { $type: dimension, $value: null }
+      thick:  { $type: dimension, $value: null }
+
+    opacity:
+      disabled: { $type: number, $value: null }
+      subtle:   { $type: number, $value: null }
+      overlay:  { $type: number, $value: null }
+
+    shadow:
+      sm: { $type: shadow, $value: null }
+      md: { $type: shadow, $value: null }
+      lg: { $type: shadow, $value: null }
+      xl: { $type: shadow, $value: null }
+
+    duration:
+      instant: { $type: duration, $value: null }
+      fast:    { $type: duration, $value: null }
+      normal:  { $type: duration, $value: null }
+      slow:    { $type: duration, $value: null }
+
+    easing:
+      standard: { $type: cubicBezier, $value: null }
+      enter:    { $type: cubicBezier, $value: null }
+      exit:     { $type: cubicBezier, $value: null }
+
+# ============================================================
+# 07 — SEMANTIC TOKENS & THEMES
+# ============================================================
+
+themes:
+  default: dark
+  light_mode_status: "No hay plan actual para tema claro; queda sin decidir como capacidad futura."
+
+  light:
+    color:
+      background:
+        canvas: null
+        surface: null
+        elevated: null
+        inset: null
+        overlay: null
+
+      foreground:
+        primary: null
+        secondary: null
+        tertiary: null
+        disabled: null
+        inverse: null
+
+      border:
+        subtle: null
+        default: null
+        strong: null
+        focus: null
+
+      action:
+        primary: null
+        primary_hover: null
+        primary_active: null
+        secondary: null
+        secondary_hover: null
+
+      feedback:
+        success: null
+        warning: null
+        danger: null
+        info: null
+
+      selection:
+        background: null
+        foreground: null
+
+      data:
+        positive: null
+        negative: null
+        neutral: null
+        categorical: []
+        sequential: []
+        diverging: []
+
+  dark:
+    color:
+      background:
+        canvas: null
+        surface: null
+        elevated: null
+        inset: null
+        overlay: null
+
+      foreground:
+        primary: null
+        secondary: null
+        tertiary: null
+        disabled: null
+        inverse: null
+
+      border:
+        subtle: null
+        default: null
+        strong: null
+        focus: null
+
+      action:
+        primary: null
+        primary_hover: null
+        primary_active: null
+        secondary: null
+        secondary_hover: null
+
+      feedback:
+        success: null
+        warning: null
+        danger: null
+        info: null
+
+      selection:
+        background: null
+        foreground: null
+
+      data:
+        positive: null
+        negative: null
+        neutral: null
+        categorical: []
+        sequential: []
+        diverging: []
+
+  behavior:
+    follows_system_preference: null
+    user_override: null
+    persists_selection: null
+    avoid_transition_flash: null
+
+# ============================================================
+# 08 — TYPOGRAPHIC SYSTEM
+# ============================================================
+
+typography:
+  scale:
+    methodology: null
+    ratio: null
+    base_size: null
+
+  text_styles:
+    display: null
+    heading_1: null
+    heading_2: null
+    heading_3: null
+    heading_4: null
+    body_large: null
+    body: null
+    body_small: null
+    caption: null
+    overline: null
+    label: null
+    button: null
+    code: null
+    numeric: null
+
+  behavior:
+    responsive_scaling: null
+    text_wrap_strategy: null
+    maximum_reading_width: null
+    truncation_rules: null
+    numeric_alignment: null
+    tabular_numbers: null
+
+  hierarchy:
+    heading_relationships: null
+    emphasis_rules: null
+    density_adjustments: null
+
+  default_profile:
+    text_family: "Geist Sans"
+    numeric_family: "Geist Mono"
+    selection_unit: "Perfil completo que combina la familia de texto y la numérica."
+    customization: "Se podrán elegir perfiles predefinidos y restaurar el aspecto original; las familias alternativas y su disponibilidad siguen abiertas."
+
+  reference_hierarchy:
+    status: "Jerarquía de la maqueta aprobada como dirección; estos valores no son tokens de producción."
+    primary_metric: { size: "34–36px", weight: 600 }
+    supporting_metric: { size: "33px", weight: 400 }
+    widget_title: { size: "17–18px", weight: 700 }
+    labels_and_subtitles: { size: "14px", weight: null }
+    details: { size: "12–13px", weight: null }
+    alternative_profiles: null
+
+# ============================================================
+# 09 — SPATIAL & LAYOUT SYSTEM
+# ============================================================
+
+layout:
+  philosophy:
+    grid_system: "CSS Grid de 12 columnas en la composición amplia del Dashboard; medidas actuales de implementación, no tokens aprobados."
+    spatial_rhythm: "La composición inicial sigue Overview; la escala de espaciado común sigue pendiente."
+    density_mode: "Densidad inicial inspirada en Overview; densidad ajustable por widget aprobada, pero aún no implementada."
+    initial_widget_balance: "Resultados, desempeño de portafolio, avisos y riesgos, y generación/evaluación de estrategias deben tener un peso visual similar en la distribución inicial, salvo la jerarquía estructural ya aprobada."
+    alignment_rules:
+      - "El widget de resultados ocupa 8 de 12 columnas y el de período 4."
+      - "Los tres widgets restantes ocupan 4 columnas cada uno en la vista amplia."
+
+  containers:
+    max_width: "1280px en el CSS actual; valor provisional pendiente de validación."
+    reading_width: null
+    fluid_width: true
+    page_padding: "Implementación actual: 20px laterales con clamp(10px, 2vw, 24px); provisional."
+
+  application_shell:
+    header:
+      enabled: true
+      height: "76px de min-height en la implementación actual."
+      behavior: "A 1050px o menos, el título y las acciones pasan a filas separadas; umbral provisional."
+
+    sidebar:
+      enabled: true
+      width: "La superficie mide 62px contraída y 200px expandida; la columna del grid mide 72px o 210px."
+      collapsed_width: "62px de superficie (72px de columna) en el CSS actual."
+      collapse_behavior: "Se expande con hover o foco; el botón de pin la conserva abierta. En ventanas de hasta 760px pasa a navegación superior."
+
+    content:
+      max_width: "1280px para la cáscara del Dashboard en la implementación actual."
+      padding: "CSS actual: 8px 8px 12px 2px en escritorio; se reduce en ventanas angostas."
+      scrolling: "La cáscara puede reacomodarse y crecer; no se ha validado visualmente el desplazamiento en todos los tamaños."
+
+    footer:
+      enabled: null
+      behavior: null
+
+  grid:
+    columns: 12
+    gutter: "10px en la implementación actual (gap-2.5 de Tailwind); provisional."
+    margin: null
+    nesting_rules: "Resultados ocupa 8 columnas; período 4; cada widget estándar 4. En cortes intermedios los widgets principales ocupan una fila y los otros 6 columnas; en estrecho todos ocupan una columna."
+    alignment_rules:
+      - "Mantener el orden de lectura de los widgets al reflujo."
+
+  breakpoints:
+    xs: null
+    sm: "540px, media query max-width actual; provisional y no aprobado como token."
+    md: "760px, media query max-width actual; provisional y no aprobado como token."
+    lg: "1050px, media query max-width actual; provisional y no aprobado como token."
+    xl: null
+    "2xl": null
+
+  responsive:
+    strategy: "Reflujo de la ventana de escritorio: reduce columnas, apila cabecera y cambia la navegación lateral a superior; los cortes actuales requieren validación."
+    stacking_rules:
+      - "A 1050px o menos, cabecera en columna; los widgets principales ocupan el ancho completo y los restantes dos columnas."
+      - "A 760px o menos, la cuadrícula pasa a una columna y la navegación se mueve arriba."
+      - "A 540px o menos, el selector de idioma y el control de pin se compactan; la navegación ocupa una segunda fila."
+    overflow_rules:
+      - "La navegación superior permite desplazamiento horizontal en ventanas angostas."
+      - "Los widgets usan min-width: 0 para permitir reducción del contenido."
+    content_priority:
+      - "Conservar título, estado de datos, selección de idioma y los cinco widgets."
+    navigation_adaptation: "Riel lateral expandible en escritorio; navegación horizontal superior en ventanas estrechas."
+
+  density:
+    supported_modes: []
+    default_mode: null
+    compact_spacing_multiplier: null
+    touch_spacing_multiplier: null
+
+  layers:
+    base: null
+    sticky: "La superficie de navegación usa position: sticky en el layout de escritorio."
+    dropdown: null
+    popover: null
+    overlay: null
+    modal: null
+    toast: null
+    tooltip: null
+
+# ============================================================
+# 10 — COMPONENT DESIGN SYSTEM
+# ============================================================
+
+components:
+  architecture:
+    methodology: "Componentes funcionales React/TypeScript, separados por función y compuestos por la feature Dashboard."
+    composition_model: "Dashboard compone DashboardHeader, Sidebar, WidgetCard y WidgetEmptyState; WidgetCard recibe children."
+    styling_strategy: "Tailwind CSS 4 y CSS local; los tokens canónicos todavía no están definidos."
+    variant_strategy: "Variantes de widget nombradas por layout (results, period, standard); no se ha seleccionado una biblioteca externa."
+    catalog_status: "No se migra el catálogo de widgets Flutter retirado por ADR-0165. Las categorías de registry no son componentes compartidos; las Cáscaras Visuales referencian una clave de specifications cuando exista y, si no, describen el rol de un componente local o pendiente. Las abstracciones compartidas se elevan con un segundo consumidor real según ADR-0139."
+    component_library: "Sin selección; piloto visual HeroUI v3 frente a shadcn/ui + Radix después de definir tokens y comportamientos comunes."
+    icon_library: "Sin selección; explorar una biblioteca compartida. SVG locales del Dashboard son implementación actual, no decisión de sistema."
+    adopted_specialized_libraries:
+      canvas: "React Flow (@xyflow/react), seleccionado como base del Canvas por ADR-0136; integración, zoom anidado, accesibilidad y rendimiento siguen sujetos a verificación."
+      tables: "TanStack Table adoptada para tablas que requieran sus capacidades; TanStack Virtual para listas o tablas cuyo volumen justifique virtualización."
+    reuse_policy: "Extraer una abstracción compartida cuando aparezca un segundo consumidor real, según ADR-0139."
+    state_management_boundary: "La cáscara conserva estado de presentación local (pin e idioma de sesión). Dominio y persistencia pertenecen al Core; la integración gRPC aún no existe en esta cáscara."
+
+  universal_contract:
+    required_properties:
+      - anatomy
+      - variants
+      - sizes
+      - visual_tokens
+      - interaction_states
+      - keyboard_behavior
+      - accessibility
+      - responsive_behavior
+      - usage_guidelines
+
+    required_states:
+      - default
+      - hover
+      - focus_visible
+      - active
+      - disabled
+      - loading
+      - error
+
+    additional_states_as_applicable:
+      - selected
+      - checked
+      - indeterminate
+      - read_only
+      - expanded
+      - dragging
+      - success
+
+  registry:
+    actions:
+      - button
+      - icon_button
+      - button_group
+      - split_button
+      - floating_action_button
+
+    inputs:
+      - text_input
+      - number_input
+      - password_input
+      - textarea
+      - select
+      - combobox
+      - autocomplete
+      - checkbox
+      - radio
+      - switch
+      - slider
+      - date_picker
+      - time_picker
+      - file_upload
+      - search_input
+
+    navigation:
+      - navbar
+      - sidebar
+      - tabs
+      - breadcrumbs
+      - pagination
+      - stepper
+      - command_palette
+
+    display:
+      - card
+      - badge
+      - avatar
+      - tag
+      - tooltip
+      - popover
+      - accordion
+      - divider
+      - statistic
+      - progress
+      - skeleton
+
+    overlays:
+      - modal
+      - drawer
+      - dropdown
+      - context_menu
+      - toast
+      - alert
+      - confirmation_dialog
+
+    data:
+      - table
+      - data_grid
+      - chart
+      - metric_card
+      - filter_bar
+      - date_range_selector
+      - tree_view
+      - empty_state
+
+  specifications:
+    dashboard_sidebar:
+      enabled: true
+      purpose: "Navegación primaria y marca de la cáscara de escritorio."
+      anatomy: [brand, primary_navigation, pin_button]
+      variants: [collapsed, expanded, pinned, narrow_window]
+      sizes: []
+      token_references: {}
+      properties:
+        pinned: "Estado local que conserva la navegación abierta durante la sesión."
+      defaults:
+        pinned: false
+      states:
+        default: "Riel contraído."
+        hover_or_focus: "Expande etiquetas y superficie."
+        pinned: "Permanece expandida."
+        narrow_window: "Pasa a navegación superior."
+      keyboard_interactions:
+        - "Usa botones nativos y conserva foco visible."
+        - "El foco dentro del riel lo expande."
+      screen_reader_behavior: "aside y nav tienen etiquetas localizadas; el destino activo usa aria-current=page."
+      responsive_behavior: "Hasta 760px cambia a barra superior; hasta 540px distribuye marca, pin y navegación en dos filas."
+      content_rules: ["Etiquetas de navegación provienen del catálogo de localización."]
+      dos: ["Conservar un nombre accesible para el botón de fijar."]
+      donts: ["No ocultar el estado activo solo por color."]
+      implementation_reference: "apps/desktop/src/components/DashboardChrome.tsx"
+
+    dashboard_header:
+      enabled: true
+      purpose: "Identifica la pantalla y expone estado de Core y selección de idioma."
+      anatomy: [title, subtitle, core_status, locale_selector]
+      variants: [wide, stacked]
+      sizes: []
+      token_references: {}
+      properties: {}
+      defaults: {}
+      states:
+        core_unavailable: "Muestra texto de estado localizado; no representa conectividad validada."
+      keyboard_interactions: ["El selector de idioma es un select nativo."]
+      screen_reader_behavior: "El estado usa role=status; el selector tiene label visible."
+      responsive_behavior: "Título y acciones se apilan a 1050px o menos; umbral actual provisional."
+      content_rules: ["Todo texto visible se obtiene de recursos es/en."]
+      dos: ["Distinguir indisponibilidad del Core de un estado vacío real cuando exista la integración."]
+      donts: ["No mostrar valores de ejemplo."]
+      implementation_reference: "apps/desktop/src/components/DashboardChrome.tsx"
+
+    widget_card:
+      enabled: true
+      purpose: "Contenedor de solo lectura para una vista de monitoreo de una feature."
+      anatomy: [title, subtitle, content]
+      variants: [results, period, standard]
+      sizes: []
+      token_references: {}
+      properties:
+        id: "Identificador estable usado para asociar el encabezado."
+        layout: "Variación de cuadrícula declarada por nombre."
+      defaults: {}
+      states:
+        default: "Presenta encabezado y contenido del widget."
+        empty: "El contenido actual usa estado vacío contextual."
+      keyboard_interactions: []
+      screen_reader_behavior: "section se vincula a su h2 mediante aria-labelledby."
+      responsive_behavior: "La cuadrícula refluye según los cortes CSS actuales; reglas finales pendientes."
+      content_rules: ["Material y borde uniformes entre tipos de widget según docs/DESIGN.yaml."]
+      dos: ["Mantener datos del Dashboard de solo lectura."]
+      donts: ["No crear estilos de superficie por tipo de widget."]
+      implementation_reference: "apps/desktop/src/components/WidgetCard.tsx"
+
+    empty_state:
+      enabled: true
+      purpose: "Explica por qué un widget aún no presenta contenido."
+      anatomy: [decorative_icon, title, description]
+      variants: [widget]
+      sizes: []
+      token_references: {}
+      properties:
+        title: "Texto localizado del estado."
+        description: "Explicación localizada del dato que falta."
+      defaults: {}
+      states: {}
+      keyboard_interactions: []
+      screen_reader_behavior: "El icono es decorativo; título y descripción son texto."
+      responsive_behavior: "La descripción puede ocupar varias líneas; ancho máximo actual 380px."
+      content_rules: ["Evitar sugerir que existen datos o actividad no confirmados."]
+      dos: ["Distinguir posteriormente sin datos, Core desconectado y carga."]
+      donts: ["No usar Lorem ipsum ni métricas ficticias."]
+      implementation_reference: "apps/desktop/src/components/DashboardWidgets.tsx"
+
+    icon_button:
+      enabled: true
+      purpose: "Acción compacta con icono y nombre accesible."
+      anatomy: [icon]
+      variants: [pin_navigation]
+      sizes: ["48px en la implementación actual"]
+      token_references: {}
+      properties:
+        label: "Nombre accesible localizado."
+        pressed: "aria-pressed comunica si la navegación está fijada."
+      defaults: {}
+      states:
+        focus_visible: "Contorno de foco visible."
+        disabled: "Cursor indica que la acción no está disponible."
+      keyboard_interactions: ["Activación nativa por teclado."]
+      screen_reader_behavior: "Usa aria-label y title localizado."
+      responsive_behavior: "Permanece disponible al cambiar el riel a navegación superior."
+      content_rules: ["El icono no sustituye el nombre accesible."]
+      dos: ["Usar IconButton para esta acción compartida."]
+      donts: ["No crear controles clicables sin semántica nativa."]
+      implementation_reference: "apps/desktop/src/components/Controls.tsx"
+
+    locale_selector:
+      enabled: true
+      purpose: "Cambia el idioma visible entre los recursos disponibles."
+      anatomy: [visible_label, native_select, locale_options]
+      variants: []
+      sizes: []
+      token_references: {}
+      properties:
+        locale: "Código de idioma activo."
+      defaults:
+        locale: es
+      states:
+        changed: "Actualiza el contenido inmediatamente durante la sesión."
+      keyboard_interactions: ["Usa interacción nativa de select."]
+      screen_reader_behavior: "Select nativo asociado a etiqueta visible."
+      responsive_behavior: "Etiqueta y control se apilan en ventanas de 540px o menos."
+      content_rules: ["Español e inglés mantienen paridad de claves."]
+      dos: ["Cargar traducciones desde archivos de locale."]
+      donts: ["No persistir la selección en el cliente como sustituto de ajustes del Core."]
+      implementation_reference: "apps/desktop/src/components/DashboardChrome.tsx y apps/desktop/src/localization/"
+
+  composition:
+    nesting_rules: []
+    spacing_rules: []
+    forbidden_combinations: []
+    reusable_patterns: []
+
+# ============================================================
+# 11 — NAVIGATION & INFORMATION ARCHITECTURE
+# ============================================================
+
+navigation:
+  information_architecture:
+    sitemap:
+      - "Dashboard (única pantalla renderizada actualmente)."
+      - "Canvas (destino visible en navegación, deshabilitado en la cáscara actual)."
+      - "Estrategias (destino visible en navegación, deshabilitado en la cáscara actual)."
+      - "Datos (destino visible en navegación, deshabilitado en la cáscara actual)."
+    primary_sections: ["Dashboard", "Canvas", "Estrategias", "Datos"]
+    secondary_sections: []
+    utility_sections: ["Selector de idioma", "Fijar navegación"]
+
+  patterns:
+    primary_navigation: "Riel lateral expandible con iconos; muestra etiquetas con hover/foco y puede fijarse abierto."
+    secondary_navigation: null
+    contextual_navigation: null
+    mobile_navigation: null # No existe navegación móvil implementada; navegación futura y soporte de otras plataformas quedan abiertos.
+
+  behavior:
+    active_state: "Dashboard comunica la página activa con aria-current=page; los destinos aún no disponibles están deshabilitados."
+    route_transitions: "No hay rutas ni transiciones entre pantallas en la cáscara actual."
+    deep_linking: null
+    breadcrumbs: null
+    back_navigation: null
+    unsaved_changes: null
+
+  search:
+    global_search: null
+    command_palette: null
+    search_suggestions: null
+    recent_items: null
+    empty_results: null
+
+  permissions:
+    role_based_navigation: null
+    restricted_routes: null
+    forbidden_state: null
+
+# ============================================================
+# 12 — INTERACTION DESIGN
+# ============================================================
+
+interaction:
+  philosophy:
+    interaction_model: "Dashboard de solo lectura; los cambios de dominio ocurren en el Canvas según ADR-0136."
+    direct_manipulation: "ADR-0136 aprueba reorganizar widgets por arrastre; la cáscara actual aún conserva orden fijo."
+    feedback_strategy: "Estados visibles con texto localizado; el color no debe ser el único portador de significado."
+    progressive_disclosure: null
+
+  feedback:
+    immediate: "El pin actualiza el estado de navegación de inmediato; cambiar locale actualiza el texto durante la sesión."
+    optimistic_updates: null
+    destructive_actions: null
+    confirmation_rules: null
+
+  forms:
+    validation_timing: null
+    required_field_policy: null
+    error_placement: null
+    success_feedback: null
+    autosave_behavior: null
+    submit_behavior: null
+    dirty_state_behavior: null
+
+  selection:
+    single_selection: null
+    multi_selection: null
+    range_selection: null
+    bulk_actions: null
+
+  drag_and_drop:
+    allowed: true
+    visual_feedback: "Pendiente de especificar; la reorganización de widgets está aprobada en ADR-0136, pero no implementada."
+    keyboard_alternative: null
+
+  configuration_mode:
+    direction: "Selector global simple/avanzado de ADR-0167; cambia la visibilidad de controles y conserva una sola configuración efectiva y los valores ocultos."
+    initial_mode: simple
+    widget_density_independent: true
+
+  progressive_disclosure:
+    direction: "Reducir el texto visible con resúmenes y detalles contextuales; algunos paneles podrán revelar más información mediante interacción."
+    constraints:
+      - "La información relevante y las acciones no dependen exclusivamente de hover."
+      - "El foco y el teclado deben poder alcanzar ayudas y acciones."
+      - "Jerarquía específica por widget y comportamiento final siguen abiertos."
+
+  keyboard:
+    shortcuts:
+      - "Atajos globales de escala tipográfica Ctrl++/Ctrl+=, Ctrl+- y Ctrl+0 definidos por ADR-0165; no implementados en la cáscara actual."
+      - "Ctrl+Shift+P para paleta, Ctrl+P para apertura rápida, Ctrl+F para búsqueda en vista y Ctrl+Shift+F para búsqueda global; definidos por ADR-0165, pendientes de implementación."
+      - "Esc para cerrar o cancelar y Ctrl+Tab para vistas recientes; definidos por ADR-0165, pendientes de implementación."
+    escape_behavior: "ADR-0165 asigna Esc a cerrar o cancelar; no existe todavía esta infraestructura en la cáscara."
+    focus_restoration: null
+    shortcut_discovery: null
+
+  undo_redo:
+    supported: null
+    applicable_actions: []
+    history_behavior: null
+
+# ============================================================
+# 13 — DATA VISUALIZATION SYSTEM
+# ============================================================
+
+data_visualization:
+  philosophy:
+    information_density: "El Dashboard prioriza monitoreo resumido; Canvas, inspectores y superficies de feature sirven para construcción, investigación, análisis y operación con mayor detalle."
+    visual_priority: "El producto cubre resultados, investigación, validación, portafolios, operación y riesgo; métricas por superficie y jerarquía siguen pendientes."
+    comparison_strategy: null
+    decoration_policy: "No agregar adornos que oculten unidad, período, procedencia o estado del dato."
+    metric_contract: "La definición y el cálculo pertenecen a la feature/Core; la UI conserva unidad, período, entorno y procedencia cuando correspondan."
+
+  data_context:
+    proposed_context: [unidad, período, entorno_de_ejecución, procedencia_del_dato, vigencia]
+    status: "Propuesta por validar con superficies y datos representativos; no define métricas ni cálculos."
+    distinctions:
+      - "Distinguir ejecución real de simulada por separado de la procedencia real o simulada de los datos de mercado."
+      - "Distinguir ausencia de datos de datos desactualizados."
+
+  chart_selection:
+    time_series: null
+    distributions: null
+    correlations: null
+    rankings: null
+    compositions: null
+    multidimensional: null
+    hierarchical: null
+    geospatial: null
+
+  chart_types:
+    - line
+    - area
+    - bar
+    - stacked_bar
+    - scatter
+    - histogram
+    - heatmap
+    - treemap
+    - radial
+    - box_plot
+    - candlestick
+  chart_type_status: "Catálogo de opciones de la plantilla; no implica selección ni implementación de todos estos tipos."
+
+  style:
+    axis_treatment: null
+    gridline_treatment: null
+    legend_position: null
+    tooltip_behavior: null
+    label_density: null
+    color_encoding: null
+    reference_lines: null
+    annotations: null
+
+  behavior:
+    hover_interaction: null
+    zoom: null
+    pan: null
+    brushing: null
+    linked_charts: null
+    filtering: null
+    live_updates: null
+
+  number_formatting:
+    decimals: null
+    thousands_separator: null
+    currency: null
+    percentages: null
+    compact_numbers: null
+    negative_numbers: null
+    missing_values: null
+
+  accessibility:
+    text_alternatives: null
+    non_color_encoding: null
+    accessible_data_table: null
+    keyboard_interaction: null
+
+  performance:
+    max_points_before_aggregation: null
+    virtualization_strategy: null
+    rendering_strategy: null
+
+# ============================================================
+# 14 — CONTENT DESIGN & MICROCOPY
+# ============================================================
+
+content:
+  voice_and_tone:
+    personality: []
+    formality: null
+    technical_depth: "La UI actual usa etiquetas concisas; la voz de marca y el vocabulario de dominio siguen pendientes."
+    vocabulary: "Los textos visibles usan claves localizadas en español e inglés; el glosario de dominio aún no está definido."
+
+  writing:
+    capitalization: null
+    punctuation: null
+    abbreviation_policy: null
+    terminology: {}
+    prohibited_phrases: []
+
+  component_copy:
+    buttons: null
+    labels: null
+    helper_text: null
+    placeholders: null
+    tooltips: null
+    confirmation_messages: null
+
+  system_messages:
+    success: null
+    warning: null
+    error: null
+    empty: "Cada widget muestra título y explicación localizados cuando no presenta contenido; hoy no distingue falta real de datos de indisponibilidad del Core."
+    loading: null
+    offline: null
+
+  formatting:
+    dates: null
+    times: null
+    currency: null
+    percentages: null
+    measurements: null
+
+# ============================================================
+# 15 — FEEDBACK & APPLICATION STATES
+# ============================================================
+
+states:
+  loading:
+    initial_page: "No hay estado de carga implementado en la cáscara actual."
+    section_loading: null
+    background_loading: null
+    skeleton_strategy: null
+    progress_indicator: null
+
+  empty:
+    no_data: "Cinco widgets muestran estados vacíos contextualizados y el encabezado indica que los datos del Core no están disponibles. Sin gRPC, no representa un resultado real del Core."
+    no_search_results: null
+    first_time_user: null
+    filtered_empty: null
+
+  error:
+    field_error: null
+    request_failure: null
+    permission_denied: null
+    server_error: null
+    partial_failure: null
+    recovery_action: null
+
+  success:
+    inline_feedback: null
+    toast_feedback: null
+    persistent_confirmation: null
+
+  connectivity:
+    offline_indicator: "El encabezado muestra un aviso localizado de Core no disponible; aún no distingue desconexión, carga ni falta de datos."
+    retry_strategy: null
+    stale_data_indicator: null
+
+# ============================================================
+# 16 — MOTION & TRANSITIONS
+# ============================================================
+
+motion:
+  philosophy:
+    purpose: "Expresar la expansión de la navegación sin bloquear el uso."
+    intensity: null
+    continuity: null
+
+  patterns:
+    enter: null
+    exit: null
+    expand: "La superficie del riel cambia ancho en 180ms; valor CSS actual pendiente de token."
+    collapse: "Las etiquetas cambian opacidad en 120ms; valor CSS actual pendiente de token."
+    reorder: "Pendiente; la reorganización de widgets no está implementada."
+    hover: "El riel se expande con hover; la transición actual dura 180ms."
+    focus: "El riel se expande al recibir foco; la transición actual dura 180ms."
+    loading: null
+    navigation: null
+
+  constraints:
+    reduced_motion_behavior: "La media query @media (prefers-reduced-motion: reduce) reduce transiciones y animaciones a 0.01ms y desactiva el desplazamiento suave."
+    maximum_duration: null
+    avoid_layout_shift: null
+    avoid_blocking_interactions: null
+    animation_performance: null
+
+# ============================================================
+# 17 — ACCESSIBILITY
+# ============================================================
+
+accessibility:
+  standard:
+    target: "WCAG 2.2 AA es una propuesta pendiente de confirmación; no es una meta aprobada ni demuestra conformidad."
+    conformance_level: null
+
+  visual:
+    text_contrast: "Pendiente de medición; el halo y la transparencia aún no se validan con contenido real."
+    non_text_contrast: null
+    focus_visibility: "Botones y select muestran contorno de foco visible de 2px con separación de 3px en CSS actual."
+    text_resizing: "ADR-0165 requiere escala tipográfica global y reflujo; la cáscara actual aún no implementa esos atajos."
+    color_independence: "El estado de Core tiene texto además de punto; los significados de color de producto deben acompañarse de texto, símbolo o forma."
+
+  interaction:
+    keyboard_access: "Los controles actuales usan button y select nativos; no se ha auditado la navegación completa por teclado."
+    logical_focus_order: "El orden sigue el DOM de Sidebar, encabezado y widgets; pendiente de verificación manual."
+    focus_trapping: null
+    focus_restoration: null
+    target_size: "El botón de icono mide 48×48px; el select tiene 48px de alto en CSS actual."
+    pointer_alternatives: "La alternativa por teclado al arrastre de widgets sigue pendiente junto con la interacción de reordenamiento."
+
+  semantics:
+    html_landmarks: "La cáscara usa header, aside, nav y main."
+    heading_hierarchy: "Dashboard usa h1 y cada widget h2."
+    aria_usage: "aria-current, aria-pressed, aria-label, aria-labelledby y role=status se usan en los controles y estado actuales."
+    control_labels: "El selector tiene etiqueta visible; el botón de pin tiene nombre accesible localizado."
+    dynamic_announcements: "El aviso de disponibilidad usa role=status; la integración con Core no está conectada."
+
+  preferences:
+    reduced_motion: "Implementado mediante media query CSS prefers-reduced-motion."
+    high_contrast: null
+    zoom_support: "El navegador permite zoom; la escala tipográfica global especificada por ADR-0165 aún no está implementada."
+
+  testing:
+    automated_tools: []
+    manual_checks: []
+    assistive_technologies: []
+
+# ============================================================
+# 18 — RESPONSIVE & ADAPTIVE EXPERIENCE
+# ============================================================
+
+adaptive:
+  device_classes:
+    mobile: null # No es un dispositivo objetivo actual; compatibilidad futura sin decidir.
+    tablet: null # No es un dispositivo objetivo actual; adaptación futura sin descartar.
+    laptop: true
+    desktop: true
+    ultrawide: null
+
+  adaptations:
+    navigation: "Riel lateral en escritorio; navegación superior en ventana estrecha."
+    layout: "La cuadrícula pasa de 12 columnas a dos columnas para widgets estándar y luego a una columna."
+    typography: "No hay escala tipográfica responsive definida; los tamaños actuales son fijos."
+    data_tables: null
+    charts: null
+    dialogs: null
+    forms: null
+
+  input_modes:
+    mouse: true
+    touch: null
+    keyboard: true
+    stylus: null
+
+  environmental:
+    reduced_motion: true
+    color_scheme: "El Dashboard usa esquema oscuro; no sigue una preferencia del sistema en la implementación actual."
+    forced_colors: null
+    reduced_data: null
+
+# ============================================================
+# 19 — INTERNATIONALIZATION
+# ============================================================
+
+internationalization:
+  default_locale: es
+  supported_locales: [es, en]
+  translation_strategy: "Recursos JSON por locale y claves estables; es/en mantienen las mismas claves. El catálogo puede incorporar idiomas agregando un archivo."
+
+  layout:
+    rtl_support: null
+    text_expansion: "Los textos actuales se localizan desde recursos; no se ha validado expansión de texto."
+    locale_aware_formatting: "Pendiente: la cáscara actual no presenta métricas, moneda, fechas ni números localizados."
+
+  formatting:
+    date_format: null
+    time_format: null
+    number_format: null
+    currency_format: null
+    units: null
+
+# ============================================================
+# 20 — APPLICATION SCREENS & PAGE TEMPLATES
+# ============================================================
+
+screens:
+  inventory:
+    - id: dashboard
+      status: "Cáscara oficial implementada; datos reales, tokens finales y QA visual pendientes."
+      route: "Raíz de la aplicación; sin router."
+      widgets: ["Ganancias y pérdidas", "Período de actividad", "Investigación de estrategias", "Portafolios", "Avisos y riesgo"]
+      visible_states: ["Datos del Core no disponibles", "Estado vacío localizado por widget"]
+    - id: canvas
+      status: "Superficie principal confirmada por el propietario; diseñada en ADR-0136, aún no implementada en la cáscara actual."
+      route: "No disponible; el shell actual no tiene router."
+      purpose: "Construcción y conexión visual de entidades, módulos y features compatibles."
+      feature_node_contract: "Los puertos de entrada y salida derivan de Puertos de Integración de cada feature; gráficas, datos y contenido del nodo dependen de su contrato y aplicabilidad, según ADR-0137."
+      module_role: "Los módulos ofrecen composiciones predefinidas que facilitan el inicio; usuarios expertos pueden componer features compatibles."
+
+  archetypes:
+    - dashboard
+    - canvas
+    - overview
+    - list
+    - detail
+    - create_edit
+    - settings
+    - onboarding
+    - authentication
+    - error_page
+
+  screen_contract:
+    route: "Pantalla raíz."
+    purpose: "Superficie oficial de monitoreo de solo lectura y pantalla inicial, complementaria al Canvas."
+    primary_user_task: "Consultar resúmenes y estado, y navegar al contexto de trabajo correspondiente."
+    information_hierarchy:
+      - "Título y descripción del Dashboard."
+      - "Disponibilidad de datos del Core y selector de idioma."
+      - "Cinco widgets ordenados según la composición inicial."
+    layout_pattern: "Dashboard tipo bento de 12 columnas; composición amplia con widget de resultados 8/12, período 4/12 y tres widgets inferiores."
+    components: ["Sidebar", "DashboardHeader", "WidgetCard", "WidgetEmptyState", "IconButton"]
+    interactions: ["Fijar o desfijar navegación", "Cambiar locale durante la sesión"]
+    states: ["Aviso de Core no disponible", "Estado vacío localizado en cada widget"]
+    responsive_variations: ["Reflujo en 1050px, 760px y 540px según CSS actual; medidas provisionales."]
+    accessibility_requirements: ["Semántica nativa", "Foco visible", "Textos localizados", "Estado no indicado solo por color"]
+    acceptance_criteria: ["No mostrar datos ficticios como reales.", "Mostrar cinco estados vacíos localizados mientras no haya datos del Core."]
+
+  page_templates:
+    dashboard: "Shell oficial de monitoreo. La disposición actual es estática; personalización de widgets prevista por ADR-0136."
+    canvas: "Superficie nodal única para composición y navegación contextual según ADR-0136/0137; no se implementa aún en la cáscara actual."
+    list_detail: null
+    workspace: null
+    wizard: null
+    settings: null
+
+# ============================================================
+# 21 — IMPLEMENTATION ARCHITECTURE
+# ============================================================
+
+implementation:
+  stack:
+    framework: "Tauri 2 + React 19 + TypeScript + Vite."
+    styling_engine: "Tailwind CSS 4 y CSS de la aplicación."
+    component_library: "Sin selección; piloto HeroUI v3 frente a shadcn/ui + Radix pendiente de tokens y comparación visual."
+    design_token_tooling: null
+
+  token_pipeline:
+    source_file: "docs/DESIGN.yaml; la especificación de tokens está incompleta y los valores CSS actuales no son fuente canónica."
+    transformation_tool: null
+    generated_formats: []
+    generated_locations: []
+    naming_transformation: null
+
+  client_data_cache: "Aplazada. No se selecciona TanStack Query ni otra caché hasta que una superficie real demuestre una necesidad que no resuelva el contrato gRPC y su estado local."
+
+  output_targets:
+    css_custom_properties: "Existen propiedades CSS locales para valores del Dashboard; aún no derivan de tokens aprobados."
+    typescript: null
+    tailwind_theme: "Existe @theme inline para tipografía y colores; la proyección completa desde tokens está pendiente."
+    component_theme: null
+    design_tool_export: null
+
+  architecture:
+    folder_structure: "apps/desktop/src/{components,features/dashboard,data,localization}."
+    component_boundaries: "La feature dashboard compone componentes compartidos; los datos de widgets son metadatos y copy, no DTOs de dominio."
+    shared_primitives: "Icon e IconButton son primitivas locales reutilizables; el catálogo canónico de componentes sigue pendiente."
+    style_isolation: "Tailwind CSS 4 y clases locales con prefijo dashboard; sin CSS-in-JS."
+    composition_patterns: "Componentes de pantalla componen hijos por children; las definiciones de widget están separadas del render."
+
+  restrictions:
+    hardcoded_colors: false # No se permiten como decisiones finales; el CSS actual conserva valores provisionales hasta definir tokens.
+    hardcoded_spacing: false # No se permiten como decisiones finales; definir escala en docs/DESIGN.yaml.
+    hardcoded_typography: false # No se permiten como decisiones finales; definir tokens sin perder la familia Geist aprobada.
+    uncontrolled_component_variants: false # Mantener variantes con nombres y propósito explícitos.
+
+  performance:
+    font_loading_strategy: "Fuentes WOFF2 locales con font-display: swap."
+    icon_loading_strategy: "Iconos SVG locales renderizados por el componente Icon."
+    image_optimization: null
+    css_bundle_strategy: null
+
+# ============================================================
+# 22 — QUALITY ASSURANCE
+# ============================================================
+
+quality:
+  validation:
+    yaml_syntax: true
+    unresolved_references: true
+    token_coverage: true
+    semantic_consistency: true
+    theme_parity: true
+    contrast_validation: true
+
+  visual_testing:
+    screenshot_baselines: null
+    supported_viewports: ["Cortes CSS actuales: 1050px, 760px y 540px; falta validarlos visualmente."]
+    theme_coverage: []
+    component_state_coverage: []
+
+  usability:
+    critical_flow_tests: []
+    error_recovery_tests: []
+    keyboard_tests: []
+
+  acceptance:
+    definition_of_done: []
+    release_blockers:
+      - "No presentar el Dashboard como integrado con el Core hasta tener datos reales por gRPC."
+      - "No declarar aprobados los tokens de CSS ni la legibilidad del halo sin validación."
+    known_exceptions:
+      - "La cáscara muestra estado no disponible y estados vacíos; no recibe datos del Core."
+      - "El orden y la densidad de widgets no son personalizables en la implementación actual."
+      - "La preferencia de idioma es temporal y se pierde al reiniciar la aplicación."
+      - "La inspección visual final y la auditoría independiente de accesibilidad siguen pendientes."
+
+# ============================================================
+# 23 — GOVERNANCE & EVOLUTION
+# ============================================================
+
+governance:
+  ownership:
+    design_owner: null
+    engineering_owner: null
+    approvers: []
+
+  change_management:
+    versioning_strategy: null
+    proposal_process: null
+    breaking_change_policy: null
+    deprecation_policy: null
+
+  documentation:
+    component_examples: null
+    token_documentation: null
+    usage_guidelines: null
+    changelog_location: null
+
+  consistency:
+    duplicate_token_policy: null
+    new_component_criteria: null
+    exception_approval: null
+
+# ============================================================
+# 24 — DECISION LOG & TRACEABILITY
+# ============================================================
+
+decision_log:
+  # Each record:
+  # id, topic, decision, rationale, evidence,
+  # alternatives, tradeoffs, confidence, status
+  entries:
+    - id: dashboard.visual-direction
+      topic: "Dirección visual del Dashboard"
+      decision: "Composición inicial de Overview; acabado y bordes de NestIQ; transparencia uniforme y halo blanco continuo."
+      rationale: "Conserva la jerarquía y densidad elegidas por el propietario y aplica un material coherente entre widgets."
+      evidence: ["docs/DESIGN.yaml, secciones 1, 3, 5 y 7", "docs/design/drasus-dashboard.html"]
+      alternatives: []
+      tradeoffs: ["La legibilidad del material depende del contenido y requiere validación."]
+      confidence: high
+      status: "Aprobada como dirección; tokens y legibilidad siguen pendientes."
+
+    - id: dashboard.read-only
+      topic: "Rol del Dashboard"
+      decision: "Dashboard es centro de monitoreo de solo lectura; las ediciones ocurren en el Canvas."
+      rationale: "Mantiene separadas la supervisión y la edición del dominio."
+      evidence: ["docs/adr/ADR-0136.md"]
+      alternatives: []
+      tradeoffs: []
+      confidence: high
+      status: "Canónica; la cáscara actual aún no integra datos del Core."
+
+    - id: product.canvas-primary-surface
+      topic: "Canvas como superficie principal"
+      decision: "Canvas es el atractivo principal para construir y conectar capacidades; Dashboard es la superficie oficial de monitoreo y navegación. Las features expuestas como nodos usan puertos tipados; visualizaciones y contenido dependen de cada contrato."
+      rationale: "Representa la composición modular del producto sin asumir que toda feature requiere su propia gráfica o superficie. Los módulos pueden servir como presets para principiantes."
+      evidence: ["docs/adr/ADR-0136.md", "docs/adr/ADR-0137.md", "docs/DESIGN.yaml"]
+      alternatives: []
+      tradeoffs: ["Canvas es dirección aprobada, pero aún no está implementado en la cáscara actual."]
+      confidence: high
+      status: "Dirección confirmada por el propietario y compatible con el canon; falta implementar y validar UX."
+
+    - id: product.audience-and-jobs
+      topic: "Audiencia y trabajos principales"
+      decision: "La experiencia se dirige a principiantes y usuarios expertos de trading algorítmico; cubre construcción, investigación, evaluación, validación, operación, monitoreo y auditoría."
+      rationale: "El Canvas y los módulos componen el trabajo visual; las superficies de producto cubren el ciclo completo de estrategias."
+      evidence: ["docs/PRODUCT.md", "docs/PRODUCT-SIMPLE.md", "docs/DESIGN.yaml"]
+      alternatives: []
+      tradeoffs: ["Los segmentos y trabajos aún no están validados mediante investigación UX."]
+      confidence: high
+      status: "Dirección de producto confirmada; investigación UX pendiente."
+
+    - id: visual.typography-profile
+      topic: "Perfil tipográfico inicial"
+      decision: "Geist Sans para texto y Geist Mono para cifras, seleccionadas juntas como perfil predeterminado."
+      rationale: "La pareja fue aprobada en la dirección actual del Dashboard; la jerarquía numérica conserva énfasis sin convertir las muestras en tokens de producción."
+      evidence: ["docs/DESIGN.yaml", "docs/design/drasus-dashboard.html", "docs/design/fonts/README.md"]
+      alternatives: ["JetBrains Mono quedó como referencia, no como perfil aprobado."]
+      tradeoffs: ["Perfiles alternativos y valores finales de escala siguen abiertos."]
+      confidence: high
+      status: "Perfil inicial aprobado; escala de producción pendiente."
+
+    - id: visual.controls-and-customization
+      topic: "Acabado de controles y personalización"
+      decision: "Controles oscuros en cápsula o círculo según función, borde luminoso superior sutil y selección blanca con texto oscuro; personalización mediante opciones predefinidas y restauración del aspecto original."
+      rationale: "Conserva la dirección visual elegida y limita combinaciones que podrían interferir con colores semánticos."
+      evidence: ["docs/DESIGN.yaml", "docs/design/comparativa-materiales.html"]
+      alternatives: []
+      tradeoffs: ["Estados interactivos, tokens y catálogo de opciones requieren especificación y validación."]
+      confidence: high
+      status: "Dirección aprobada; valores de tokens y alternativas visuales pendientes."
+
+    - id: components.react-catalog-lifecycle
+      topic: "Catálogo de componentes para Tauri/React"
+      decision: "No se migra el catálogo de widgets Flutter retirado. La Cáscara Visual cita una clave de components.specifications cuando exista; si no, describe un componente local o pendiente, sin exigir un ID. Los componentes se extraen al aparecer su segundo consumidor real. El Banco de Verificación conserva su función de harness por feature y no se usa como galería visual."
+      rationale: "La especificación debe describir componentes disponibles sin reconstruir la biblioteca Flutter que se retiró; ADR-0139 evita abstraer componentes antes de tener consumidores reales."
+      evidence: ["docs/adr/ADR-0117.md", "docs/adr/ADR-0135.md", "docs/adr/ADR-0139.md", "docs/adr/ADR-0152.md", "docs/adr/ADR-0165.md"]
+      alternatives: ["Exigir IDs de catálogo para toda Cáscara Visual."]
+      tradeoffs: ["El primer consumidor puede mantener un componente local; la extracción compartida queda para cuando aparezca el segundo consumidor real."]
+      confidence: high
+      status: "Regla vigente; las fichas de componentes se crearán cuando exista un consumidor real."
+
+    - id: desktop.stack
+      topic: "Stack de interfaz"
+      decision: "Tauri 2 + React/TypeScript y Tailwind CSS; Core Rust y frontera gRPC/Protobuf."
+      rationale: "Mantiene la UI delgada y separa dominio, persistencia y transporte."
+      evidence: ["docs/adr/ADR-0165.md", "apps/desktop/package.json"]
+      alternatives: []
+      tradeoffs: ["El contrato gRPC del Dashboard aún no está conectado."]
+      confidence: high
+      status: "Canónica; integración parcial."
+
+    - id: localization.base
+      topic: "Idiomas base"
+      decision: "Español e inglés con recursos JSON pareados y claves estables."
+      rationale: "Permite agregar locales sin cambiar la lógica de interfaz."
+      evidence: ["docs/adr/ADR-0160.md", "apps/desktop/src/localization/"]
+      alternatives: []
+      tradeoffs: ["La selección actual no persiste."]
+      confidence: high
+      status: "Canónica; selector de sesión implementado."
+
+assumptions:
+  confirmed:
+    - "El Dashboard es la superficie oficial del producto, no un demo."
+    - "El Canvas es el principal atractivo del producto; Dashboard complementa con monitoreo de solo lectura y navegación."
+    - "La audiencia objetivo va de principiantes a expertos, aunque no hay personas validadas mediante investigación UX."
+    - "Los trabajos principales cubren el ciclo más amplio que el monitoreo: construir, investigar, validar, operar, analizar y auditar."
+    - "Geist Sans y Geist Mono son el perfil tipográfico inicial aprobado."
+    - "La composición del Dashboard y el acento blanco están aprobados como dirección, no como tokens de producción."
+  inferred:
+    - "Los cortes actuales describen el reflujo de ventanas de escritorio; no permiten concluir ni descartar soporte futuro web, tablet o móvil."
+    - "Los breakpoints y medidas CSS actuales describen la implementación presente, no una decisión canónica."
+  unverified:
+    - "Contraste y legibilidad de los widgets translúcidos con datos reales."
+    - "Comportamiento visual a escala tipográfica global y tamaños de ventana representativos."
+    - "Accesibilidad completa con lector de pantalla y teclado."
+    - "Necesidades, perfiles y tareas prioritarias requieren investigación con usuarios; la confirmación del propietario no la reemplaza."
+
+open_questions:
+  # Each record:
+  # id, question, impact, priority, proposed_resolution
+  entries:
+    - id: first-release-business-objectives
+      question: "¿Qué resultado observable debe lograr el primer release distribuido como negocio y qué señales de éxito lo medirán?"
+      impact: "Sin objetivos y métricas no se puede priorizar valor de negocio ni evaluar el resultado del release."
+      priority: high
+      proposed_resolution: "Entrevistar por el bloque Objectives; no inferir metas comerciales desde las capacidades de producto."
+    - id: visual-tokens
+      question: "¿Qué valores y nombres se aprobarán para tokens semánticos, tema oscuro, espaciado, radios y elevación; se requiere también un tema claro?"
+      impact: "Evita que los valores provisionales del CSS se conviertan en canon."
+      priority: high
+      proposed_resolution: "Entrevistar por el bloque de fundamentos en docs/DESIGN.yaml."
+    - id: responsive-rules
+      question: "¿Qué cortes y reglas responsivas quedan aprobados tras validar ventanas representativas?"
+      impact: "Afecta la jerarquía, navegación y legibilidad del Dashboard."
+      priority: high
+      proposed_resolution: "Validar el reflujo actual y ajustar el canon de diseño."
+    - id: future-client-platforms
+      question: "¿Qué prioridad y requisitos tendrán la adaptación responsive a tablet/móvil y un posible cliente web?"
+      impact: "Afecta arquitectura de superficies, interacción, navegación, entrada táctil y verificación de plataforma."
+      priority: medium
+      proposed_resolution: "Conservar abierto; decidir por bloque de plataformas después de definir usuarios y recorridos."
+    - id: widget-interaction
+      question: "¿Cómo se reordenan widgets y cómo se ajusta su densidad con teclado y puntero?"
+      impact: "Afecta personalización y accesibilidad del Dashboard."
+      priority: high
+      proposed_resolution: "Definir interacción, estados y alternativa al arrastre."
+    - id: component-library
+      question: "¿Se adopta una biblioteca de componentes después del piloto visual?"
+      impact: "Afecta componentes y costos de mantenimiento."
+      priority: medium
+      proposed_resolution: "Seguir el piloto documentado en docs/DESIGN.yaml."
+    - id: icon-library
+      question: "¿Qué biblioteca o sistema de iconos se usará en producto?"
+      impact: "Afecta consistencia, accesibilidad, licencia y mantenimiento de iconos."
+      priority: medium
+      proposed_resolution: "Explorar opciones junto con el piloto de componentes y documentar licencia y cobertura."
+    - id: accessibility-target
+      question: "¿Se confirma WCAG 2.2 AA como objetivo de diseño?"
+      impact: "Define el alcance de verificación de contraste, foco, teclado y semántica."
+      priority: high
+      proposed_resolution: "Confirmar la propuesta en el bloque de accesibilidad."
+    - id: locale-preference
+      question: "¿Dónde se guarda la preferencia de idioma cuando exista el contrato de ajustes del Core?"
+      impact: "El selector actual se reinicia al cerrar la aplicación."
+      priority: medium
+      proposed_resolution: "Definir el contrato de ajustes antes de persistir la preferencia."
+
+implementation_roadmap:
+  phases:
+    - "Hecho: corregir la ficha inicial con hechos del producto y migrar la fuente única a docs/DESIGN.yaml; conservar abiertas las decisiones sin entrevista."
+    - "Siguiente: entrevistar por bloques en el orden que indique el propietario, separando preferencias, canon e investigación UX."
+    - "Después: actualizar los campos de cada bloque solo con decisiones confirmadas; mantener lo no definido como null o pregunta abierta."
+  dependencies:
+    - "Integración del Dashboard con datos reales del Core por la frontera gRPC definida en ADR-0165."
+    - "Definición canónica de tokens y componentes en docs/DESIGN.yaml."
+  risks:
+    - "Confundir estilos provisionales implementados con tokens aprobados."
+    - "Interpretar la composición responsiva actual como validada sin inspección visual."
+
+# ============================================================
+# END OF MASTER DESIGN SPECIFICATION
+# ============================================================

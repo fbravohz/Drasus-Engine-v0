@@ -5,7 +5,7 @@
 El sistema se organiza en **dos superficies**:
 
 1. **Dashboard:** Centro de monitoreo read-only. Bento grid de widgets arrastrables que muestran métricas, KPIs y estado del sistema. Cada elemento clickeable abre el Canvas en el contexto correspondiente. No hace zoom ni forma parte del Canvas.
-2. **Canvas [Forge/Reactor — TBD]:** Lienzo nodal unificado con card-nodes estilo N8N / React Flow y puertos tipados (ADR-0137). Implementa layout automático (Dagre), validación estricta de aciclicidad en backend Rust (`petgraph`), y motor de invalidación reactiva de caché de validación. Tiene dos estados de zoom continuo:
+2. **Canvas [Forge/Reactor — TBD]:** Lienzo nodal unificado con card-nodes y puertos tipados (ADR-0137). La superficie usa React Flow según [ADR-0136](../adr/ADR-0136.md). Implementa layout automático (Dagre), validación estricta de aciclicidad en backend Rust (`petgraph`), y motor de invalidación reactiva de caché de validación. Tiene dos estados de zoom continuo:
    - **Vista Relacional:** nodos pequeños con conexiones visibles — conectar, reordenar, crear pipelines.
    - **Vista Interior:** zoom in-place en un nodo — editar lógica interna, Logic Blocks, parámetros.
 
@@ -14,6 +14,8 @@ El sistema se organiza en **dos superficies**:
    - **Eje de Proceso** (el "qué opera sobre el dato"): `Workspace → Pipeline → Módulo/Feature`.
 
    Los dos ejes se conectan por puerto tipado (ADR-0137), nunca por containment: un nodo de Feature no "posee" las estrategias que procesa, las referencia. Los feature nodes (hojas atómicas) abren Inspector Panel lateral sin salir del canvas.
+
+Un menú accesible desde cualquier pantalla permite elegir el modo global simple o avanzado para los controles de configuración. Ambos conservan los mismos valores y procesos; la densidad de cada widget se ajusta independientemente. Ver [ADR-0167](../adr/ADR-0167.md) y [DESIGN.yaml](../DESIGN.yaml).
 
 ### 6.1 El "Happy Path" (Máxima Confianza)
 `Dashboard` (Detección oportunidad) → `Canvas — Vista Relacional` (Construir / ejecutar Generate/Validate) → `Canvas — Inspector Panel` (Inspección robustez) → `Deploy` (Incubación; perfil configurable: Cuarentena 7 días / Extendido 21 días / Legacy 3-6 meses — ADR-0088) → `Live Trading`.

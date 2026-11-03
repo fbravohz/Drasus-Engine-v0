@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Drasus Engine — Dashboard conceptual</title>
+  <style>
+    @font-face { font-family: "Drasus Geist"; src: url("fonts/Geist.woff2") format("woff2"); font-style: normal; font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "Drasus Geist Mono"; src: url("fonts/GeistMono.woff2") format("woff2"); font-style: normal; font-weight: 100 900; font-display: swap; }
+    @font-face { font-family: "Drasus JetBrains Mono"; src: url("fonts/JetBrainsMono.woff2") format("woff2"); font-style: normal; font-weight: 100 800; font-display: swap; }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    :root { color-scheme: dark; font-family: "Drasus Geist", sans-serif; background: #111213; color: #f3f3f3; }
+    body { margin: 0; }
+    button, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, select:focus-visible { outline: 2px solid #f1f1f1; outline-offset: 3px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .preview-bar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin: 0 0 12px; color: #c6c6c6; font-size: 12px; }
+    .preview-bar strong { color: #f1f1f1; font-weight: 600; }
+    .preview-bar p { margin: 0; line-height: 1.5; }
+    .preview-controls { display: flex; align-items: center; justify-content: end; gap: 8px; flex-wrap: wrap; }
+    .copy-style-control { display: flex; align-items: center; gap: 6px; color: #b8b8bb; font-size: 11px; white-space: nowrap; }
+    .preview-options { display: flex; gap: 3px; flex: 0 0 auto; padding: 3px; border: 1px solid #383838; border-radius: 10px; background: #1a1a1a; }
+    .preview-options button { padding: 8px 11px; border: 0; border-radius: 7px; color: #c9c9c9; background: transparent; font-size: 12px; }
+    .preview-options button[aria-pressed="true"] { background: #eaeaea; color: #111; }
+
+    /* Un solo campo de luz une cabecera, widgets y separaciones sin cortes entre contenedores. */
+    .app { --accent: #f5f5f5; --accent-ink: #121212; --text-font: "Drasus Geist", sans-serif; --number-font: "Drasus Geist Mono", monospace; display: grid; grid-template-columns: 72px minmax(0,1fr); gap: 8px; position: relative; width: min(100%,1280px); min-height: 860px; margin: 0 auto; padding: 9px; overflow: hidden; border: 10px solid #494949; border-radius: 51px; color: #f4f4f4; font-family: var(--text-font); background: radial-gradient(ellipse 82% 78% at 100% 0%,rgba(255,255,255,.216) 0%,rgba(255,255,255,.072) 25%,transparent 65%), linear-gradient(to bottom right,transparent 31%,rgba(255,255,255,.1512) 44%,rgba(255,255,255,.0504) 50%,transparent 65%),#050505; box-shadow: 0 18px 60px rgba(0,0,0,.35); }
+    .app.nav-pinned { grid-template-columns: 210px minmax(0,1fr); }
+    .d-icon { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.55; stroke-linecap: round; stroke-linejoin: round; }
+    .number { font-family: var(--number-font); font-variant-numeric: tabular-nums; font-variant-ligatures: none; letter-spacing: -.025em; }
+    .rail { position: relative; z-index: 5; min-width: 0; }
+    .rail-surface { position: absolute; top: 0; bottom: 0; left: 0; display: flex; flex-direction: column; width: 62px; overflow: hidden; padding: 17px 7px 15px; border: 1px solid #29292c; border-radius: 39px; background: linear-gradient(180deg,#0e0f10,#101114 76%,#0b0c0d); transition: width .18s ease; }
+    .rail:hover .rail-surface, .rail:focus-within .rail-surface, .nav-pinned .rail-surface { width: 200px; }
+    .brand { display: flex; align-items: center; gap: 13px; min-height: 42px; padding: 0 6px; overflow: hidden; white-space: nowrap; }
+    .brand-mark { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; color: #f2f2f2; }
+    .brand-mark svg { width: 28px; height: 28px; }
+    .brand-text { opacity: 0; color: #f3f3f3; font-size: 13px; font-weight: 650; transition: opacity .12s ease; }
+    .rail:hover .brand-text, .rail:focus-within .brand-text, .nav-pinned .brand-text { opacity: 1; }
+    .rail-nav { display: grid; grid-template-columns: minmax(0,1fr); gap: 8px; min-width: 0; margin-top: 45px; }
+    .rail-button { display: flex; align-items: center; gap: 15px; width: 100%; min-width: 0; min-height: 44px; overflow: hidden; padding: 0 11px; border: 0; border-radius: 15px; background: transparent; color: #b6b6b9; text-align: left; white-space: nowrap; }
+    .rail-button:hover { background: rgba(255,255,255,.055); color: #fff; }
+    .rail-button[aria-current="page"] { position: relative; border: 1px solid transparent; background: transparent; color: var(--accent); box-shadow: none; }
+    .rail-button[aria-current="page"]::before { content: ""; position: absolute; top: 9px; bottom: 9px; left: 3px; width: 2px; border-radius: 2px; background: var(--accent); }
+    .rail-button span { opacity: 0; font-size: 13px; font-weight: 500; transition: opacity .12s ease; }
+    .rail:hover .rail-button span, .rail:focus-within .rail-button span, .nav-pinned .rail-button span { opacity: 1; }
+    .rail-bottom { display: grid; grid-template-columns: minmax(0,1fr); gap: 8px; min-width: 0; margin-top: auto; }
+    .pin[aria-pressed="true"] { background: #262626; color: #fff; }
+    .workspace { position: relative; min-width: 0; padding: 12px 13px 12px 2px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; min-height: 57px; margin: 0 4px 0 20px; }
+    .dashboard-title { min-width: 0; }
+    .app-name { margin: 0; color: #f4f4f4; font-size: 26px; font-weight: 600; letter-spacing: -.035em; }
+    .app-subtitle { margin: 4px 0 0; color: #b4b4b4; font-size: 12px; }
+    .top-actions { display: flex; align-items: center; justify-content: end; gap: 8px; }
+    .control { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 14px; border: 1px solid #1b1c1e; border-radius: 999px; background: linear-gradient(155deg,#292a2d 0%,#1a1b1e 35%,#111214 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.28), inset 1px 0 0 rgba(255,255,255,.12), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.36); color: #ededed; font-size: 12px; white-space: nowrap; }
+    .control:hover, .icon-button:hover { filter: brightness(1.2); }
+    .control .d-icon { width: 15px; height: 15px; }
+    .icon-button { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: 0 0 auto; padding: 0; border: 1px solid #17181a; border-radius: 50%; background: linear-gradient(150deg,#28292c 0%,#17181a 39%,#0e0f11 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.30), inset 1px 0 0 rgba(255,255,255,.10), inset 0 -1px 2px rgba(0,0,0,.85), 0 3px 9px rgba(0,0,0,.48); color: #efefef; }
+    .icon-button .d-icon { width: 15px; height: 15px; }
+    .mode-wrap, .appearance-wrap, .widget-menu-wrap { position: relative; }
+    .popover { position: absolute; top: calc(100% + 9px); right: 0; z-index: 10; width: 264px; padding: 14px; border: 1px solid #414141; border-radius: 17px; background: #1b1b1b; box-shadow: 0 16px 38px rgba(0,0,0,.58); }
+    .popover h3 { margin: 0; font-size: 14px; font-weight: 600; }
+    .popover p { margin: 5px 0 12px; color: #bbb; font-size: 11px; line-height: 1.5; }
+    .popover-label { display: block; margin: 13px 0 7px; color: #c2c2c2; font-size: 11px; }
+    .option-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .option { min-height: 32px; padding: 6px 9px; border: 1px solid #484848; border-radius: 9px; background: #252525; color: #eee; font-size: 11px; }
+    .option[aria-pressed="true"] { border-color: #e6e6e6; box-shadow: inset 0 0 0 1px #e6e6e6; }
+    .option .swatch { display: inline-block; width: 10px; height: 10px; margin-right: 5px; border-radius: 50%; background: var(--swatch); }
+    .popover .reset { width: 100%; margin-top: 12px; }
+    .accent-preview { margin-top: 7px; border-top: 1px solid #353638; }
+    .accent-preview-note { display: block; margin-top: -3px; color: #aaa; font-size: 10px; line-height: 1.4; }
+    .accent-samples { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .accent-sample-tabs { display: flex; gap: 3px; padding: 3px; border: 1px solid #343537; border-radius: 10px; background: #141517; }
+    .accent-sample-tab { display: inline-flex; align-items: center; min-height: 28px; padding: 0 8px; border: 1px solid transparent; border-radius: 7px; background: transparent; color: #bdbdbf; font-size: 10px; white-space: nowrap; }
+    .accent-sample-tab.accent-target { position: relative; color: var(--accent); }
+    .accent-sample-tab.accent-target::after { content: ""; position: absolute; right: 8px; bottom: 1px; left: 8px; height: 2px; border-radius: 2px; background: var(--accent); }
+    .accent-sample-primary { display: inline-flex; align-items: center; min-height: 34px; padding: 0 10px; border: 1px solid var(--accent); border-radius: 9px; background: var(--accent); color: var(--accent-ink); box-shadow: none; font-size: 11px; white-space: nowrap; }
+    .mode-menu { width: 180px; }
+    .menu-action { display: block; width: 100%; padding: 10px; border: 0; border-radius: 8px; background: transparent; color: #eee; text-align: left; font-size: 12px; }
+    .menu-action:hover, .menu-action:focus-visible { background: #333; }
+    .data-note { color: #b9b9b9; font-size: 11px; white-space: nowrap; }
+    .scope { display: inline-flex; align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid #414141; border-radius: 30px; color: #e4e4e4; background: rgba(24,24,24,.8); }
+    .scope-dot { width: 6px; height: 6px; border-radius: 50%; background: #bbb; }
+    .grid { display: grid; grid-template-columns: repeat(12,minmax(0,1fr)); gap: 9px; }
+    /* Una sola regla define el material base de todos los widgets. */
+    .widget { position: relative; min-width: 0; min-height: 338px; padding: 18px 19px; border: 1px solid rgba(255,255,255,.025); border-radius: 23px; background: linear-gradient(145deg,rgba(35,36,37,.42),rgba(19,20,21,.52)); box-shadow: inset 0 1px rgba(255,255,255,.035); }
+    .widget[data-widget="resultado"] { grid-column: span 8; min-height: 400px; }
+    .widget[data-widget="periodo"] { grid-column: span 4; min-height: 400px; }
+    .widget[data-widget="portafolios"], .widget[data-widget="riesgo"], .widget[data-widget="investigacion"] { grid-column: span 4; }
+    .widget.dragging { opacity: .55; }
+    .widget.drop-target { outline: 2px solid #ddd; outline-offset: 2px; }
+    .widget-head { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+    .widget-title { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .widget-title h2 { margin: 0; color: #fff; font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
+    .widget-subtitle { margin: 7px 0 0; color: #b7b7b9; font-size: 12px; }
+    .widget-actions { display: flex; gap: 5px; flex: 0 0 auto; }
+    .drag-handle { cursor: grab; }
+    .drag-handle:active { cursor: grabbing; }
+    .widget-menu { width: 185px; padding: 6px; }
+    .metric { margin: 20px 0 0; font-size: clamp(34px,2.5vw,36px); font-weight: 600; line-height: 1.1; }
+    .metric.positive { color: #7bd9a3; }
+    .metric-note { margin: 7px 0 0; color: #bdbdbf; font-size: 12px; }
+    .help { display: inline-flex; }
+    .help button { display: grid; place-items: center; width: 20px; height: 20px; padding: 0; border: 1px solid #6d6d6d; border-radius: 50%; background: transparent; color: #c7c7c7; font-size: 11px; }
+    .tooltip { display: none; position: absolute; z-index: 8; top: 40px; left: 22px; width: min(205px,calc(100% - 44px)); padding: 10px 11px; border: 1px solid #454545; border-radius: 10px; background: #252525; box-shadow: 0 8px 22px rgba(0,0,0,.4); color: #eee; font-size: 11px; line-height: 1.45; }
+    .help:hover .tooltip, .help:focus-within .tooltip, .help[data-open="true"] .tooltip { display: block; }
+    .help[data-dismissed="true"] .tooltip { display: none; }
+    .chart-wrap { margin-top: 18px; }
+    .chart-body { display: grid; grid-template-columns: 62px minmax(0,1fr); gap: 8px; height: 185px; }
+    .chart-y { display: flex; flex-direction: column; justify-content: space-between; margin: -6px 0 0; padding-bottom: 25px; color: #b2b2b2; font-size: 11px; text-align: right; }
+    .chart-bars { position: relative; display: flex; justify-content: space-around; gap: 8px; height: 160px; }
+    .chart-gridline { position: absolute; left: 0; right: 0; top: var(--position); height: 1px; background: rgba(255,255,255,.09); }
+    .chart-gridline.baseline { background: rgba(255,255,255,.22); }
+    .chart-point { position: relative; flex: 1 1 0; min-width: 12px; height: 100%; }
+    .chart-point i { position: absolute; left: 23%; right: 23%; border: 1px solid #45484b; border-radius: 12px 12px 4px 4px; background: linear-gradient(180deg,rgba(123,217,163,.82),rgba(45,122,80,.68)); box-shadow: inset 0 1px rgba(255,255,255,.15); }
+    .chart-point.positive i { bottom: 25%; height: max(var(--height),2px); }
+    .chart-point.negative i { top: 75%; height: var(--height); border-radius: 4px 4px 12px 12px; background: linear-gradient(180deg,rgba(255,116,116,.72),rgba(151,54,54,.66)); }
+    .chart-point.current i { border-color: #fff; box-shadow: inset 0 1px rgba(255,255,255,.55),0 2px 5px rgba(0,0,0,.4); }
+    .chart-point > span { position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); color: #b2b2b2; font-size: 11px; white-space: nowrap; }
+    .chart-point:first-of-type > span { left: 0; transform: none; }
+    .chart-point:last-of-type > span { left: 100%; transform: translateX(-100%); }
+    .chart-note { display: flex; justify-content: space-between; gap: 10px; margin: 4px 0 0; color: #b7b7b9; font-size: 11px; }
+    .period-title { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 14px; font-weight: 550; }
+    .period-title > div { display: flex; align-items: center; gap: 7px; }
+    .period-title .icon-button { width: 34px; height: 34px; }
+    .chevron-left { transform: rotate(180deg); }
+    .period-grid { display: grid; grid-template-columns: repeat(7,minmax(0,1fr)); gap: 4px; margin-top: 16px; }
+    .period-grid span { display: grid; place-items: center; aspect-ratio: 1; min-width: 0; border: 1px solid rgba(255,255,255,.025); border-radius: 8px; background: linear-gradient(155deg,#252629 0%,#1c1d20 40%,#141518 100%); box-shadow: inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 1px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.30); color: #ededee; font-size: 11px; }
+    .period-grid .weekday { border: 0; background: none; box-shadow: none; color: #a9aaad; font-size: 10px; }
+    .period-grid .blank { border-color: transparent; background: transparent; box-shadow: none; }
+    .period-grid .current { border-color: var(--accent); background: #202123; color: var(--accent); box-shadow: none; }
+    .period-summary { display: flex; align-items: center; gap: 10px; margin-top: 15px; padding: 8px 10px; border: 1px solid #303135; border-radius: 17px; background: #151618; color: #bdbdbf; font-size: 11px; }
+    .portfolio-summary { display: flex; align-items: baseline; gap: 8px; margin-top: 22px; }
+    .portfolio-summary strong { font-size: 34px; font-weight: 600; }
+    .portfolio-summary span { color: #b7b7b9; font-size: 12px; }
+    .list { display: grid; gap: 0; margin-top: 14px; }
+    .list-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 53px; border-top: 1px solid rgba(255,255,255,.08); }
+    .list-main { min-width: 0; }
+    .list-main strong { display: block; overflow: hidden; color: #ececec; font-size: 13px; font-weight: 500; text-overflow: ellipsis; white-space: nowrap; }
+    .list-main small { display: block; margin-top: 4px; color: #b6b6b8; font-size: 11px; }
+    .list-value { color: #e5e5e5; font-size: 12px; white-space: nowrap; }
+    .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 8px; border: 1px solid #4b4b4b; border-radius: 30px; color: #ddd; font-size: 11px; white-space: nowrap; }
+    .badge:before { width: 6px; height: 6px; border-radius: 50%; background: #bdbdbd; content: ""; }
+    .badge.warning { border-color: #796748; color: #f1cf8b; background: rgba(130,92,29,.10); }
+    .badge.warning:before { background: #e9c87e; }
+    .risk-lead { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
+    .risk-lead strong { font-size: 24px; font-weight: 600; }
+    .risk-item { display: flex; align-items: start; gap: 12px; margin-top: 19px; padding: 13px 14px; border: 1px solid rgba(255,255,255,.07); border-radius: 14px; background: rgba(9,9,9,.25); }
+    .risk-symbol { display: grid; place-items: center; flex: 0 0 23px; width: 23px; height: 23px; border: 1px solid #b39558; border-radius: 50%; color: #f1cf8b; font-size: 14px; }
+    .risk-item strong { display: block; font-size: 13px; font-weight: 550; }
+    .risk-item p { margin: 5px 0 0; color: #bbb; font-size: 12px; line-height: 1.45; }
+    .research-list { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 0; margin-top: 27px; }
+    .research-item { min-width: 0; padding: 0 14px; border-left: 1px solid rgba(255,255,255,.10); }
+    .research-item:first-child { padding-left: 0; border-left: 0; }
+    .research-item:last-child { padding-right: 0; }
+    .research-item span { display: block; color: #bdbdbf; font-size: 12px; }
+    .research-item strong { display: block; margin-top: 11px; color: #d7d7d9; font-size: 33px; font-weight: 400; }
+    .research-item small { display: block; margin-top: 5px; color: #b3b3b5; font-size: 11px; line-height: 1.4; }
+    .widget-foot { margin: 21px 0 0; color: #b4b4b6; font-size: 11px; line-height: 1.5; }
+    .app.support-copy-readable .widget-subtitle,
+    .app.support-copy-readable .metric-note,
+    .app.support-copy-readable .portfolio-summary span,
+    .app.support-copy-readable .research-item span { color: #d7d7d9; font-size: 14px; }
+    .app.support-copy-readable .research-item small,
+    .app.support-copy-readable .list-main small,
+    .app.support-copy-readable .widget-foot,
+    .app.support-copy-readable .chart-note,
+    .app.support-copy-readable .chart-y,
+    .app.support-copy-readable .chart-point > span,
+    .app.support-copy-readable .period-summary { color: #c7c7c9; font-size: 12px; }
+    .app.support-copy-readable .risk-item p,
+    .app.support-copy-readable .empty-state p { color: #c7c7c9; font-size: 13px; }
+    .empty-state { display: grid; align-content: center; min-height: 160px; color: #bdbdbf; }
+    .empty-state strong { color: #efefef; font-size: 15px; font-weight: 550; }
+    .empty-state p { max-width: 340px; margin: 8px 0 0; font-size: 12px; line-height: 1.6; }
+    .compact [data-detail] { display: none; }
+    .compact { min-height: 185px; }
+    .bottom-note { display: flex; justify-content: space-between; gap: 16px; margin: 20px 2px 0; color: #aaa; font-size: 11px; line-height: 1.5; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 20; max-width: 320px; padding: 12px 15px; border: 1px solid #4a4a4a; border-radius: 12px; background: #242424; box-shadow: 0 10px 30px rgba(0,0,0,.45); color: #f3f3f3; font-size: 12px; line-height: 1.5; }
+    @media (max-width: 1050px) { .workspace { padding: 12px; } .top-actions { flex-wrap: wrap; } .widget[data-widget="resultado"], .widget[data-widget="periodo"] { grid-column: span 12; } .widget[data-widget="portafolios"], .widget[data-widget="riesgo"], .widget[data-widget="investigacion"] { grid-column: span 6; } .grid { gap: 9px; } .widget { padding: 18px; } .widget-title h2 { font-size: 17px; } }
+    @media (max-width: 780px) { .app { min-height: 0; border-width: 6px; border-radius: 30px; } .app.nav-pinned { grid-template-columns: 72px minmax(0,1fr); } .grid { grid-template-columns: minmax(0,1fr); } .widget[data-widget="resultado"], .widget[data-widget="periodo"], .widget[data-widget="portafolios"], .widget[data-widget="riesgo"], .widget[data-widget="investigacion"] { grid-column: 1; } .workspace { padding: 12px; } .topbar { align-items: start; flex-direction: column; gap: 12px; margin-bottom: 15px; } .top-actions { justify-content: start; } .widget, .widget[data-widget="resultado"], .widget[data-widget="periodo"] { min-height: 0; } .period-grid { max-width: 360px; } }
+    @media (max-width: 480px) { .preview-bar { align-items: start; flex-direction: column; gap: 8px; } .app { grid-template-columns: 56px minmax(0,1fr); border-radius: 24px; } .app.nav-pinned { grid-template-columns: 56px minmax(0,1fr); } .rail-surface { width: 49px; padding: 10px 2px; border-radius: 23px; } .rail:hover .rail-surface, .rail:focus-within .rail-surface, .nav-pinned .rail-surface { width: 190px; } .brand { padding-left: 4px; } .rail-button { padding-left: 10px; } .workspace { padding: 12px 8px; } .topbar { margin: 0 4px 12px 8px; } .top-actions { justify-content: start; } .app-name { font-size: 24px; } .widget { padding: 16px; border-radius: 20px; } .widget-actions { gap: 3px; } .widget-actions .icon-button { width: 32px; height: 32px; } .research-item { padding: 0 8px; } .research-item span { font-size: 11px; } .bottom-note { flex-direction: column; gap: 4px; } }
+    @media (max-width: 480px) { .chart-point:nth-of-type(2) > span, .chart-point:nth-of-type(3) > span, .chart-point:nth-of-type(4) > span, .chart-point:nth-of-type(5) > span, .chart-point:nth-of-type(6) > span { display: none; } }
+    @media (max-width: 340px) { .widget-head { flex-wrap: wrap; gap: 8px; } .widget-head > div:first-child { flex: 1 0 100%; } .widget-actions { margin-left: auto; } }
+    @media (prefers-reduced-motion: reduce) { *, *:before, *:after { transition-duration: .01ms !important; animation-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <symbol id="d-home" viewBox="0 0 24 24"><path d="m4 10 8-6 8 6v9H4zM9 19v-6h6v6"/></symbol>
+    <symbol id="d-canvas" viewBox="0 0 24 24"><rect x="3" y="4" width="6" height="6" rx="1"/><rect x="15" y="14" width="6" height="6" rx="1"/><path d="M9 7h4a3 3 0 0 1 3 3v4"/></symbol>
+    <symbol id="d-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="d-data" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12v7c0 1.7 3.6 3 8 3s8-1.3 8-3v-7"/></symbol>
+    <symbol id="d-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.8v2M12 19.2v2M4 4l1.4 1.4M18.6 18.6 20 20M2.8 12h2M19.2 12h2M4 20l1.4-1.4M18.6 5.4 20 4"/><circle cx="12" cy="12" r="7"/></symbol>
+    <symbol id="d-pin" viewBox="0 0 24 24"><path d="m8 4 8 0-1 5 3 3v2H6v-2l3-3zM12 14v7"/></symbol>
+    <symbol id="d-sliders" viewBox="0 0 24 24"><path d="M4 7h16M4 17h16M9 4v6M15 14v6"/></symbol>
+    <symbol id="d-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"/></symbol>
+    <symbol id="d-density" viewBox="0 0 24 24"><path d="M5 6h14M5 12h14M5 18h14"/></symbol>
+    <symbol id="d-more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></symbol>
+    <symbol id="d-drag" viewBox="0 0 24 24"><circle cx="9" cy="6" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="18" r="1"/></symbol>
+  </svg>
+
+  <div class="preview-bar">
+    <p><strong>Propuesta Drasus</strong> · Datos ficticios, sin conexión al Core</p>
+    <div class="preview-controls">
+      <div class="preview-options" role="group" aria-label="Estado de la muestra"><button type="button" data-demo-state="filled" aria-pressed="true">Con datos</button><button type="button" data-demo-state="empty" aria-pressed="false">Sin datos</button></div>
+    </div>
+  </div>
+
+  <div class="app support-copy-readable" id="app">
+    <aside class="rail" aria-label="Navegación principal">
+      <div class="rail-surface">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M3 7 14 16 3 25zM29 7 18 16l11 9z" fill="currentColor"/><path d="m16 2 13 7-13 7L3 9zM16 16l13 7-13 7-13-7z" fill="#777"/></svg></span><span class="brand-text">Drasus Engine</span></div>
+        <nav class="rail-nav" aria-label="Secciones">
+          <button class="rail-button" type="button" aria-current="page" aria-label="Dashboard"><svg class="d-icon" aria-hidden="true"><use href="#d-home"/></svg><span>Dashboard</span></button>
+          <button class="rail-button" type="button" data-destination="Canvas" aria-label="Canvas"><svg class="d-icon" aria-hidden="true"><use href="#d-canvas"/></svg><span>Canvas</span></button>
+          <button class="rail-button" type="button" data-destination="Estrategias" aria-label="Estrategias"><svg class="d-icon" aria-hidden="true"><use href="#d-layers"/></svg><span>Estrategias</span></button>
+          <button class="rail-button" type="button" data-destination="Datos" aria-label="Datos"><svg class="d-icon" aria-hidden="true"><use href="#d-data"/></svg><span>Datos</span></button>
+        </nav>
+        <div class="rail-bottom"><button class="rail-button pin" type="button" data-pin aria-pressed="false" aria-label="Fijar navegación abierta"><svg class="d-icon" aria-hidden="true"><use href="#d-pin"/></svg><span>Fijar navegación</span></button><button class="rail-button" type="button" data-destination="Ajustes" aria-label="Ajustes"><svg class="d-icon" aria-hidden="true"><use href="#d-settings"/></svg><span>Ajustes</span></button></div>
+      </div>
+    </aside>
+
+    <main class="workspace">
+      <header class="topbar">
+        <div class="dashboard-title"><h1 class="app-name">Dashboard</h1><p class="app-subtitle">Resumen de tu actividad e investigación</p></div>
+        <div class="top-actions">
+          <div class="copy-style-control"><span>Texto de apoyo</span><div class="preview-options" role="group" aria-label="Tratamiento del texto de apoyo"><button type="button" data-copy-style="discreet" aria-pressed="false">Discreto</button><button type="button" data-copy-style="readable" aria-pressed="true">Más legible</button></div></div>
+          <span class="scope"><span class="scope-dot"></span>Entorno simulado</span><span class="data-note">Datos de ejemplo</span>
+          <div class="mode-wrap"><button class="control" type="button" data-popover="mode-menu" aria-expanded="false" aria-controls="mode-menu"><span data-mode-label>Modo simple</span><svg class="d-icon" aria-hidden="true"><use href="#d-chevron"/></svg></button><div class="popover mode-menu" id="mode-menu" hidden><button class="menu-action" type="button" data-mode="simple">Modo simple</button><button class="menu-action" type="button" data-mode="advanced">Modo avanzado</button></div></div>
+          <div class="appearance-wrap"><button class="control" type="button" data-popover="appearance-menu" aria-expanded="false" aria-controls="appearance-menu"><svg class="d-icon" aria-hidden="true"><use href="#d-sliders"/></svg>Personalizar</button><div class="popover" id="appearance-menu" hidden><h3>Personalizar apariencia</h3><p>Muestras del catálogo; los tonos exactos siguen por revisar.</p><span class="popover-label">Acento</span><div class="option-row" role="group" aria-label="Color de acento"><button class="option" type="button" data-accent="white" aria-pressed="true"><span class="swatch" style="--swatch:#f5f5f5"></span>Blanco</button><button class="option" type="button" data-accent="red" aria-pressed="false"><span class="swatch" style="--swatch:#c82030"></span>Rojo</button><button class="option" type="button" data-accent="blue" aria-pressed="false"><span class="swatch" style="--swatch:#c1d7e7"></span>Azul</button><button class="option" type="button" data-accent="green" aria-pressed="false"><span class="swatch" style="--swatch:#28784a"></span>Verde</button><button class="option" type="button" data-accent="violet" aria-pressed="false"><span class="swatch" style="--swatch:#5141a5"></span>Violeta</button><button class="option" type="button" data-accent="purple" aria-pressed="false"><span class="swatch" style="--swatch:#813c8b"></span>Morado</button><button class="option" type="button" data-accent="cyan" aria-pressed="false"><span class="swatch" style="--swatch:#45bfd0"></span>Cian</button><button class="option" type="button" data-accent="silver" aria-pressed="false"><span class="swatch" style="--swatch:#c9cbce"></span>Plata</button><button class="option" type="button" data-accent="gold" aria-pressed="false"><span class="swatch" style="--swatch:#b28a24"></span>Dorado</button></div><span class="popover-label">Perfil tipográfico</span><div class="option-row" role="group" aria-label="Perfil tipográfico"><button class="option" type="button" data-font-profile="geist" aria-pressed="true">Geist</button><button class="option" type="button" data-font-profile="system" aria-pressed="false">Sistema · prueba</button></div><div class="accent-preview"><span class="popover-label">Vista previa del acento</span><small class="accent-preview-note">Indicador y borde en selección; relleno reservado para acciones principales.</small><div class="accent-samples" aria-hidden="true"><div class="accent-sample-tabs"><span class="accent-sample-tab accent-target">Resumen</span><span class="accent-sample-tab">Actividad</span></div><span class="accent-sample-primary">Acción principal</span></div></div><button class="control reset" type="button" data-reset>Restablecer apariencia</button></div></div>
+        </div>
+      </header>
+
+      <div class="grid" id="widgets">
+        <section class="widget" data-widget="resultado" aria-labelledby="resultado-title">
+          <header class="widget-head"><div><div class="widget-title"><h2 id="resultado-title">Ganancias y pérdidas</h2><span class="help"><button type="button" aria-label="Acerca del resultado" aria-describedby="resultado-help">i</button><span class="tooltip" role="tooltip" id="resultado-help">Resultado acumulado de operaciones simuladas durante el período indicado.</span></span></div><p class="widget-subtitle">1–30 oct 2026 · USD · operaciones simuladas</p></div><div class="widget-actions"><button class="icon-button drag-handle" type="button" draggable="true" aria-label="Arrastrar ganancias y pérdidas para reordenar" title="Arrastrar"><svg class="d-icon" aria-hidden="true"><use href="#d-drag"/></svg></button><button class="icon-button" type="button" data-density aria-pressed="false" aria-label="Reducir detalle de ganancias y pérdidas" title="Cambiar densidad"><svg class="d-icon" aria-hidden="true"><use href="#d-density"/></svg></button><div class="widget-menu-wrap"><button class="icon-button" type="button" data-widget-menu aria-expanded="false" aria-label="Opciones de ganancias y pérdidas"><svg class="d-icon" aria-hidden="true"><use href="#d-more"/></svg></button><div class="popover widget-menu" hidden><button class="menu-action" type="button" data-widget-action="density">Reducir detalle</button><button class="menu-action" type="button" data-widget-action="previous">Mover antes</button><button class="menu-action" type="button" data-widget-action="next">Mover después</button></div></div></div></header>
+          <div data-filled><p class="metric positive number">+$1,284.50</p><p class="metric-note">Resultado acumulado del período</p><div data-detail><div class="chart-wrap" role="img" aria-label="Resultado simulado por fecha: alterna entre ganancias y una pérdida, y termina en más 1,284.50 dólares."><div class="chart-body"><div class="chart-y number" aria-hidden="true"><span>+$1,500</span><span>+$1,000</span><span>+$500</span><span>$0</span><span>−$500</span></div><div class="chart-bars" aria-hidden="true"><span class="chart-gridline" style="--position:0%"></span><span class="chart-gridline" style="--position:25%"></span><span class="chart-gridline" style="--position:50%"></span><span class="chart-gridline baseline" style="--position:75%"></span><span class="chart-gridline" style="--position:100%"></span><div class="chart-point positive" style="--height:0%"><i></i><span class="number">1 oct</span></div><div class="chart-point positive" style="--height:12.5%"><i></i><span class="number">5 oct</span></div><div class="chart-point negative" style="--height:6%"><i></i><span class="number">10 oct</span></div><div class="chart-point positive" style="--height:17.5%"><i></i><span class="number">15 oct</span></div><div class="chart-point positive" style="--height:11%"><i></i><span class="number">20 oct</span></div><div class="chart-point positive" style="--height:45%"><i></i><span class="number">25 oct</span></div><div class="chart-point positive current" style="--height:64.2%"><i></i><span class="number">30 oct</span></div></div></div><p class="chart-note"><span>Resultado neto acumulado</span><span>Datos de ejemplo</span></p></div></div>
+          <div class="empty-state" data-empty hidden><strong>Aún no hay resultados</strong><p>Cuando existan operaciones simuladas, aquí verás su resultado y período.</p></div>
+        </section>
+
+        <section class="widget" data-widget="periodo" aria-labelledby="period-title">
+          <header class="widget-head"><div><div class="widget-title"><h2 id="period-title">Período</h2></div><p class="widget-subtitle">Filtra el resultado por fecha</p></div><div class="widget-actions"><button class="icon-button drag-handle" type="button" draggable="true" aria-label="Arrastrar período para reordenar" title="Arrastrar"><svg class="d-icon" aria-hidden="true"><use href="#d-drag"/></svg></button><button class="icon-button" type="button" data-density aria-pressed="false" aria-label="Reducir detalle de período" title="Cambiar densidad"><svg class="d-icon" aria-hidden="true"><use href="#d-density"/></svg></button><div class="widget-menu-wrap"><button class="icon-button" type="button" data-widget-menu aria-expanded="false" aria-label="Opciones de período"><svg class="d-icon" aria-hidden="true"><use href="#d-more"/></svg></button><div class="popover widget-menu" hidden><button class="menu-action" type="button" data-widget-action="density">Reducir detalle</button><button class="menu-action" type="button" data-widget-action="previous">Mover antes</button><button class="menu-action" type="button" data-widget-action="next">Mover después</button></div></div></div></header>
+          <div data-filled><div class="period-title"><div><button class="icon-button" type="button" aria-label="Mes anterior"><svg class="d-icon chevron-left" aria-hidden="true"><use href="#d-chevron"/></svg></button><strong>Octubre 2026</strong></div><button class="icon-button" type="button" aria-label="Mes siguiente"><svg class="d-icon" aria-hidden="true"><use href="#d-chevron"/></svg></button></div><div class="period-grid" role="img" aria-label="Calendario ilustrativo de octubre de 2026" data-detail><span class="weekday">L</span><span class="weekday">M</span><span class="weekday">X</span><span class="weekday">J</span><span class="weekday">V</span><span class="weekday">S</span><span class="weekday">D</span><span class="blank"></span><span class="blank"></span><span class="blank"></span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span><span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span><span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span><span class="current">30</span><span>31</span></div><p class="period-summary" data-detail><span>Período mostrado</span><strong class="number">1–30 oct</strong></p></div>
+          <div class="empty-state" data-empty hidden><strong>Sin operaciones simuladas</strong><p>Selecciona un período con actividad para consultar el resultado.</p></div>
+        </section>
+
+        <section class="widget" data-widget="investigacion" aria-labelledby="research-title">
+          <header class="widget-head"><div><div class="widget-title"><h2 id="research-title">Investigación de estrategias</h2></div><p class="widget-subtitle">Resumen de generación y evaluación</p></div><div class="widget-actions"><button class="icon-button drag-handle" type="button" draggable="true" aria-label="Arrastrar investigación para reordenar" title="Arrastrar"><svg class="d-icon" aria-hidden="true"><use href="#d-drag"/></svg></button><button class="icon-button" type="button" data-density aria-pressed="false" aria-label="Reducir detalle de investigación" title="Cambiar densidad"><svg class="d-icon" aria-hidden="true"><use href="#d-density"/></svg></button><div class="widget-menu-wrap"><button class="icon-button" type="button" data-widget-menu aria-expanded="false" aria-label="Opciones de investigación"><svg class="d-icon" aria-hidden="true"><use href="#d-more"/></svg></button><div class="popover widget-menu" hidden><button class="menu-action" type="button" data-widget-action="density">Reducir detalle</button><button class="menu-action" type="button" data-widget-action="previous">Mover antes</button><button class="menu-action" type="button" data-widget-action="next">Mover después</button></div></div></div></header>
+          <div data-filled><div class="research-list"><div class="research-item"><span>Generadas</span><strong class="number">12</strong><small data-detail>candidatas</small></div><div class="research-item"><span>Evaluación</span><strong class="number">4</strong><small data-detail>en revisión</small></div><div class="research-item"><span>Incubación</span><strong class="number">2</strong><small data-detail>en seguimiento</small></div></div><p class="widget-foot" data-detail>Son actividades de ejemplo; el rendimiento no indica por sí solo que una estrategia esté validada.</p></div>
+          <div class="empty-state" data-empty hidden><strong>Comienza una investigación</strong><p>Cuando generes o evalúes estrategias, encontrarás aquí un resumen.</p></div>
+        </section>
+
+        <section class="widget" data-widget="portafolios" aria-labelledby="portfolio-title">
+          <header class="widget-head"><div><div class="widget-title"><h2 id="portfolio-title">Portafolios</h2></div><p class="widget-subtitle">Seguimiento en simulación</p></div><div class="widget-actions"><button class="icon-button drag-handle" type="button" draggable="true" aria-label="Arrastrar portafolios para reordenar" title="Arrastrar"><svg class="d-icon" aria-hidden="true"><use href="#d-drag"/></svg></button><button class="icon-button" type="button" data-density aria-pressed="false" aria-label="Reducir detalle de portafolios" title="Cambiar densidad"><svg class="d-icon" aria-hidden="true"><use href="#d-density"/></svg></button><div class="widget-menu-wrap"><button class="icon-button" type="button" data-widget-menu aria-expanded="false" aria-label="Opciones de portafolios"><svg class="d-icon" aria-hidden="true"><use href="#d-more"/></svg></button><div class="popover widget-menu" hidden><button class="menu-action" type="button" data-widget-action="density">Reducir detalle</button><button class="menu-action" type="button" data-widget-action="previous">Mover antes</button><button class="menu-action" type="button" data-widget-action="next">Mover después</button></div></div></div></header>
+          <div data-filled><div class="portfolio-summary"><strong class="number">2</strong><span>portafolios en seguimiento</span></div><div class="list" data-detail><div class="list-row"><div class="list-main"><strong>Diversificado</strong><small>6 estrategias</small></div><span class="badge">Simulación</span></div><div class="list-row"><div class="list-main"><strong>Tendencial</strong><small>3 estrategias</small></div><span class="badge">Simulación</span></div></div><p class="widget-foot" data-detail>Los resultados mostrados pertenecen al entorno simulado.</p></div>
+          <div class="empty-state" data-empty hidden><strong>Aún no hay portafolios</strong><p>Cuando organices tus estrategias en un portafolio, aparecerá aquí.</p></div>
+        </section>
+
+        <section class="widget" data-widget="riesgo" aria-labelledby="risk-title">
+          <header class="widget-head"><div><div class="widget-title"><h2 id="risk-title">Avisos y riesgo</h2></div><p class="widget-subtitle">Estado de seguimiento</p></div><div class="widget-actions"><button class="icon-button drag-handle" type="button" draggable="true" aria-label="Arrastrar avisos y riesgo para reordenar" title="Arrastrar"><svg class="d-icon" aria-hidden="true"><use href="#d-drag"/></svg></button><button class="icon-button" type="button" data-density aria-pressed="false" aria-label="Reducir detalle de avisos y riesgo" title="Cambiar densidad"><svg class="d-icon" aria-hidden="true"><use href="#d-density"/></svg></button><div class="widget-menu-wrap"><button class="icon-button" type="button" data-widget-menu aria-expanded="false" aria-label="Opciones de avisos y riesgo"><svg class="d-icon" aria-hidden="true"><use href="#d-more"/></svg></button><div class="popover widget-menu" hidden><button class="menu-action" type="button" data-widget-action="density">Reducir detalle</button><button class="menu-action" type="button" data-widget-action="previous">Mover antes</button><button class="menu-action" type="button" data-widget-action="next">Mover después</button></div></div></div></header>
+          <div data-filled><div class="risk-lead"><strong><span class="number">1</span> aviso</strong><span class="badge warning">Atención</span></div><div class="risk-item"><span class="risk-symbol" aria-hidden="true">!</span><div><strong>Datos sin actualizar</strong><p data-detail>Última lectura de ejemplo: 29 oct · 14:20.</p></div></div><p class="widget-foot" data-detail>Corte del ejemplo: 30 oct · 14:20.</p></div>
+          <div class="empty-state" data-empty hidden><strong>Sin información de riesgo</strong><p>Los avisos aparecerán cuando haya datos para evaluar.</p></div>
+        </section>
+
+      </div>
+      <div class="bottom-note"><span>Entorno simulado · datos históricos de ejemplo</span><span>Maqueta visual · sin datos reales</span></div>
+    </main>
+  </div>
+  <div class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+    const app = document.querySelector('#app');
+    const grid = document.querySelector('#widgets');
+    const toast = document.querySelector('.toast');
+    let toastTimer;
+
+    function reportPreviewSize() {
+      if (window.parent !== window) window.parent.postMessage({ type: 'drasus-preview-height', height: document.body.getBoundingClientRect().height }, '*');
+    }
+    window.addEventListener('message', (event) => {
+      if (event.source === window.parent && event.data?.type === 'drasus-preview-measure') reportPreviewSize();
+    });
+    window.addEventListener('load', reportPreviewSize);
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(reportPreviewSize).observe(document.body);
+
+    function announce(message) {
+      toast.textContent = message;
+      toast.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.hidden = true; }, 4000);
+    }
+    function closeMenus(except) {
+      document.querySelectorAll('.popover').forEach((menu) => {
+        if (menu === except) return;
+        menu.hidden = true;
+        const trigger = menu.parentElement.querySelector('[aria-expanded]');
+        if (trigger) trigger.setAttribute('aria-expanded', 'false');
+      });
+    }
+    function toggleDensity(widget) {
+      const compact = widget.classList.toggle('compact');
+      const button = widget.querySelector('[data-density]');
+      const name = widget.querySelector('h2').textContent.toLowerCase();
+      button.setAttribute('aria-pressed', String(compact));
+      button.setAttribute('aria-label', (compact ? 'Mostrar más detalle de ' : 'Reducir detalle de ') + name);
+      widget.querySelector('[data-widget-action="density"]').textContent = compact ? 'Mostrar más detalle' : 'Reducir detalle';
+      announce((compact ? 'Vista compacta: ' : 'Vista detallada: ') + name + '.');
+    }
+    function moveWidget(widget, direction) {
+      const other = direction === 'previous' ? widget.previousElementSibling : widget.nextElementSibling;
+      if (!other) { announce('El widget ya está en ese extremo.'); return; }
+      if (direction === 'previous') grid.insertBefore(widget, other);
+      else grid.insertBefore(other, widget);
+      announce(widget.querySelector('h2').textContent + ' cambió de posición en la maqueta.');
+    }
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button) { if (!event.target.closest('.popover')) closeMenus(); return; }
+      if (!button.closest('.popover') && !button.hasAttribute('data-popover') && !button.hasAttribute('data-widget-menu')) closeMenus();
+      if (button.dataset.demoState) {
+        const empty = button.dataset.demoState === 'empty';
+        document.querySelectorAll('[data-demo-state]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+        document.querySelectorAll('[data-filled]').forEach((item) => { item.hidden = empty; });
+        document.querySelectorAll('[data-empty]').forEach((item) => { item.hidden = !empty; });
+      }
+      if (button.dataset.copyStyle) {
+        const readable = button.dataset.copyStyle === 'readable';
+        app.classList.toggle('support-copy-readable', readable);
+        document.querySelectorAll('[data-copy-style]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      }
+      if (button.hasAttribute('data-pin')) {
+        const pinned = app.classList.toggle('nav-pinned');
+        button.setAttribute('aria-pressed', String(pinned));
+        button.setAttribute('aria-label', pinned ? 'Desfijar navegación' : 'Fijar navegación abierta');
+      }
+      if (button.dataset.destination) announce(button.dataset.destination + ': esta vista aún no forma parte de la maqueta.');
+      if (button.dataset.popover) {
+        const menu = document.getElementById(button.dataset.popover);
+        const open = menu.hidden;
+        closeMenus(menu);
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+      if (button.dataset.mode) {
+        document.querySelector('[data-mode-label]').textContent = button.dataset.mode === 'simple' ? 'Modo simple' : 'Modo avanzado';
+        closeMenus();
+        announce('El modo cambia la visibilidad de ajustes; esta maqueta no modifica procesos.');
+      }
+      if (button.dataset.accent) {
+        const colors = {
+          white: { background: '#f5f5f5', foreground: '#121212' },
+          red: { background: '#c82030', foreground: '#fff' },
+          blue: { background: '#c1d7e7', foreground: '#121212' },
+          green: { background: '#28784a', foreground: '#fff' },
+          violet: { background: '#5141a5', foreground: '#fff' },
+          purple: { background: '#813c8b', foreground: '#fff' },
+          cyan: { background: '#45bfd0', foreground: '#121212' },
+          silver: { background: '#c9cbce', foreground: '#121212' },
+          gold: { background: '#b28a24', foreground: '#121212' },
+        };
+        const color = colors[button.dataset.accent];
+        app.style.setProperty('--accent', color.background);
+        app.style.setProperty('--accent-ink', color.foreground);
+        document.querySelectorAll('[data-accent]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      }
+      if (button.dataset.fontProfile) {
+        const isGeist = button.dataset.fontProfile === 'geist';
+        app.style.setProperty('--text-font', isGeist ? '"Drasus Geist", sans-serif' : 'system-ui, sans-serif');
+        app.style.setProperty('--number-font', isGeist ? '"Drasus Geist Mono", monospace' : 'ui-monospace, monospace');
+        document.querySelectorAll('[data-font-profile]').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
+      }
+      if (button.hasAttribute('data-reset')) {
+        app.style.removeProperty('--accent');
+        app.style.removeProperty('--accent-ink');
+        app.style.removeProperty('--text-font');
+        app.style.removeProperty('--number-font');
+        document.querySelectorAll('[data-accent]').forEach((item) => item.setAttribute('aria-pressed', String(item.dataset.accent === 'white')));
+        document.querySelectorAll('[data-font-profile]').forEach((item) => item.setAttribute('aria-pressed', String(item.dataset.fontProfile === 'geist')));
+        announce('Apariencia inicial restaurada en la maqueta.');
+      }
+      if (button.hasAttribute('data-density')) toggleDensity(button.closest('.widget'));
+      if (button.hasAttribute('data-widget-menu')) {
+        const menu = button.nextElementSibling;
+        const open = menu.hidden;
+        closeMenus(menu);
+        menu.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+      }
+      if (button.dataset.widgetAction) {
+        const widget = button.closest('.widget');
+        if (button.dataset.widgetAction === 'density') toggleDensity(widget);
+        else moveWidget(widget, button.dataset.widgetAction);
+        closeMenus();
+      }
+    });
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      closeMenus();
+      const help = event.target.closest('.help');
+      if (help) help.dataset.dismissed = 'true';
+    });
+    document.querySelectorAll('.help').forEach((help) => {
+      help.addEventListener('mouseleave', () => { delete help.dataset.dismissed; });
+      help.addEventListener('focusin', () => { help.dataset.open = 'true'; });
+      help.addEventListener('focusout', () => { delete help.dataset.open; delete help.dataset.dismissed; });
+    });
+    let dragged;
+    grid.addEventListener('dragstart', (event) => {
+      const handle = event.target.closest('.drag-handle');
+      if (!handle) { event.preventDefault(); return; }
+      dragged = handle.closest('.widget');
+      dragged.classList.add('dragging');
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', dragged.dataset.widget);
+    });
+    grid.addEventListener('dragover', (event) => {
+      const target = event.target.closest('.widget');
+      if (!dragged || !target || target === dragged) return;
+      event.preventDefault();
+      grid.querySelectorAll('.drop-target').forEach((item) => item.classList.remove('drop-target'));
+      target.classList.add('drop-target');
+    });
+    grid.addEventListener('drop', (event) => {
+      const target = event.target.closest('.widget');
+      if (!dragged || !target || target === dragged) return;
+      event.preventDefault();
+      const rect = target.getBoundingClientRect();
+      const after = event.clientY > rect.top + rect.height / 2 || (Math.abs(event.clientY - (rect.top + rect.height / 2)) < rect.height / 3 && event.clientX > rect.left + rect.width / 2);
+      grid.insertBefore(dragged, after ? target.nextElementSibling : target);
+      announce(dragged.querySelector('h2').textContent + ' cambió de posición en la maqueta.');
+    });
+    grid.addEventListener('dragend', () => {
+      grid.querySelectorAll('.dragging, .drop-target').forEach((item) => item.classList.remove('dragging', 'drop-target'));
+      dragged = null;
+    });
+  </script>
+</body>
+</html>

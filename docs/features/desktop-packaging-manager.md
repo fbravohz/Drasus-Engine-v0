@@ -1,7 +1,7 @@
 # Desktop Packaging Manager
 
 **Carpeta:** `./features/desktop-packaging-manager.md`
-**Estado:** En Diseño
+**Estado:** 🟡 En curso (2026-11-02). TTR-001 y TTR-002 pendientes; TTR-003 parcial. Evidencia de TTR-003: [STORY-074](../execution/STORY-074-cascaron-tauri-react.md).
 **Decisión Arquitectónica Asociada:** ADR-0165
 
 ## ¿Qué es esta feature?
@@ -48,9 +48,30 @@ La feature entrega el contenedor de escritorio, el ciclo de vida del Core y los 
 
 Construir el supervisor de proceso, el health check y la credencial de sesión local. Está terminado cuando una máquina limpia abre y cierra la aplicación sin procesos huérfanos ni listener externo.
 
+- **Estado:** Pendiente; depende de resolver SPIKE-006.
+- **Precondición:** TTR-003 completo; el trabajo del servidor gRPC espera el Spike de ADR-0142.
+
 ### TTR-002: Bundling y actualización
 
-Producir instaladores firmados por plataforma y cablearlos al actualizador seguro. Está terminado cuando el paquete verifica firma, instala, actualiza y conserva la integridad de la instancia local.
+Producir instaladores firmados por plataforma y cablearlos al actualizador seguro. La primera instalación debe abrir en una máquina limpia sin que el usuario instale Rust, Node, compiladores ni bibliotecas de desarrollo. Está terminado cuando cada paquete verifica firma, instala, abre, actualiza y conserva la integridad de la instancia local.
+
+- **Estado:** Pendiente; la matriz de soporte y la elección de formatos aún no están definidas.
+- **Matriz de soporte:** fijar versiones mínimas de Windows/Linux/macOS y arquitecturas. Validar cada piso contra el WebView del sistema: WebView2 en Windows, WKWebView ligado a la versión de macOS y WebKitGTK 4.1 en Linux.
+- **Dependencias del instalador:** asegurar WebView2 en Windows. En Linux, comparar paquetes `.deb`/`.rpm`, AppImage y Flatpak según las distribuciones objetivo; AppImage exige construir desde una base antigua compatible con WebKitGTK 4.1 y comprobar las dependencias de runtime porque Tauri no incluye el WebView. Flatpak aporta un runtime controlado, pero requiere declarar permisos de acceso a datos locales. No pedir al usuario paquetes `-dev` ni toolchains.
+- **Confianza de instalación:** conservar un identificador de aplicación estable y firmar los artefactos. La distribución directa de macOS requiere Developer ID y notarización; Windows debe evitar binarios sin firma que disparen bloqueos o avisos de SmartScreen.
+- **Verificación de primera ejecución:** instalar y arrancar en imágenes limpias de cada SO soportado; comprobar WebView, permisos, readiness del Core, mensaje accionable ante fallo, actualización firmada y conservación de datos al actualizar o desinstalar.
+- **Referencias oficiales:** [WebViews de Tauri](https://v2.tauri.app/reference/webview-versions/), [instalación de Windows](https://v2.tauri.app/distribute/windows-installer/), [AppImage](https://v2.tauri.app/distribute/appimage/), [Flatpak](https://v2.tauri.app/distribute/flatpak/) y [firma de macOS](https://v2.tauri.app/distribute/sign/macos/).
+
+### TTR-003: Cascarón de desarrollo Tauri/React
+
+Preparar la aplicación React/TypeScript con Tauri 2 y Vite en `apps/desktop`, con TypeScript estricto, la compilación de Tailwind, Node.js 22.12 o posterior y las familias tipográficas Geist Sans/Geist Mono aprobadas. El paquete usa pnpm, es independiente del binario CLI `crates/app` y del workspace Rust raíz. Solo entrega una ventana de desarrollo vacía; no agrega una superficie de producto ni tokens visuales pendientes de `docs/DESIGN.yaml`.
+
+- **Estado:** 🟡 Parcial (2026-11-02); typecheck, build y arranque nativo verificados, revisión visual/QA pendiente. Evidencia: [STORY-074](../execution/STORY-074-cascaron-tauri-react.md).
+- **Consumidor:** TTR-001 y las futuras superficies React/TypeScript.
+- **Observable de verificación:** la aplicación de desarrollo abre una ventana Tauri con el punto de montaje React vacío y compila la hoja Tailwind.
+- **Precondición:** ADR-0165 y las decisiones vigentes de `docs/DESIGN.yaml`.
+- **Postcondición:** el cascarón puede iniciarse localmente sin iniciar el Core; el workspace Cargo raíz conserva solo sus miembros Rust actuales.
+- **Límite:** no implementa el servidor ni el cliente gRPC, generación Protobuf, supervisor del Core, sesión local, vistas de producto, biblioteca de componentes ni caché. La instalación del Core y el transporte siguen en TTR-001 y requieren el Spike previo de ADR-0142.
 
 ## Persistencia
 

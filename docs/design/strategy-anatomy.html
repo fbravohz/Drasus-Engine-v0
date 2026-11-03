@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#080a18">
+  <title>Perfil Radial de Estrategia · Drasus Engine</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --void: #080a18;
+      --surface: #0d1222;
+      --panel: #11182e;
+      --panel-hi: #172239;
+      --line: #26314a;
+      --muted: #8290a6;
+      --text: #edf3f8;
+      --soft: #bac8d7;
+      --cyan: #54e8d0;
+      --green: #7cf06a;
+      --amber: #ffc94d;
+      --red: #ff6b6b;
+      --violet: #a99aff;
+      --font: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--void);
+      color: var(--text);
+      font-family: var(--font);
+      background-image: radial-gradient(circle, #1b2440 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    .app { min-height: 100vh; display: flex; flex-direction: column; background: linear-gradient(110deg, rgba(8,10,24,.97), rgba(8,10,24,.88) 55%, rgba(8,10,24,.97)); }
+    .topbar { height: 62px; padding: 0 26px; display: flex; align-items: center; gap: 25px; border-bottom: 1px solid rgba(125,145,175,.14); background: rgba(8,10,24,.8); }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 190px; font-size: 12px; font-weight: 750; letter-spacing: .17em; }
+    .brand-mark { width: 22px; height: 22px; border: 1px solid var(--cyan); border-radius: 7px; display: grid; place-items: center; color: var(--cyan); font-size: 12px; box-shadow: 0 0 18px #54e8d026; }
+    .crumbs { display: flex; align-items: center; gap: 9px; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .crumbs b { color: var(--text); font-weight: 550; }
+    .crumbs .sep { color: #43506a; }
+    .top-actions { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+    .demo-chip, .status-chip { border: 1px solid #313d55; background: #11182eaa; border-radius: 999px; padding: 7px 10px; color: var(--soft); font: 10px var(--mono); letter-spacing: .06em; }
+    .demo-chip { border-color: #715c30; color: #f5d686; background: #ffc94d10; }
+    .icon-button { width: 32px; height: 32px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 9px; background: #11182e; color: var(--soft); cursor: pointer; }
+    .icon-button:hover { border-color: var(--cyan); color: var(--cyan); }
+    .workspace { display: grid; grid-template-columns: 220px minmax(480px, 1fr) 340px; min-height: calc(100vh - 62px); }
+    .left-rail { padding: 23px 15px 20px 20px; border-right: 1px solid rgba(125,145,175,.14); background: rgba(9,13,26,.72); }
+    .rail-label, .eyebrow { color: var(--muted); font: 10px var(--mono); text-transform: uppercase; letter-spacing: .13em; }
+    .strategy-card { margin-top: 15px; padding: 15px 13px; border: 1px solid #26314a; border-radius: 13px; background: linear-gradient(145deg,#151e32,#0e1527); }
+    .strategy-id { display: flex; justify-content: space-between; color: #8391a6; font: 10px var(--mono); }
+    .strategy-card h1 { margin: 11px 0 5px; font-size: 16px; font-weight: 630; letter-spacing: -.03em; }
+    .strategy-card p { margin: 0; color: var(--muted); font-size: 11px; line-height: 1.5; }
+    .readiness { display: flex; align-items: center; gap: 7px; margin-top: 13px; color: #b9d8cb; font-size: 10px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; background: var(--green); box-shadow: 0 0 10px #7cf06a88; }
+    .mode-switch { margin: 21px 0 17px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr; border: 1px solid #25304a; border-radius: 10px; background: #090e1c; }
+    .mode-switch button { padding: 8px 3px; border: 0; border-radius: 7px; background: transparent; color: var(--muted); cursor: pointer; font-size: 10px; }
+    .mode-switch button[aria-pressed="true"] { background: #1a2840; color: var(--text); box-shadow: inset 0 0 0 1px #33415b; }
+    .part-list { display: grid; gap: 4px; margin-top: 11px; }
+    .part-button { display: grid; grid-template-columns: 25px 1fr auto; align-items: center; gap: 8px; padding: 9px 8px; text-align: left; border: 1px solid transparent; border-radius: 9px; background: transparent; cursor: pointer; color: var(--soft); }
+    .part-button:hover, .part-button[aria-current="true"] { background: #141d30; border-color: #26324b; color: var(--text); }
+    .part-icon { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 7px; color: var(--cyan); background: #54e8d014; font-size: 11px; }
+    .part-name { font-size: 11px; }
+    .part-count { color: #74829a; font: 9px var(--mono); }
+    .rail-foot { margin-top: 23px; padding-top: 13px; border-top: 1px solid #202b41; color: #68758b; font-size: 10px; line-height: 1.6; }
+    .center { min-width: 0; display: flex; flex-direction: column; padding: 21px 24px 17px; }
+    .center-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; }
+    .center-head h2 { margin: 5px 0 0; font-size: 19px; font-weight: 570; letter-spacing: -.035em; }
+    .center-head .sub { margin-top: 5px; color: var(--muted); font-size: 11px; }
+    .head-tools { display: flex; align-items: center; gap: 7px; }
+    .tool { border: 1px solid var(--line); border-radius: 8px; background: #10172a; padding: 7px 10px; color: #aab6c7; font-size: 10px; cursor: pointer; }
+    .tool:hover { border-color: #51617c; color: white; }
+    .tool.active { color: var(--cyan); border-color: #397e78; background: #54e8d010; }
+    .scene { position: relative; flex: 1; min-height: 485px; margin-top: 12px; overflow: hidden; border: 1px solid #1b2940; border-radius: 16px; background: radial-gradient(ellipse at 51% 43%, #14243a 0%, #0d1629 38%, #0a1020 78%); box-shadow: inset 0 0 70px #02040b80; }
+    .scene::before { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg,transparent 72%,#080a18a8); z-index: 1; }
+    .scene-grid { position: absolute; inset: 0; opacity: .35; background: radial-gradient(circle,#32415c 1px,transparent 1.25px); background-size: 22px 22px; mask-image: linear-gradient(transparent,#000 18%,#000 85%,transparent); }
+    .scene-topline { position: absolute; left: 18px; top: 16px; z-index: 2; display: flex; gap: 10px; align-items: center; color: #7788a0; font: 9px var(--mono); letter-spacing: .08em; }
+    .scene-topline .on { color: var(--cyan); }
+    .radar-readout { position: absolute; top: 14px; right: 16px; z-index: 3; display: flex; align-items: center; gap: 8px; color: #7f90a7; font: 9px var(--mono); letter-spacing: .08em; }
+    .radar-readout b { color: #b6c5d6; font-weight: 500; }
+    .machine-wrap { position: absolute; inset: 7% 5% 11%; display: grid; place-items: center; z-index: 2; }
+    .machine { width: 100%; height: 100%; display: grid; place-items: center; filter: drop-shadow(0 24px 28px #0007); }
+    .machine svg { width: auto; height: 100%; max-width: 100%; overflow: visible; }
+    .hotspot { cursor: pointer; outline: none; }
+    .hotspot .hit { fill: #10182a; stroke: #6b7a91; stroke-width: 1.5; transition: .2s ease; }
+    .hotspot .pulse { fill: none; stroke: #54e8d055; stroke-width: 1; animation: ping 2.5s ease-in-out infinite; pointer-events: none; }
+    @keyframes ping { 0%, 100% { opacity: .2; } 50% { opacity: .9; } }
+    .hotspot:hover .hit, .hotspot:focus-visible .hit, .hotspot.selected .hit { stroke: #e7fbff; fill: #1d3544; stroke-width: 2.5; filter: drop-shadow(0 0 8px #54e8d0aa); }
+    .hotspot.selected .pulse { stroke: #54e8d0a0; }
+    .radar-label { cursor: pointer; outline: none; }
+    .radar-label:hover text, .radar-label:focus-visible text, .radar-label.selected text { fill: #f3ffff; filter: drop-shadow(0 0 5px #54e8d080); }
+    .hotspot-label { fill: #a9b8ca; font: 10px var(--mono); letter-spacing: .08em; pointer-events: none; }
+    .evidence-overlay { display: none; }
+    .scene.evidence .evidence-overlay { display: block; }
+    .compare-legend { display: none !important; }
+    .scene.evidence .compare-legend { display: inline-flex !important; }
+    .scene-footer { position: absolute; z-index: 3; left: 19px; right: 19px; bottom: 15px; display: flex; align-items: center; justify-content: space-between; color: #77869b; font-size: 9px; }
+    .legend { display: flex; align-items: center; gap: 13px; }
+    .legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .legend i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
+    .legend .lg-violet { background: var(--violet); }
+    .legend .lg-amber { background: var(--amber); }
+    .legend .lg-green { background: var(--green); }
+    .helptext { color: #8b9ab0; }
+    .metrics-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin-top: 11px; }
+    .metric-card { padding: 11px 12px; border: 1px solid #202d44; border-radius: 11px; background: #101729d9; }
+    .metric-label { color: #8190a5; font: 9px var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+    .metric-value { margin-top: 7px; color: #edf4f8; font-size: 17px; font-weight: 560; letter-spacing: -.03em; }
+    .metric-note { margin-top: 3px; color: #718097; font-size: 9px; }
+    .right-panel { padding: 23px 19px 18px; border-left: 1px solid rgba(125,145,175,.14); background: rgba(9,13,26,.76); }
+    .panel-top { display: flex; align-items: center; justify-content: space-between; }
+    .panel-top .eyebrow { color: #7e8ba1; }
+    .panel-close { width: 26px; height: 26px; border: 1px solid #28344c; border-radius: 7px; background: #11182e; color: #9aa9bd; cursor: pointer; }
+    .part-title { margin: 19px 0 7px; font-size: 21px; font-weight: 570; letter-spacing: -.04em; }
+    .part-desc { margin: 0; max-width: 38ch; color: #9aa9bc; font-size: 11px; line-height: 1.65; }
+    .panel-status { display: inline-flex; align-items: center; gap: 7px; margin-top: 14px; border: 1px solid #28524d; background: #54e8d00c; color: #9ce7dc; border-radius: 7px; padding: 6px 8px; font: 9px var(--mono); }
+    .detail-section { margin-top: 24px; padding-top: 15px; border-top: 1px solid #202b40; }
+    .detail-heading { display: flex; justify-content: space-between; align-items: center; color: #8796aa; font: 9px var(--mono); text-transform: uppercase; letter-spacing: .1em; }
+    .detail-heading b { color: #607087; font-weight: 500; }
+    .detail-rows { display: grid; gap: 0; margin-top: 8px; }
+    .detail-row { min-height: 37px; display: flex; align-items: center; justify-content: space-between; gap: 9px; border-bottom: 1px solid #182238; color: #91a0b5; font-size: 10px; }
+    .detail-row strong { color: #d8e3ed; font: 10px var(--mono); font-weight: 500; text-align: right; }
+    .mini-chart { height: 104px; margin-top: 13px; padding: 9px 8px 4px; border: 1px solid #202c42; border-radius: 10px; background: #0b1120; }
+    .mini-chart svg { width: 100%; height: 100%; }
+    .panel-note { margin-top: 13px; padding: 10px; border-left: 2px solid #54e8d0; background: #54e8d00b; color: #94a6b8; font-size: 10px; line-height: 1.6; }
+    .panel-note b { color: #c9e7e1; font-weight: 550; }
+    .panel-bottom { margin-top: 23px; display: flex; gap: 8px; }
+    .panel-action { flex: 1; min-height: 35px; border: 1px solid #33415a; border-radius: 8px; background: #151f32; color: #cbd8e5; font-size: 10px; cursor: pointer; }
+    .panel-action:hover { border-color: var(--cyan); color: white; }
+    .panel-action.secondary { flex: 0 0 38px; }
+    .toast { position: fixed; left: 50%; bottom: 22px; transform: translate(-50%, 20px); opacity: 0; pointer-events: none; z-index: 10; border: 1px solid #3c4a61; border-radius: 9px; background: #131c2e; padding: 10px 14px; box-shadow: 0 12px 40px #0008; color: #deebf4; font-size: 11px; transition: .2s; }
+    .toast.show { transform: translate(-50%,0); opacity: 1; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    @media (max-width: 1120px) {
+      .workspace { grid-template-columns: 190px minmax(400px,1fr); }
+      .right-panel { grid-column: 1 / -1; display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 17px; border-left: 0; border-top: 1px solid rgba(125,145,175,.14); padding: 17px 22px; }
+      .right-panel > * { margin-top: 0; }
+      .right-panel .part-title { margin-top: 10px; }
+      .right-panel .detail-section { border-top: 0; padding-top: 7px; }
+      .right-panel .panel-bottom { align-self: end; }
+    }
+    @media (max-width: 760px) {
+      .topbar { height: 54px; padding: 0 13px; gap: 10px; }
+      .brand { min-width: 0; font-size: 10px; }
+      .crumbs { display: none; }
+      .top-actions { gap: 6px; }
+      .status-chip { display: none; }
+      .workspace { display: flex; flex-direction: column; min-height: calc(100vh - 54px); }
+      .left-rail { padding: 14px 14px 10px; border-right: 0; border-bottom: 1px solid rgba(125,145,175,.14); }
+      .rail-label, .strategy-card, .rail-foot { display: none; }
+      .mode-switch { margin: 0; max-width: 260px; }
+      .part-list { display: flex; overflow-x: auto; margin-top: 10px; padding-bottom: 2px; }
+      .part-button { flex: 0 0 auto; grid-template-columns: 23px auto; padding: 6px 8px; }
+      .part-count { display: none; }
+      .center { padding: 15px 12px 13px; }
+      .center-head h2 { font-size: 16px; }
+      .center-head .sub { font-size: 10px; }
+      .head-tools .tool:first-child { display: none; }
+      .scene { min-height: 430px; margin-top: 12px; }
+      .machine-wrap { inset: 5% 2% 13%; }
+      .radar-readout { top: 13px; right: 10px; }
+      .scene-topline { left: 10px; top: 14px; font-size: 8px; }
+      #sceneCaption { display: none; }
+      .scene-footer { left: 10px; right: 10px; bottom: 10px; }
+      .helptext { display: none; }
+      .metrics-strip { grid-template-columns: repeat(2,1fr); gap: 7px; }
+      .metric-card { padding: 9px; }
+      .metric-value { font-size: 15px; }
+      .right-panel { display: block; padding: 18px 15px; }
+      .right-panel .detail-section { border-top: 1px solid #202b40; padding-top: 13px; margin-top: 17px; }
+      .right-panel .panel-bottom { margin-top: 16px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">D</span><span>DRASUS <span style="color:#62718a;font-weight:500">ENGINE</span></span></div>
+      <nav class="crumbs" aria-label="Ruta"><span>Workspace</span><span class="sep">/</span><span>FX Research</span><span class="sep">/</span><b>Momentum Divergence</b></nav>
+      <div class="top-actions"><span class="demo-chip">DEMO · DATOS FICTICIOS</span><span class="status-chip">ESTRATEGIA · INACTIVA</span><button class="icon-button" aria-label="Más opciones" id="moreButton">···</button></div>
+    </header>
+    <main class="workspace">
+      <aside class="left-rail" aria-label="Partes de la estrategia">
+        <div class="rail-label">Estrategia seleccionada</div>
+        <section class="strategy-card">
+          <div class="strategy-id"><span>STR-084</span><span>v.12</span></div>
+          <h1>Momentum Divergence</h1>
+          <p>Perfil de resultados de una corrida de muestra sobre varios destinos.</p>
+          <div class="readiness"><i class="dot"></i> Muestra ficticia · solo lectura</div>
+        </section>
+        <div class="mode-switch" role="group" aria-label="Vista de métricas">
+          <button id="anatomyMode" aria-pressed="true">Perfil radial</button>
+          <button id="evidenceMode" aria-pressed="false">Comparar</button>
+        </div>
+        <div class="rail-label">Métricas · selecciona un eje</div>
+        <div class="part-list">
+          <button class="part-button" data-part="net-profit" aria-current="false"><span class="part-icon">↗</span><span class="part-name">Net Profit</span><span class="part-count">+18.6%</span></button>
+          <button class="part-button" data-part="return-dd" aria-current="true"><span class="part-icon">R</span><span class="part-name">Return / DD</span><span class="part-count">2.21</span></button>
+          <button class="part-button" data-part="max-dd" aria-current="false"><span class="part-icon">↓</span><span class="part-name">Max DD</span><span class="part-count">8.4%</span></button>
+          <button class="part-button" data-part="sharpe" aria-current="false"><span class="part-icon">σ</span><span class="part-name">Sharpe Ratio</span><span class="part-count">1.36</span></button>
+          <button class="part-button" data-part="profit-factor" aria-current="false"><span class="part-icon">×</span><span class="part-name">Profit Factor</span><span class="part-count">1.42</span></button>
+          <button class="part-button" data-part="recovery" aria-current="false"><span class="part-icon">⟳</span><span class="part-name">Recovery</span><span class="part-count">2.20</span></button>
+          <button class="part-button" data-part="win-rate" aria-current="false"><span class="part-icon">%</span><span class="part-name">Win Rate</span><span class="part-count">54%</span></button>
+          <button class="part-button" data-part="expectancy" aria-current="false"><span class="part-icon">E</span><span class="part-name">Expectancy</span><span class="part-count">0.18R</span></button>
+        </div>
+        <div class="rail-foot">El polígono muestra un perfil normalizado de ejemplo. Las cifras originales permanecen visibles en cada eje; no existe un puntaje total.</div>
+      </aside>
+
+      <section class="center" aria-labelledby="viewTitle">
+        <div class="center-head">
+          <div><div class="eyebrow">Canvas · vista interior de estrategia</div><h2 id="viewTitle">Perfil radial de Momentum Divergence</h2><div class="sub">Cada eje es una métrica; la forma resume la corrida seleccionada.</div></div>
+          <div class="head-tools"><button class="tool" id="resetView">Restablecer</button><button class="tool active" id="flowToggle" aria-pressed="true">Ejes visibles</button></div>
+        </div>
+        <div class="scene" id="scene">
+          <div class="scene-grid"></div>
+          <div class="scene-topline"><span class="on">●</span><span>RADAR DE MÉTRICAS</span><span>·</span><span id="sceneCaption">ESCALA DE REFERENCIA ILUSTRATIVA · 0–100</span></div>
+          <div class="radar-readout"><span>PERFIL</span><b>8 EJES</b></div>
+          <div class="machine-wrap" id="machineWrap">
+            <div class="machine" id="machine">
+              <svg viewBox="150 10 640 490" role="img" aria-labelledby="svgTitle svgDesc">
+                <title id="svgTitle">Perfil radial interactivo de métricas de trading</title>
+                <desc id="svgDesc">Radar de ocho ejes con Net Profit, Return sobre Drawdown, Max Drawdown, Sharpe, Profit Factor, Recovery Factor, Win Rate y Expectancy. Los valores originales y la normalización ficticia se detallan al seleccionar cada eje.</desc>
+                <defs>
+                  <radialGradient id="radarGlow"><stop stop-color="#54e8d0" stop-opacity=".13"/><stop offset="1" stop-color="#54e8d0" stop-opacity="0"/></radialGradient>
+                  <linearGradient id="radarFill" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#54e8d0" stop-opacity=".31"/><stop offset="1" stop-color="#54e8d0" stop-opacity=".08"/></linearGradient>
+                </defs>
+                <circle cx="470" cy="255" r="225" fill="url(#radarGlow)"/>
+                <circle cx="470" cy="255" r="204" fill="#101a2b" fill-opacity=".32" stroke="#40526a" stroke-opacity=".42"/>
+                <circle cx="470" cy="255" r="190" fill="none" stroke="#29364f" stroke-opacity=".35" stroke-dasharray="2 7"/>
+                <g class="radar-grid" aria-hidden="true" fill="none" stroke="#394761" stroke-opacity=".78" stroke-width="1">
+                  <path d="M470 220L494.7 230.3L505 255L494.7 279.7L470 290L445.3 279.7L435 255L445.3 230.3Z"/>
+                  <path d="M470 185L519.5 205.5L540 255L519.5 304.5L470 325L420.5 304.5L400 255L420.5 205.5Z"/>
+                  <path d="M470 150L544.2 180.8L575 255L544.2 329.2L470 360L395.8 329.2L365 255L395.8 180.8Z"/>
+                  <path d="M470 115L569 156L610 255L569 354L470 395L371 354L330 255L371 156Z"/>
+                  <path d="M470 80L593.7 131.3L645 255L593.7 378.7L470 430L346.3 378.7L295 255L346.3 131.3Z"/>
+                </g>
+                <g fill="#71839a" font-family="monospace" font-size="8" aria-hidden="true">
+                  <text x="476" y="217">20</text><text x="476" y="182">40</text><text x="476" y="147">60</text><text x="476" y="112">80</text><text x="476" y="77">100</text>
+                </g>
+                <g class="evidence-overlay" aria-label="Corrida de referencia ficticia">
+                  <path d="M470 148.3L543 182L575 255L538 323L470 365.3L407 318L368.5 255L395.8 180.8Z" fill="#a99aff" fill-opacity=".08" stroke="#a99aff" stroke-opacity=".92" stroke-width="2" stroke-dasharray="6 5"/>
+                </g>
+                <path d="M470 124.8L538.4 186.6L571.5 255L537.3 322.3L470 345.4L401.9 323.1L365 255L391.7 176.7Z" fill="url(#radarFill)" stroke="#54e8d0" stroke-width="2.5" stroke-linejoin="round"/>
+                <g class="radar-grid" fill="none" stroke="#54e8d0" stroke-opacity=".22" stroke-width="1">
+                  <path d="M470 255L470 80 M470 255L593.7 131.3 M470 255L645 255 M470 255L593.7 378.7 M470 255L470 430 M470 255L346.3 378.7 M470 255L295 255 M470 255L346.3 131.3"/>
+                </g>
+                <g class="hotspot metric-axis" data-part="net-profit" tabindex="0" role="button" aria-label="Net Profit: más 18.6 por ciento" transform="translate(470 124.8)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="return-dd" tabindex="0" role="button" aria-label="Return sobre Drawdown: 2.21" transform="translate(538.4 186.6)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="max-dd" tabindex="0" role="button" aria-label="Max Drawdown: 8.4 por ciento" transform="translate(571.5 255)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="sharpe" tabindex="0" role="button" aria-label="Sharpe Ratio: 1.36" transform="translate(537.3 322.3)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="profit-factor" tabindex="0" role="button" aria-label="Profit Factor: 1.42" transform="translate(470 345.4)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="recovery" tabindex="0" role="button" aria-label="Recovery Factor: 2.20" transform="translate(401.9 323.1)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="win-rate" tabindex="0" role="button" aria-label="Win Rate: 54 por ciento" transform="translate(365 255)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="hotspot metric-axis" data-part="expectancy" tabindex="0" role="button" aria-label="Expectancy: 0.18 R" transform="translate(391.7 176.7)"><circle class="pulse" r="14"/><circle class="hit" r="7"/><circle r="2.3" fill="#eafffa"/></g>
+                <g class="radar-label hotspot" data-part="net-profit" tabindex="0" role="button"><text x="470" y="43" text-anchor="middle" class="hotspot-label">NET PROFIT</text><text x="470" y="58" text-anchor="middle" fill="#d8e7ed" font-family="monospace" font-size="10">+18.6%</text></g>
+                <g class="radar-label hotspot" data-part="return-dd" tabindex="0" role="button"><text x="631" y="99" class="hotspot-label">RETURN / DD</text><text x="631" y="114" fill="#d8e7ed" font-family="monospace" font-size="10">2.21</text></g>
+                <g class="radar-label hotspot" data-part="max-dd" tabindex="0" role="button"><text x="674" y="252" class="hotspot-label">MAX DD ↓</text><text x="674" y="267" fill="#d8e7ed" font-family="monospace" font-size="10">8.4%</text></g>
+                <g class="radar-label hotspot" data-part="sharpe" tabindex="0" role="button"><text x="627" y="406" class="hotspot-label">SHARPE RATIO</text><text x="627" y="421" fill="#d8e7ed" font-family="monospace" font-size="10">1.36</text></g>
+                <g class="radar-label hotspot" data-part="profit-factor" tabindex="0" role="button"><text x="470" y="449" text-anchor="middle" class="hotspot-label">PROFIT FACTOR</text><text x="470" y="464" text-anchor="middle" fill="#d8e7ed" font-family="monospace" font-size="10">1.42</text></g>
+                <g class="radar-label hotspot" data-part="recovery" tabindex="0" role="button"><text x="313" y="406" text-anchor="end" class="hotspot-label">RECOVERY FACTOR</text><text x="313" y="421" text-anchor="end" fill="#d8e7ed" font-family="monospace" font-size="10">2.20</text></g>
+                <g class="radar-label hotspot" data-part="win-rate" tabindex="0" role="button"><text x="266" y="252" text-anchor="end" class="hotspot-label">WIN RATE</text><text x="266" y="267" text-anchor="end" fill="#d8e7ed" font-family="monospace" font-size="10">54%</text></g>
+                <g class="radar-label hotspot" data-part="expectancy" tabindex="0" role="button"><text x="314" y="99" text-anchor="end" class="hotspot-label">EXPECTANCY</text><text x="314" y="114" text-anchor="end" fill="#d8e7ed" font-family="monospace" font-size="10">0.18R</text></g>
+                <circle cx="470" cy="255" r="27" fill="#101827" stroke="#54e8d0" stroke-opacity=".65"/>
+                <circle cx="470" cy="255" r="19" fill="#17243a" stroke="#45677a"/>
+                <text x="470" y="252" text-anchor="middle" fill="#e4f5f1" font-family="monospace" font-size="9">STR</text>
+                <text x="470" y="265" text-anchor="middle" fill="#7f96a8" font-family="monospace" font-size="7">084</text>
+              </svg>
+            </div>
+          </div>
+          <div class="scene-footer"><div class="legend"><span><i></i> Corrida seleccionada</span><span class="compare-legend"><i class="lg-violet"></i> Corrida de referencia</span></div><div class="helptext">Radio normalizado 0–100 · Max DD invierte dirección · sin puntaje agregado</div></div>
+        </div>
+        <div class="metrics-strip" aria-label="Resumen ficticio de evidencia">
+          <div class="metric-card"><div class="metric-label">Net Profit</div><div class="metric-value">+18.6%</div><div class="metric-note">Neto · ejemplo ficticio</div></div>
+          <div class="metric-card"><div class="metric-label">Return / DD</div><div class="metric-value">2.21</div><div class="metric-note">Índice del ejemplo</div></div>
+          <div class="metric-card"><div class="metric-label">Max DD</div><div class="metric-value">8.4%</div><div class="metric-note">Menor es mejor</div></div>
+          <div class="metric-card"><div class="metric-label">Sharpe Ratio</div><div class="metric-value">1.36</div><div class="metric-note">Muestra ilustrativa</div></div>
+        </div>
+      </section>
+
+      <aside class="right-panel" aria-label="Detalle del componente seleccionado" aria-live="polite">
+        <div>
+          <div class="panel-top"><span class="eyebrow">Inspector · parte seleccionada</span><button class="panel-close" id="closeInspector" aria-label="Restablecer inspector">×</button></div>
+          <h2 class="part-title" id="partTitle">Return / Drawdown</h2>
+          <p class="part-desc" id="partDesc">Relación ilustrativa entre retorno neto y drawdown máximo de la corrida seleccionada.</p>
+          <div class="panel-status"><i class="dot"></i><span id="partStatus">VALOR DE MUESTRA · SOLO LECTURA</span></div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-heading"><span id="detailHeading">Detalle de la métrica</span><b id="detailCount">FICTICIO</b></div>
+          <div class="detail-rows" id="detailRows">
+            <div class="detail-row"><span>Valor original</span><strong>2.21</strong></div>
+            <div class="detail-row"><span>Radio ilustrativo</span><strong>70 / 100</strong></div>
+            <div class="detail-row"><span>Rango de referencia</span><strong>0–4.0</strong></div>
+            <div class="detail-row"><span>Corrida</span><strong>6 ventanas · demo</strong></div>
+          </div>
+          <div class="panel-note" id="panelNote"><b>Lectura radial:</b> la distancia al borde expresa una escala de referencia; no combina las métricas en una calificación.</div>
+        </div>
+        <div class="detail-section">
+          <div class="detail-heading"><span id="trendHeading">Métrica por ventana</span><b>FICTICIA · 6 VENTANAS</b></div>
+          <div class="mini-chart"><svg viewBox="0 0 290 90" role="img" aria-label="Serie ficticia por ventana"><defs><linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#54e8d0" stop-opacity=".22"/><stop offset="1" stop-color="#54e8d0" stop-opacity="0"/></linearGradient></defs><path d="M4 69H286M4 45H286M4 21H286" stroke="#263149" stroke-width="1" stroke-dasharray="3 5"/><path id="metricArea" d="M4 72 L60 59 L116 49 L172 35 L228 28 L286 17 L286 82 L4 82Z" fill="url(#chartFill)"/><path id="metricLine" d="M4 72 L60 59 L116 49 L172 35 L228 28 L286 17" fill="none" stroke="#54e8d0" stroke-width="2"/><circle id="metricDot" cx="286" cy="17" r="3" fill="#ffc94d" stroke="#11182e" stroke-width="2"/></svg></div>
+        </div>
+          <div class="panel-bottom"><button class="panel-action" id="traceButton">Enfocar eje</button><button class="panel-action secondary" id="infoButton" aria-label="Información de muestra">ⓘ</button></div>
+      </aside>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+  <script>
+    const parts = {
+      "net-profit": { title: "Net Profit", actual: "+18.6%", radius: 74.4, range: "0–25%", direction: "Mayor es mejor", desc: "Ganancia neta de la corrida de muestra después de los costos incluidos en este ejemplo.", note: "<b>Lectura radial:</b> el valor ocupa 74.4 de 100 puntos de su rango ilustrativo. La cifra original sigue visible en el radar.", series: [12, 15, 14, 19, 17, 18.6] },
+      "return-dd": { title: "Return / Drawdown", actual: "2.21", radius: 55.3, range: "0–4.0", direction: "Mayor es mejor", desc: "Relación ilustrativa entre retorno y drawdown de la corrida seleccionada. La definición exacta del ratio dependerá del contrato de métrica del producto.", note: "<b>Lectura radial:</b> 2.21 se normaliza contra el rango ficticio 0–4.0. El radio no se suma con los otros ejes.", series: [1.6, 2.0, 1.8, 2.4, 2.0, 2.21] },
+      "max-dd": { title: "Max Drawdown", actual: "8.4%", radius: 58, range: "0–20%", direction: "Menor es mejor · radio invertido", desc: "Mayor caída desde un máximo local hasta el mínimo posterior, expresada aquí como porcentaje ficticio.", note: "<b>Dirección inversa:</b> 8.4% se dibuja a 58 de 100 porque menos drawdown es mejor dentro del rango 0–20%. El valor bruto sigue visible.", series: [6.2, 8.9, 11.3, 7.1, 9.5, 8.4] },
+      "sharpe": { title: "Sharpe Ratio", actual: "1.36", radius: 54.4, range: "0–2.5", direction: "Mayor es mejor", desc: "Métrica de retorno ajustado por variabilidad. La cifra y su escala son datos ficticios de demostración.", note: "<b>Contexto:</b> el valor 1.36 ocupa 54.4 de 100 puntos del rango ilustrativo 0–2.5.", series: [1.1, 1.4, 1.2, 1.6, 1.3, 1.36] },
+      "profit-factor": { title: "Profit Factor", actual: "1.42", radius: 51.7, range: "0.8–2.0", direction: "Mayor es mejor", desc: "Relación entre ganancias brutas y pérdidas brutas de la muestra. Valor incluido solo para el prototipo.", note: "<b>Detalle disponible:</b> el valor 1.42 se dibuja dentro del rango ilustrativo 0.8–2.0; una vista real incluiría cálculo y operaciones fuente.", series: [1.25, 1.53, 1.39, 1.61, 1.47, 1.42] },
+      recovery: { title: "Recovery Factor", actual: "2.20", radius: 55, range: "0–4.0", direction: "Mayor es mejor", desc: "Métrica de recuperación mostrada como eje separado. El valor de la gráfica es ficticio.", note: "<b>Lectura:</b> 2.20 ocupa 55 de 100 puntos del rango ilustrativo 0–4.0; no representa una calificación global.", series: [1.8, 2.5, 1.9, 2.7, 2.4, 2.2] },
+      "win-rate": { title: "Win Rate", actual: "54%", radius: 60, range: "30–70%", direction: "Más no siempre es mejor", desc: "Porcentaje de operaciones ganadoras en el ejemplo. Debe leerse junto con el tamaño medio de ganancias y pérdidas.", note: "<b>Contexto:</b> 54% queda a 60 de 100 en el rango ilustrativo 30–70%. Un Win Rate mayor no implica por sí solo mejor expectativa ni menor riesgo.", series: [49, 57, 53, 59, 51, 54] },
+      expectancy: { title: "Expectancy", actual: "0.18R", radius: 63.3, range: "−0.2R–0.4R", direction: "Mayor es mejor", desc: "Resultado esperado por operación expresado en R para esta muestra completamente ficticia.", note: "<b>Lectura:</b> 0.18R ocupa 63.3 de 100 puntos entre −0.2R y 0.4R en esta referencia ficticia.", series: [0.11, 0.20, 0.15, 0.23, 0.19, 0.18] }
+    };
+    const scene = document.getElementById("scene");
+    const toast = document.getElementById("toast");
+    let selected = "return-dd";
+    let toastTimer;
+    function showToast(message) {
+      toast.textContent = message; toast.classList.add("show");
+      clearTimeout(toastTimer); toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+    function renderSeries(values) {
+      const min = Math.min(...values), max = Math.max(...values), span = max - min || 1;
+      const points = values.map((value, index) => ({ x: 4 + index * 56.4, y: 69 - ((value - min) / span) * 48 }));
+      const line = "M" + points.map(point => `${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" L");
+      document.getElementById("metricLine").setAttribute("d", line);
+      document.getElementById("metricArea").setAttribute("d", `${line} L${points.at(-1).x.toFixed(1)} 82 L4 82Z`);
+      document.getElementById("metricDot").setAttribute("cx", points.at(-1).x.toFixed(1));
+      document.getElementById("metricDot").setAttribute("cy", points.at(-1).y.toFixed(1));
+    }
+    function selectPart(key) {
+      const item = parts[key]; if (!item) return;
+      selected = key;
+      document.querySelectorAll(".part-button").forEach(button => button.setAttribute("aria-current", button.dataset.part === key ? "true" : "false"));
+      document.querySelectorAll(".hotspot[data-part]").forEach(hotspot => hotspot.classList.toggle("selected", hotspot.dataset.part === key));
+      document.getElementById("partTitle").textContent = item.title;
+      document.getElementById("partDesc").textContent = item.desc;
+      document.getElementById("partStatus").textContent = item.direction.toUpperCase() + " · SOLO LECTURA";
+      document.getElementById("detailHeading").textContent = "Detalle de la métrica";
+      document.getElementById("detailCount").textContent = "FICTICIO";
+      document.getElementById("detailRows").innerHTML = [
+        ["Valor original", item.actual], ["Radio ilustrativo", `${item.radius.toFixed(1)} / 100`], ["Rango de referencia", item.range], ["Dirección radial", item.direction]
+      ].map(row => `<div class="detail-row"><span>${row[0]}</span><strong>${row[1]}</strong></div>`).join("");
+      document.getElementById("panelNote").innerHTML = item.note;
+      document.getElementById("trendHeading").textContent = `${item.title} · ventanas demo`;
+      renderSeries(item.series);
+    }
+    document.querySelectorAll("[data-part]").forEach(el => {
+      el.addEventListener("click", () => selectPart(el.dataset.part));
+      if (el.classList.contains("hotspot")) el.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); selectPart(el.dataset.part); } });
+    });
+    document.getElementById("anatomyMode").addEventListener("click", event => {
+      scene.classList.remove("evidence"); event.currentTarget.setAttribute("aria-pressed", "true"); document.getElementById("evidenceMode").setAttribute("aria-pressed", "false");
+      document.getElementById("sceneCaption").textContent = "ESCALA DE REFERENCIA ILUSTRATIVA · 0–100";
+    });
+    document.getElementById("evidenceMode").addEventListener("click", event => {
+      const comparing = event.currentTarget.getAttribute("aria-pressed") !== "true";
+      scene.classList.toggle("evidence", comparing); event.currentTarget.setAttribute("aria-pressed", String(comparing));
+      document.getElementById("anatomyMode").setAttribute("aria-pressed", String(!comparing));
+      document.getElementById("sceneCaption").textContent = comparing ? "CORRIDA ACTUAL Y REFERENCIA FICTICIA" : "ESCALA DE REFERENCIA ILUSTRATIVA · 0–100";
+      showToast(comparing ? "Referencia de comparación visible" : "Referencia de comparación oculta");
+    });
+    document.getElementById("resetView").addEventListener("click", () => {
+      selectPart("return-dd"); scene.classList.remove("evidence");
+      document.getElementById("anatomyMode").setAttribute("aria-pressed", "true"); document.getElementById("evidenceMode").setAttribute("aria-pressed", "false");
+      document.getElementById("sceneCaption").textContent = "ESCALA DE REFERENCIA ILUSTRATIVA · 0–100";
+      document.querySelectorAll(".radar-grid").forEach(group => group.style.opacity = "1");
+      const axesButton = document.getElementById("flowToggle"); axesButton.setAttribute("aria-pressed", "true"); axesButton.classList.add("active");
+      showToast("Perfil radial restablecido");
+    });
+    document.getElementById("flowToggle").addEventListener("click", event => {
+      const visible = event.currentTarget.getAttribute("aria-pressed") === "true";
+      event.currentTarget.setAttribute("aria-pressed", String(!visible)); event.currentTarget.classList.toggle("active", !visible);
+      document.querySelectorAll(".radar-grid").forEach(group => group.style.opacity = visible ? ".08" : "1");
+      showToast(visible ? "Guías radiales atenuadas" : "Guías radiales visibles");
+    });
+    document.getElementById("traceButton").addEventListener("click", () => { document.querySelector(`.metric-axis[data-part="${selected}"]`)?.focus(); showToast(`${parts[selected].title}: ${parts[selected].actual} · escala de ejemplo`); });
+    document.getElementById("closeInspector").addEventListener("click", () => { selectPart("return-dd"); showToast("Inspector restablecido"); });
+    document.getElementById("infoButton").addEventListener("click", () => showToast("Valores y rangos ficticios; no hay conexión al Core."));
+    document.getElementById("moreButton").addEventListener("click", () => showToast("Prototipo independiente · sin acciones externas"));
+    selectPart("return-dd");
+  </script>
+</body>
+</html>

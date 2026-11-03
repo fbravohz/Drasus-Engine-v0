@@ -1,9 +1,11 @@
 # Verification Bench (Banco de Pruebas)
 
-**Carpeta:** `./features/verification-bench/`
-**Estado:** 🟡 Parcial — chasis nacido en EPIC-0/SPIKE-006 (tab maestro-detalle + registro extensible), despachador genérico y validación visual de forma pendientes.
-**Última actualización:** 2026-07-12
+**Ficha:** `docs/features/verification-bench.md`
+**Estado:** 🟡 Contrato funcional conservado; la implementación Flutter/FFI fue retirada por ADR-0165. El cliente Tauri/React actual aún no incluye el Banco; su reimplementación depende del Spike gRPC de ADR-0142.
+**Última actualización:** 2026-11-02
 **Decisión Arquitectónica Asociada:** ADR-0152 (Banco de Pruebas como Gate Permanente de Definición de Terminado), enmienda de ADR-0117.
+
+> **Vigencia de esta ficha:** conserva el comportamiento esperado del harness. Las rutas Flutter/FFI, `custom_ui`, la galería de widgets y las instrucciones de implementación que aparecen más abajo son históricas; no se deben usar como base de la nueva interfaz. Antes de implementar, actualizar esta ficha según ADR-0135, ADR-0142 y ADR-0165. El Banco permite probar una feature por separado con su contrato real; no sustituye la integración de esa feature con el Core por gRPC.
 
 ## ¿Qué es esta feature?
 

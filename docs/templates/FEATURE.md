@@ -93,12 +93,6 @@ Describe entrada → proceso → salida, **sin detalles de implementación**. Ve
 > **Cardinalidad:** `1` = exactamente uno · `0..1` = opcional · `0..N` = múltiple · `1..N` = al menos uno.
 > **Plomería sin puertos de usuario:** si la feature es plomería pura (bus, clock, queue), declara aun así sus puertos técnicos (ej. `job_in: AsyncJob | Input | 1..N`).
 
-## Cáscara Visual (Thin Shell)
-
-> Autoridad: ADR-0165 · ADR-0136 · ADR-0117 · ADR-0135 · `docs/DESIGN.md`
->
-> **Producida por el skill `ui-designer` (Etapa 0.5 del Tech Lead) — NUNCA rellenar a mano sin leer DESIGN.md primero.**
-
 ## Operaciones observables y recuperables (OBLIGATORIO si un puerto público muta estado o puede ser invocado por un agente)
 
 Declara, sin inventar rutas ni detalles de transporte:
@@ -111,34 +105,51 @@ Declara, sin inventar rutas ni detalles de transporte:
 - la superficie propia que lo representa o la representación genérica autorizada que muestra la actividad tras reconexión.
 
 La actividad no guarda secretos, parámetros sensibles ni texto suministrado por el agente. Los códigos se localizan en la interfaz. Si la Feature no muta estado ni es invocable por un agente, declara explícitamente que esta sección no aplica. Autoridad: ADR-0166.
-> Si la feature es Plomería (declara "Ventana de Verificación"), escribe solo la nota de Ventana de Verificación Visual y omite el resto.
+
+## Cáscara Visual (Thin Shell)
+
+> Autoridad: ADR-0165 · ADR-0136 · ADR-0117 · ADR-0135 · `docs/DESIGN.yaml`
+>
+> **Producida por el skill `ui-ux-designer` según el despacho. Consulta `docs/DESIGN.yaml` para tokens y especificaciones estructuradas; consulta `docs/DESIGN.md` para contexto.**
+>
+> Si existe una especificación en `components.specifications`, referencia su clave YAML. Si no existe, describe el rol visual como componente local de la feature o pendiente. No inventes IDs ni reutilices el catálogo de widgets Flutter retirado. Mantén el componente local hasta que un segundo consumidor real justifique compartirlo, según ADR-0139. No incluyas clases Tailwind, CSS ni código aquí.
+>
+> El Banco de Verificación es un harness funcional por feature, no una galería de componentes. Su contrato y gate siguen ADR-0117/ADR-0152; su futura UI debe seguir Tauri/React y gRPC según ADR-0142/ADR-0165.
+>
+> Si la feature es Plomería (declara "Ventana de Verificación"), omite esta sección y declara solo el observable exigido por ADR-0117.
 
 ### Contexto de superficie (ADR-0136)
 **[Dashboard widget | Canvas — Vista Relacional | Canvas — Vista Interior | Inspector Panel | Plomería]** — [una frase: qué ve el usuario y en qué parte del Canvas o Dashboard]
 
-### Superficie y Densidad
-- **Superficie principal:** [panel-solid `panelSolid #0E1426` | panel-glass `glassFill 0x73141C36`]
-- **Densidad:** [densa — Dashboard / Vista Relacional | cómoda — Vista Interior / Inspector Panel]
-- **Lienzo de fondo:** `deepSpace #080A18` + telón cósmico tenue
+### Comportamiento y datos
+- **Acciones y resultado visible:** [qué inicia el usuario y qué respuesta observable recibe]
+- **Entradas y salidas:** [datos que presenta la superficie; referencia al contrato de la feature]
+- **Estados y errores:** [carga, vacío, éxito, error y recuperación aplicables]
 
-### Componentes
-| ID de catálogo (DESIGN.md §4–§11) | Rol en esta feature | Tokens clave | Estados semánticos |
+### Composición y densidad
+- **Jerarquía y agrupaciones:** [orden del contenido, paneles y acciones]
+- **Densidad:** [decisión vigente o pendiente para esta superficie]
+- **Adaptación a ventana:** [reflujo y límites aprobados; deja abierto lo no definido]
+
+### Componentes y tokens
+| Rol o componente | Estado (compartido / local / pendiente) | Clave en `components.specifications` (si existe) | Tokens aprobados |
 |---|---|---|---|
-| `[id-kebab-case]` | [qué representa] | [tokens de DESIGN.md] | [óptimo / transición / alerta / crítico] |
+| [rol visual o componente concreto] | [estado] | [clave o pendiente] | [referencias semánticas; no inventar valores] |
 
-### Estados Semánticos (Espectro de Vitalidad)
-| Estado de negocio | Color token | Tratamiento visual completo |
+### Estados semánticos
+| Estado de negocio o interfaz | Texto, forma o símbolo | Tokens aplicables |
 |---|---|---|
-| [estado] | `optimaCyan #54E8D0` | chip: texto `#54E8D0`, fondo `#08251F`, borde 1px `#1E5E4F`, radio 8px · `glow(optimaCyan)` |
+| [estado] | [señal accesible además del color cuando corresponda] | [claves de `docs/DESIGN.yaml` o pendiente] |
 
-### Layout
-- [descripción: grid, columnas, agrupaciones, scroll, paneles laterales]
+### Accesibilidad
+- **Teclado y foco:** [activación, orden y foco visible]
+- **Nombres accesibles y contenido:** [etiquetas, alternativa a gráficas o arrastre cuando aplique]
 
-### Animaciones Aplicables
-- [ ] Zoom canvas (relacional ↔ interior) · [ ] Clic botón (propagación de luz) · [ ] Hover (glow intensificado) · [ ] Foco input (glow limpio, sin aberración RGB) · [ ] Dropdown (AnimatedSize + chevron) · [ ] Chip parpadeante · [ ] Loader/progreso (glow pulsante) · [ ] Switch (knob deslizante)
+### Movimiento
+- [Reglas aplicables de `docs/DESIGN.yaml`, incluidos movimiento reducido y estados sin animación]
 
 ### Notas de implementación para Tauri/React
-[Instrucciones específicas: estructura de componentes, contrato gRPC, accesibilidad y restricciones de rendimiento]
+[Solo límites visibles para frontend: contrato de transporte generado, accesibilidad o rendimiento. No dupliques DTOs ni lógica del Core.]
 
 ---
 

@@ -4,16 +4,20 @@
 
 ## Estado de reanudación
 
-Última sesión resumida: 2026-08-02. Contrasta el estado operativo con las Órdenes y el ROADMAP al reanudar.
+Última actualización: 2026-11-02. Contrasta el estado operativo con las Órdenes y el ROADMAP al reanudar.
 
 - **Fase:** EPIC-1 — Soberanía de Datos (`ingest`), en curso.
-- **Orden activa:** [STORY-073 — Asistente de Importación](../../../docs/execution/STORY-073-asistente-importacion-pantalla.md), construida y verificada; registra 13/14 criterios.
+- **Orden activa de UI:** [STORY-075 — Dashboard oficial](../../../docs/execution/STORY-075-dashboard-oficial-tauri-react.md), 🟡 parcial: typecheck y build pasan; faltan revisión visual y QA independiente.
+- **Siguiente paso de UI:** observar la ventana Tauri y completar QA. La integración de datos reales espera SPIKE-006; persistencia del locale espera un contrato de ajustes del Core.
+- **Orden de ingesta pendiente:** [STORY-073 — Asistente de Importación](../../../docs/execution/STORY-073-asistente-importacion-pantalla.md), construida y verificada; registra 13/14 criterios.
 - **Para cerrar STORY-073:** el propietario debe completar el criterio 13 importando el archivo real desde la aplicación; el recorrido está en §6.1. Faltan las tres lecciones del Modo Docente (§8).
 - **Después:** conectar la salida de barras al almacenamiento Parquet particionado Hive-Style; revisar [`DEBT-036`](../../../docs/debt/DEBT-036.md) y [`DEBT-040`](../../../docs/debt/DEBT-040.md).
 - **Validación manual (2026-08-01):** corregidos el selector de archivos en Linux, el parpadeo de la zona de carga y la copia de errores. STORY-073 registra `flutter test` 30/30, `flutter analyze` sin errores y `flutter build linux --debug` correcto.
 - STORY-073 pagó DEBT-035, DEBT-037 y DEBT-041. DEBT-045 se pagó el 2026-08-02.
 
 ## Pendientes acumulados
+
+- **Base de escritorio:** [STORY-074](../../../docs/execution/STORY-074-cascaron-tauri-react.md) prepara el shell; [STORY-075](../../../docs/execution/STORY-075-dashboard-oficial-tauri-react.md) implementa el Dashboard oficial sin datos simulados. **SPIKE-006** sigue siendo requisito para implementar el servidor gRPC y TTR-001.
 
 - **Importación:** DEBT-036 y DEBT-040 se disparan con la persistencia real. DEBT-039 está parcial: la interfaz muestra fechas reales junto al rango; el análisis profundo de homogeneidad sigue pendiente. DEBT-043 (mensajes con jerga) y DEBT-044 (arrastre de archivos) siguen abiertas.
 - **Modelo de ingesta:** falta implementar en `pit-data-validator` los gates de coherencia de calendario y homogeneidad de ADR-0162. El [diseño de TASK-064](../../../docs/execution/TASK-064-politica-spread-fill-model-dst.md) está cerrado; su contraste empírico del spread depende de datos de ticks. El catálogo de [TASK-065](../../../docs/execution/TASK-065-catalogo-broker-instrumento-sesion.md) se entregó en STORY-066.

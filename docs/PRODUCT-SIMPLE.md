@@ -311,7 +311,7 @@ La regla es una sola: **acortar lo más posible el camino hasta que el sistema o
 
 | Etapa | Qué se termina | Estado |
 |---|---|---|
-| Cimientos | El esqueleto, y la plomería del negocio | ✅ y 🟡 |
+| Cimientos | El esqueleto, y la plomería del negocio | ✅ núcleo; 🟡 faltan el nuevo escritorio y su conexión al motor |
 | 1 | Que los datos no mientan | 🟡 en curso |
 | 2 | El simulador honesto | pendiente |
 | 3 | El criadero (Darwin) | pendiente |

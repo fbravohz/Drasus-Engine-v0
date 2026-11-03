@@ -197,7 +197,7 @@ Las features son **unidades hexagonales autónomas** (ADR-0137): cada una expone
 | [**operator-roles**](./features/operator-roles.md) | Roles de operador a la carta dentro de una cuenta maestra: matriz de capacidades gateada por puerto de Feature (no por módulo), asignable a humanos o agentes LLM vía MCP; cascada de autoridad del fondo sobre cuentas hijas (ADR-0149, cimiento #14). | Cabina de Mando / substrato |
 | [**instrument-catalog**](./features/instrument-catalog.md) | Catálogo canónico de instrumentos y sus términos de trading: identidad general del símbolo (pip/tick size, monedas) declarada una vez, y los términos que varían por bróker (spread, comisión, swap) como override que hereda del canónico (ADR-0162). | ingest |
 | [**session-catalog**](./features/session-catalog.md) | Catálogo de plantillas de calendario de mercado: una forma de mercado (`FOREX_245`, `NYSE_REGULAR`…) se declara una vez con su zona horaria IANA y se referencia desde cuantos instrumentos la compartan (ADR-0162). | ingest |
-| [**verification-bench**](./features/verification-bench.md) | Banco de Pruebas: harness genérico de verificación en el Panel Operativo Fundacional — selector de feature, input JSON editable, envío real por FFI y validación visual de forma del input (Válido/Inválido); realización canónica de la SVF y gate permanente de Definición de Terminado (ADR-0117/ADR-0152). | Todos |
+| [**verification-bench**](./features/verification-bench.md) | Banco de Pruebas: harness para verificar features por separado con entradas y resultados reales. Su contrato y gate siguen ADR-0117/ADR-0152; la implementación Flutter anterior quedó retirada y la versión Tauri/React con gRPC está pendiente (ADR-0142/ADR-0165). | Todos |
 
 ---
 
@@ -263,6 +263,12 @@ Proyectos de investigación avanzada y alta complejidad.
 | [**pfof-order-flow**](./moonshots/pfof-order-flow.md) | ⚠️ ZIZAÑA — venta de flujo de órdenes (PFOF): imposible en el modelo local sin ser el ruteador; archivado condicionado a ejecución hosteada (ADR-0144). |
 | [**capital-allocation-platform**](./moonshots/capital-allocation-platform.md) | ⚠️ ZIZAÑA — plataforma que asigna capital de terceros con management/performance fee: convierte a Drasus en gestor regulado, deja de ser software (ADR-0144). |
 | [**regulatory-signoff-service**](./moonshots/regulatory-signoff-service.md) | ⚠️ ZIZAÑA — validación con firma acreditada (SR 11-7/UCITS/Basel): el motor genera el reporte, pero el sello exige acreditación que no se tiene (ADR-0144). |
+
+---
+
+## 🗺️ Plan y estado de ejecución
+
+Consulta el [Roadmap](./ROADMAP.md) para conocer la fase y el estado de las entregas. El estado por tarea técnica y su evidencia viven en la ficha de cada feature y en la Orden enlazada.
 
 ---
 
@@ -406,12 +412,13 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 | [**ADR-0132**](./adr/ADR-0132.md) | Rust como Lenguaje del Núcleo — Rechazo Razonado de C++/Qt Total |
 | [**ADR-0133**](./adr/ADR-0133.md) | Pirámide de Pruebas Canónica + Fuzzing Obligatorio en Fronteras Externas |
 | [**ADR-0134**](./adr/ADR-0134.md) | Matriz de Plataformas de Despliegue (Desktop Nativo + Mobile/Web Cliente Delgado) y Detección de Terminación del Padre Portátil |
-| [**ADR-0135**](./adr/ADR-0135.md) | Sección `## Cáscara Visual` Obligatoria en Features con Superficie — UI-Designer como Etapa 0.5 |
+| [**ADR-0135**](./adr/ADR-0135.md) | Cáscara Visual Obligatoria en Features con Superficie — Especificación UX/UI en la Etapa 0.5 del Tech Lead |
 | [**ADR-0136**](./adr/ADR-0136.md) | Arquitectura Visual Unificada — Dashboard + Canvas [Forge/Reactor] · supersede ADR-0028 |
 | [**ADR-0137**](./adr/ADR-0137.md) | Feature como Unidad Hexagonal Autónoma con Puertos Tipados — Módulos como Composiciones Preset |
 | [**ADR-0138**](./adr/ADR-0138.md) | ~~Design System Centralization en UI — ThemeExtension + Librería de Componentes Flutter~~ ⚠️ Superado por ADR-0165 |
 | [**ADR-0165**](./adr/ADR-0165.md) | Cliente Tauri + React; puertos Rust para dominio y Protobuf para transporte gRPC — decisión vigente de UI/transporte |
 | [**ADR-0166**](./adr/ADR-0166.md) | Operaciones Observables y Recuperables — actividad compartida, recuperación, concurrencia y delegación agéntica |
+| [**ADR-0167**](./adr/ADR-0167.md) | Visibilidad Global de Configuración — modo simple y avanzado con una configuración efectiva |
 | [**ADR-0139**](./adr/ADR-0139.md) | Principio Rector General — Single Source of Truth para Contratos Reusables |
 | [**ADR-0140**](./adr/ADR-0140.md) | Opciones Financieras — Diferimiento al Post-MVP con Puerta Abierta |
 | [**ADR-0141**](./adr/ADR-0141.md) | Modelado Relacional Soberano — Tipos canónicos, STRICT, UUIDv7, índices, integridad SQLite↔Parquet |
@@ -434,6 +441,12 @@ Registro ordenado de las decisiones de diseño clave que gobiernan la arquitectu
 ---
 
 ## 📣 Definición de Producto
+
+**Sistema de diseño:** [DESIGN.yaml](./DESIGN.yaml) conserva propiedades, tokens y estados estructurados para automatización; [DESIGN.md](./DESIGN.md) explica el contexto y la justificación para lectores y entrevistas. El YAML gobierna los valores estructurados y ambos deben mantenerse sincronizados.
+
+**Exploración visual:** [Dirección de identidad e interfaz](./design/VISUAL-DIRECTIONS.md) — tres propuestas para iterar, con [comparativa visual](./design/visual-directions.html). Pendiente de selección; no sustituye decisiones canónicas.
+
+**Exploración de UX:** [Prototipos individuales](./design/ux-competition/) — propuestas exploratorias pendientes de selección.
 
 Fuente única de verdad para explicar qué es Drasus Engine, para quién y por qué. De aquí salen infografías, presentaciones, sitio web, roadmap público y elevator pitch — ningún material de difusión inventa contenido, lo deriva de aquí. Dueño: el Architect.
 
@@ -482,6 +495,7 @@ El contexto de agentes vive en este repositorio. `.agents/` contiene la capa act
 
 | Skill | Flujo | Descripción |
 |-------|-----|-------------|
+| [**ui-ux-designer**](./../.agents/skills/ui-ux-designer/SKILL.md) | Diseño | Diseña y evalúa la experiencia, la identidad y las interfaces de Drasus. |
 | [**drasus-dispatch**](./../.agents/skills/drasus-dispatch/SKILL.md) | Clasificación | Determina flujo, riesgo y contexto antes de editar. |
 | [**drasus-plan**](./../.agents/skills/drasus-plan/SKILL.md) | Planificación | Delimita un cambio con fuentes y validación. |
 | [**drasus-implement**](./../.agents/skills/drasus-implement/SKILL.md) | Implementación | Ejecuta cambios de producto aprobados. |

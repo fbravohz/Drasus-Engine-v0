@@ -138,7 +138,7 @@ Cada ADR vive en su propio archivo bajo [`adr/`](./adr/). Para leer un ADR concr
 | [ADR-0132](./adr/ADR-0132.md) | Rust como Lenguaje del Núcleo — Rechazo Razonado de C++/Qt Total |
 | [ADR-0133](./adr/ADR-0133.md) | Pirámide de Pruebas Canónica + Fuzzing Obligatorio en Fronteras Externas |
 | [ADR-0134](./adr/ADR-0134.md) | Matriz de Plataformas de Despliegue (Desktop Nativo + Mobile/Web Cliente Delgado) y Detección de Terminación del Padre Portátil |
-| [ADR-0135](./adr/ADR-0135.md) | Sección `## Cáscara Visual` Obligatoria en Features con Superficie — Skill UI-Designer como Etapa 0.5 del Tech Lead |
+| [ADR-0135](./adr/ADR-0135.md) | Cáscara Visual Obligatoria en Features con Superficie — Especificación UX/UI en la Etapa 0.5 del Tech Lead |
 | [ADR-0136](./adr/ADR-0136.md) | Arquitectura Visual Unificada — Dashboard + Canvas [Forge/Reactor — TBD] · supersede ADR-0028 (ZUI 3 niveles nominados) |
 | [ADR-0137](./adr/ADR-0137.md) | Feature como Unidad Hexagonal Autónoma con Puertos Tipados — Módulos como Composiciones Preset · enmienda ADR-0002 + ADR-0118 |
 | [ADR-0138](./adr/ADR-0138.md) | Design System Centralization en UI (Flutter) — ThemeExtension + Widgets Primitivos |
@@ -169,6 +169,7 @@ Cada ADR vive en su propio archivo bajo [`adr/`](./adr/). Para leer un ADR concr
 | [ADR-0163](./adr/ADR-0163.md) | Idempotencia de Reimportación — Resolución de Solape en Particiones Hive-Style por Hash-Check, Política Configurable de Sobrescritura/Omisión y Reescritura Atómica · extiende ADR-0030/ADR-0141/ADR-0154 |
 | [ADR-0165](./adr/ADR-0165.md) | Cliente de Escritorio Tauri + React; puertos Rust para dominio y Protobuf para transporte gRPC — reemplaza Flutter/FFI |
 | [ADR-0166](./adr/ADR-0166.md) | Operaciones Observables y Recuperables — Actividad Compartida para Humanos y Agentes |
+| [ADR-0167](./adr/ADR-0167.md) | Visibilidad Global de Configuración — Modo Simple y Avanzado con una Configuración Efectiva |
 | [ADR-0157](./adr/ADR-0157.md) | Visualización de Estrategia — Un Motor de Render, Dos Entradas Separadas (Vista en Vivo / Repetición de Corrida), Invariante de No-Perturbación y Agnosticismo al Tipo de Barra · refresca la feature previa de reproducción, extiende ADR-0136/ADR-0137, hereda ADR-0114/ADR-0027 |
 | [ADR-0158](./adr/ADR-0158.md) | Topología de Fuentes de Señal y Destinos de Ejecución — Estrategias Cross-Market y Cross-Timeframe de Entrada, Alineación por Reloj para Toda Fuente, Riesgo Agregado en Destinos Múltiples · extiende ADR-0114/ADR-0111/ADR-0108/ADR-0151, depende de TASK-059 |
 | [ADR-0159](./adr/ADR-0159.md) | Símbolos Sintéticos por Fórmula — Instrumentos Derivados Deterministas como Fuente de Señal, AST Tipado, Modos Declarado y Evolucionado, Conocibilidad por Eslabón Más Débil · fuente de ADR-0158, extiende ADR-0113/ADR-0020/ADR-0161 |

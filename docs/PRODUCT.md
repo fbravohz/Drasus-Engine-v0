@@ -332,7 +332,7 @@ El orden lo decide un principio único — **Alpha-First**: acortar la distancia
 
 | Fase | Entrega | Qué desbloquea | Capacidades | Estado |
 |---|---|---|---|---|
-| **EPIC-0** | Fundación | Esqueleto compilable, riesgos técnicos resueltos, primera interfaz | base de `CAP-09` | ✅ cerrada |
+| **EPIC-0** | Fundación | Esqueleto compilable, riesgos técnicos resueltos, primera interfaz | base de `CAP-09` | 🟡 cierre residual: [STORY-074](./execution/STORY-074-cascaron-tauri-react.md) prepara Tauri/React; el slice gRPC espera SPIKE-006 |
 | **Cimientos** | Substrato de negocio | Cualquier modelo de monetización sin rehacer el núcleo | `CAP-10` | 🟡 backends cerrados, conexión a interfaz en curso |
 | **EPIC-1** | Soberanía de datos | Un lago de datos limpio y auditado | `CAP-01` | 🟡 en curso |
 | **EPIC-2** | Motor de backtest | Simulación determinista y confiable | `CAP-02` | pendiente |

@@ -1,5 +1,7 @@
 # Visual DAG Editor — Canvas Nodal de Construcción de Lógica
 
+> **Superficie vigente:** el Canvas usa React Flow según [ADR-0136](../adr/ADR-0136.md) dentro de Tauri/React conforme a [ADR-0165](../adr/ADR-0165.md). Las demás referencias a Flutter en esta ficha son históricas y se reescribirán por slice.
+
 **Carpeta:** `./features/visual-dag-editor/`
 **Estado:** Lista para implementar
 **Última actualización:** 2026-06-23
@@ -9,7 +11,7 @@
 
 ## ¿Qué es esta feature?
 
-El Visual DAG Editor implementa el lienzo nodal interactivo del Canvas [Forge/Reactor] (ADR-0136). Permite al usuario construir y modificar pipelines de estrategias mediante **card-nodes rectangulares** estilo N8N / React Flow: arrastrar nodos desde una paleta, conectar puertos tipados con bezier S-curves, expandir módulos en sus features internas, y editar la lógica interna de una Strategy mediante bloques micro (Logic Blocks).
+El Visual DAG Editor implementa el lienzo nodal interactivo del Canvas [Forge/Reactor] (ADR-0136) con React Flow. Permite al usuario construir y modificar pipelines de estrategias mediante **card-nodes rectangulares**: arrastrar nodos desde una paleta, conectar puertos tipados con bezier S-curves, expandir módulos en sus features internas, y editar la lógica interna de una Strategy mediante bloques micro (Logic Blocks).
 
 La feature también implementa el **Motor de Invalidación Reactiva**: cualquier cambio en parámetros de Logic Blocks invalida el caché de validación de la estrategia padre y lo marca visualmente en el canvas, impidiendo el despliegue a producción con resultados obsoletos.
 
@@ -98,11 +100,11 @@ Este lienzo funciona igual con la lógica de una estrategia. Cada pieza es un bl
 
 ## Tareas (TTRs)
 
-### TTR-001: Canvas de Card-Nodes (N8N / React Flow)
+### TTR-001: Canvas de Card-Nodes con React Flow
 
 **¿Cuál es el problema?** El operador necesita construir y reconfigurar pipelines de validación y estrategia de forma visual, conectando módulos y features como si fueran bloques.
 
-**¿Qué tiene que pasar?** Implementar el canvas interactivo en Flutter `CustomPainter` con:
+**¿Qué tiene que pasar?** Implementar el canvas interactivo con React Flow en Tauri/React, conforme a ADR-0136 y ADR-0165, con:
 - Card-nodes: header `32–36px` (nombre, ícono, borde izquierdo coloreado por dominio), body (key-values del nodo).
 - Port handles: círculos de `10px` en los laterales izquierdo (inputs) y derecho (outputs).
 - Conexiones: bezier S-curves coloreadas por tipo de dato (ADR-0137), con arrowhead en el target.
