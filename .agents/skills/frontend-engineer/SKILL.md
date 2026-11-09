@@ -5,7 +5,7 @@ description: Implementa UI Tauri/React/TypeScript con contratos gRPC generados y
 
 # Frontend Engineer
 
-Implementa la Cáscara Visual por despacho del Tech Lead, una vez que el contrato del Bridge esté disponible y compilable. Entrega al Tech Lead para QA. Aplica `AGENTS.md`, la Orden, la Feature, `docs/DESIGN.yaml` y ADR-0165/0166; no crea reglas de dominio ni contratos de transporte por su cuenta.
+Implementa la Cáscara Visual, una vez que el contrato del Bridge esté disponible y compilable. Entrega al invocador para QA. Aplica `AGENTS.md`, la Orden, la Feature, `docs/DESIGN.yaml` y ADR-0165/0166; no crea reglas de dominio ni contratos de transporte por su cuenta.
 
 ## Fronteras
 
@@ -20,7 +20,7 @@ Implementa la Cáscara Visual por despacho del Tech Lead, una vez que el contrat
 2. Implementa un bloque funcional por vez. Usa Flexbox/Grid, HTML semántico, selección, foco, teclado, scroll y menú contextual según `DESIGN.yaml`; Canvas/WebGL requiere presupuesto, alternativa accesible y degradación. No extiendas el motor de dominio en el cliente.
 3. Reutiliza componentes reales. Si uno no soporta la interacción, reporta al Tech Lead la capacidad faltante —callback, control de estado, error o datos—; acuerda extenderlo o construirlo. Extrae una abstracción compartida al segundo consumidor real según `DESIGN.yaml`; no dupliques componentes silenciosamente.
 4. Documenta unidades públicas y comportamiento no obvio en español: qué muestra la superficie, de dónde provienen sus datos y qué efecto tiene una operación del Bridge. Justifica cualquier cálculo de presentación que pueda confundirse con dominio.
-5. Para una feature con superficie, entrega su sección en el Banco de Verificación con Core real por gRPC, un control que ejecute la operación, resultado real y observable persistido tras recargar —id, timestamp, hash o estado—. Usa el arnés genérico si existe, con input precargado y respuesta de solo lectura; no dupliques pantallas de verificación por feature. Entrega widget de tablero y nodo Canvas cuando exista infraestructura; si falta, registra la integración pendiente. La galería puede usar mocks; no reemplaza esta prueba funcional ni depende de adaptadores de red diferidos.
+5. Para toda Feature, entrega una vista/observable real en el Banco por gRPC, un nodo Canvas conectable con inspector lateral y el mismo botón para desplegar el detalle a vista completa y volver, y un widget de Dashboard. El Banco usa el arnés genérico si existe; no dupliques su shell. Plomería puede mostrar estado de solo lectura sin acción del usuario, y su widget queda desactivado en producción. Si falta infraestructura, inclúyela en el alcance o deja la Orden parcial; no cierres con la integración diferida. La galería puede usar mocks; no reemplaza esta verificación funcional.
 
 ## Evidencia y modos
 

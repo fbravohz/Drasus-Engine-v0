@@ -1,34 +1,13 @@
 # AGENTS.md — Mapa operativo
 
-Mapa de arranque y canon operativo de los agentes. Contiene las reglas globales; el detalle de producto vive en `docs/README.md`, ADRs, SAD y skills.
-
-## Arranque y selección de agente
-
-Para cualquier tarea de Drasus, consulta primero `docs/README.md` como índice y abre solo los documentos relevantes. Antes de actuar, clasifica **ambigüedad, impacto, novedad, riesgo** (datos, dinero, seguridad o contratos), **alcance** y **validación**.
-
-**Luna es el caballo de batalla:** primera opción para implementación diaria, debugging, tests, documentación, UI, gRPC, refactors claros y exploración.
-
-| Agente | Úsalo para | Razonamiento |
-|---|---|---|
-| **Luna** | Tareas acotadas, reversibles, mecánicas o con diseño claro; exploración y subagentes | `medium/high/max` |
-| **Sol** | Implementación compleja, vertical slices y cambios multiarchivo con arquitectura/contratos definidos | `high/xhigh/max` |
-| **Astra** | Arquitectura nueva, conflictos, decisiones irreversibles, trading, riesgo, seguridad y errores caros | `high/xhigh/max/ultra` |
-
-Reglas:
-
-- **Autoridad del usuario:** solo invoca o selecciona Sol o Astra si el usuario lo pide explícitamente en el turno actual. La matriz, el riesgo, una skill o una regla de auditoría no autorizan su uso por sí solos.
-- **Delegación descendente:** el agente de mayor nivel seleccionado por el usuario puede delegar a Luna cuando esté justificado y autorizado. Un agente de menor nivel no escala a Sol o Astra; solo una petición explícita del usuario permite esa excepción.
-- Las señales de ambigüedad, impacto, novedad, riesgo o validación intensifican el análisis y la evidencia del agente seleccionado; no cambian automáticamente el agente. Para seguridad y tareas críticas, documenta evidencia, severidad, corrección y verificaciones dentro del alcance autorizado.
-- Si el usuario solicita Sol o Astra, resuelve el ID real disponible en el host (`gpt-6-astra`, `gpt-5.6-sol` son ejemplos); usa el máximo nivel soportado y decláralo.
-- El agente debe producir un resultado verificable, no solo un plan. Antes de empezar, declara: `tarea → clasificación → agente/nivel → motivo → escalamiento → subagentes`.
-- Para un barrido amplio, delimita el alcance y delega a Luna solo cuando esté justificado y autorizado. Los subagentes devuelven solo la conclusión y nunca escriben concurrentemente en los mismos archivos.
+Mapa de arranque y canon operativo de los agentes. Contiene las reglas globales.
 
 ## Skills
 
 ### Caveman global
 
 1. Usa la skill `$caveman` por defecto en cada respuesta y cada sesión.
-2. Usa `$caveman-commit` solo cuando el usuario pida un mensaje de commit.
+2. Cuando el usuario pida un mensaje de commit, usa el modo commit de `$caveman`.
 
 ### Skills y MCP en Codex
 
@@ -40,6 +19,7 @@ Reglas:
    - `assets/`: plantillas y archivos auxiliares.
 4. En `SKILL.md` define entradas, pasos, salidas, validaciones, límites y cuándo consultar cada auxiliar. Mantenlo conciso y procedural.
 5. **Usa MCP** para datos vivos, servicios externos, autenticación, acciones controladas o infraestructura centralizada. La skill orquesta; MCP expone datos y acciones tipadas.
+   - Antes de usar el MCP de Notion con el hub Drasus Engine, invoca `$notion-hub` ([skill](.agents/skills/notion-hub/SKILL.md)) para consultar u operar sus recursos. Toda mutación requiere una instrucción explícita y acotada del propietario en el turno actual.
 6. No uses MCP para servir recursos estáticos que pueden versionarse junto a la skill ni expongas lectores de archivos o ejecutores arbitrarios.
 7. Para PDF, Excel, DOCX y reportes, usa scripts o herramientas MCP deterministas y valídalos; no dejes que el modelo construya manualmente el resultado.
 8. El harness descubre `SKILL.md` y usa primero `name`/`description`; carga el cuerpo y auxiliares bajo demanda. `AGENTS.md` contiene reglas globales; el detalle condicional vive junto a la skill o en su fuente canónica.
@@ -102,7 +82,7 @@ Redacta cada regla para que se entienda en una lectura, conserve la información
 1. Documenta las interfaces públicas y las unidades cuyo contrato no sea evidente; explica qué efecto producen, qué devuelven o qué garantizan. No comentes código obvio.
 2. Comenta en línea solo decisiones no obvias: condiciones de borde, invariantes, seguridad, concurrencia, cálculos complejos y motivos para conservar una operación riesgosa. Explica el porqué y la consecuencia, no la sintaxis.
 3. Justifica cualquier `unwrap`, `expect`, pánico o equivalente que no pueda reemplazarse por manejo de errores; deja clara la invariante que hace seguro el fallo.
-4. Registra una simplificación deliberada como `ponytail:` solo si tiene un trade-off y un disparador medible; registra deuda causada por una dependencia externa en `docs/DEBT.md`.
+4. Registra con `ponytail:` solo una simplificación local, correcta y bajo control del módulo; explica el trade-off, por qué basta y el umbral medible que dispara su revisión. Registra en `docs/DEBT.md` la deuda que dependa de eventos o dependencias externas.
 5. No uses comentarios como historial, referencias crudas a tickets o ADR, prosa defensiva ni repetición del código. Define los términos que el lector no pueda inferir del contexto.
 
 ## Arquitectura y límites del proyecto
@@ -119,7 +99,7 @@ Redacta cada regla para que se entienda en una lectura, conserve la información
 7. **Fase:** el proyecto está en greenfield hasta el primer release distribuido: el esquema base puede corregirse en sitio. Antes de cambiar esquema consulta los ADR de migraciones. Después del primer release pasa a brownfield y las migraciones son solo hacia adelante (ADR-0006).
 8. **Dirección de UI:** Flutter quedó retirado como cliente activo por ADR-0165. No reutilices su implementación ni el catálogo de widgets a medida. Para toda UI nueva usa React/TypeScript dentro de Tauri 2; React comparte componentes cuando el segundo consumidor real lo justifique, según ADR-0139. El Banco de Verificación conserva su función de probar features por separado conforme a ADR-0117/ADR-0152; su UI nueva debe usar Tauri/React y gRPC según ADR-0142/ADR-0165. Las especificaciones Flutter restantes son históricas y deben adaptarse antes de guiar una implementación.
 9. **Portabilidad Rust:** protege toda API específica del sistema operativo y sus pruebas con el `#[cfg(...)]` exacto: `unix` para POSIX, `target_os = "linux"` para `/proc` o `prctl`, `target_os = "macos"` para APIs de macOS y `windows` para Windows. Proporciona una alternativa o un error tipado en los demás targets; no dejes que el símbolo desaparezca para sus llamadores.
-10. **Entrega de UI:** aplica ADR-0117 según las enmiendas de ADR-0165 y ADR-0166. Una feature con superficie entrega en la misma Story su sección en el Banco de Verificación con datos reales por gRPC, su widget de tablero y su nodo Canvas si la infraestructura existe; si no existe, registra la deuda de integración. Una feature de plomería declara la feature consumidora y el observable concreto de su Ventana de Verificación.
+10. **Entrega de UI:** aplica ADR-0117 según las enmiendas de ADR-0165 y ADR-0166. Toda Orden de implementación de una Feature —incluida plomería— entrega y verifica con datos reales: una vista/observable propio en el Banco de Verificación, un nodo Canvas conectable con inspector lateral desplegable a vista completa y un widget de Dashboard. Los widgets de producto están habilitados; los de plomería quedan desactivados en producción. La plomería puede ser de solo lectura y sin interacción. Declara además su Feature consumidora y observable de la Ventana de Verificación. Si falta infraestructura, inclúyela en la Orden o deja la entrega parcial; no la difieras como deuda de una Orden cerrada.
 11. **Modelo de datos:** toda migración creada o modificada actualiza en el mismo cambio `docs/data-model/<tabla>.md` y, para una tabla nueva, `docs/DATA-MODEL.md`; contrasta columna, restricción e índice contra la migración real.
 
 ## Documentación y recuperación de contexto
@@ -176,12 +156,13 @@ Cuando una orden de trabajo declare un modo, aplícalo por agente; sin declaraci
 ## Gestión de deuda técnica
 
 1. **Registro:** usa una deuda (`DEBT-XXX`) solo para un hueco conocido en algo ya construido que no puede resolverse ahora; regístrala en `docs/DEBT.md` y `docs/debt/DEBT-XXX.md` con origen, impacto, causa raíz, severidad, disparador de pago, plan y estado.
-2. **Clasificación:** usa una tarea (`TASK-XXX`) para una decisión, insumo o trabajo aún pendiente; si depende del usuario, márcala explícitamente como bloqueada. Usa `ponytail:` solo para una simplificación local bajo control del módulo y con umbral medible. Un defecto de correctitud no es deuda: corrígelo ahora.
+2. **Clasificación:** usa `TASK-XXX` para decisiones, insumos o trabajos pendientes; si dependen del usuario, márcalos bloqueados. Un defecto de correctitud no es deuda: corrígelo ahora.
 3. **Promoción:** al cerrar un hito o decidir el siguiente trabajo, revisa los disparadores de `docs/DEBT.md` y promueve los cumplidos; un hueco de definición de terminado tiene prioridad sobre el siguiente hito y no puede tener severidad baja.
 4. **Pago:** salda una deuda mediante una Story o entregable verificable y actualiza su ficha y el índice canónico con el enlace correspondiente.
 5. **Referencia:** cuando una orden pida seguir un patrón, consulta el documento canónico que lo define; usa una implementación existente solo para un punto específico ya auditado.
 6. **Deuda de agentes:** registra huecos de skills, hooks, plantillas o gobernanza en `.agents/CONTEXT-DEBT.md` y `.agents/debt/CONTEXT-DEBT-NNN.md`, con los mismos campos y disciplina de una deuda de producto.
 7. **Severidad:** usa Alta si una condición alcanzable puede corromper datos o violar una invariante; Media para pérdida segura de función o correctitud bajo una condición todavía ausente; Baja solo para asuntos cosméticos o de secuenciación sin riesgo de correctitud.
+8. **Auditoría de marcadores:** cuando pidan un ledger, busca comentarios `shortcut:` y `ponytail:` —o el marcador indicado— con `git grep --no-index --exclude-standard -nE '(#|//|/[*]) ?(shortcut|ponytail):'`; adapta el patrón al marcador solicitado. Cuenta diferimientos reales, no atajos de teclado ni menciones de la convención. Agrupa una fila por marcador y archivo: `<archivo>:<línea>, <simplificación>. ceiling: <límite>. upgrade: <disparador>.` Extrae límite y disparador del comentario; si falta cualquiera, indica `no-trigger`, sin inventar valores. Cierra con `<N> markers, <M> with no trigger.`; sin hits, usa `No shortcut debt. Clean ledger.` Verifica los totales contra las filas. Usa `git blame -L<línea>,<línea>` solo si piden responsables. Es de solo lectura; persiste el ledger únicamente con autorización explícita.
 
 ## Ledgers append-only
 
@@ -216,6 +197,16 @@ Estas reglas aplican al crear, ejecutar o cerrar una Orden en `docs/execution/`:
 
 1. **Implementación mínima:** omite lo especulativo; prefiere biblioteca estándar, capacidades nativas, dependencias ya instaladas y el menor código correcto. No introduzcas una interfaz de una sola implementación, una fábrica de un solo producto, configuración inmutable ni andamiaje futuro sin una necesidad verificable.
 2. **Límites:** no simplifiques fronteras de confianza, manejo de errores que evita pérdida de datos, seguridad, accesibilidad, calibración física ni requisitos explícitos. Toda lógica no trivial deja la verificación ejecutable más pequeña que falle si se rompe.
-3. **Marca deliberada:** usa `ponytail:` solo para una simplificación local correcta hoy; indica qué se simplificó, por qué basta y el umbral medible para escalar. Si depende de un evento externo, regístralo como deuda.
-4. **Rojo y verde:** para cada criterio de aceptación o garantía de comportamiento, demuestra que la prueba falla al romper el comportamiento, revierte la rotura y demuestra el verde. No compares una función consigo misma ni uses como esperado un valor producido por la misma implementación.
-5. **Evidencia:** mide concurrencia, recuperación, atomicidad y límites de recursos con valores que distingan la conducta correcta. Deriva cada valor esperado desde la especificación, un cálculo mostrado o una fuente citada; nunca desde la salida observada. Tras un reemplazo mecánico, confirma con `rg` cero ocurrencias residuales del patrón anterior.
+3. **Rojo y verde:** para cada criterio de aceptación o garantía de comportamiento, demuestra que la prueba falla al romper el comportamiento, revierte la rotura y demuestra el verde. No compares una función consigo misma ni uses como esperado un valor producido por la misma implementación.
+4. **Evidencia:** mide concurrencia, recuperación, atomicidad y límites de recursos con valores que distingan la conducta correcta. Deriva cada valor esperado desde la especificación, un cálculo mostrado o una fuente citada; nunca desde la salida observada. Tras un reemplazo mecánico, confirma con `rg` cero ocurrencias residuales del patrón anterior.
+
+## Revisión de código
+
+Aplica esta guía cuando pidan una revisión; informa sin editar el código.
+
+1. **Alcance:** revisa los archivos, cambios staged/no staged, rama o PR indicados. Si no indican alcance, revisa los cambios de trabajo; si están limpios, el último commit.
+2. **Evidencia:** lee el diff, callers, callees, pruebas y README pertinentes; sigue entrada, almacenamiento y salida, y busca todos los callers si cambia una firma, retorno o comportamiento. Deriva usuarios y carga esperada de evidencia del repositorio o despliegue; declara los supuestos.
+3. **Riesgos:** prioriza correctitud, seguridad, carga esperada, pruebas, rendimiento y simplicidad. Comprueba resultados y bordes —vacío, cero, último elemento, redondeo y zonas horarias—; validación de entradas, errores omitidos, orden de transacciones/escrituras y pérdida de datos, carreras, trabajo duplicado por proceso, memoria sin límite, consultas por elemento y crecimiento cuadrático. Un defecto compartido sigue siendo defecto aunque el parche local parezca correcto.
+4. **Pruebas y rendimiento:** exige pruebas discriminantes para ramas riesgosas, parsers, dinero, seguridad, escrituras y bugs corregidos. Una ralentización importante es defecto; una microoptimización de bucle crítico es sugerencia según la latencia real. Busca código especulativo o sin uso, helpers duplicados —cita el existente—, dependencias innecesarias frente a la biblioteca estándar o capacidades nativas, abstracciones de un solo uso, configuración sin uso y copias que deban evolucionar juntas. Divide trabajos mezclados, no por longitud ni para acortar funciones.
+5. **Hallazgos:** confirma líneas exactas y un escenario alcanzable con entrada/situación y resultado incorrecto. Un `ponytail:` o `shortcut:` con límite explícito es una decisión salvo que exceda la carga esperada. Excluye preferencias, dudas vagas y sugerencias «consider» sin respaldo; recomienda el arreglo correcto más pequeño, preferentemente quitar código, sin agregar capas o configuración innecesarias.
+6. **Informe:** usa el idioma del usuario y abre con un resumen de 2–3 frases. Agrupa y numera los hallazgos como requeridos —bugs, seguridad, pérdida de datos o fallos de carga—, recomendados —pruebas riesgosas faltantes, lentitud real, duplicación o trabajos mezclados— y opcionales; omite grupos vacíos. Cada hallazgo cita archivo/línea e indica conducta, falla concreta, arreglo mínimo y costo de diferir. Cierra con `ready` o los números que deben corregirse primero, posible reducción de líneas si hay simplificaciones y una línea de verificaciones materiales pendientes. Si no hay hallazgos, indica qué cambió, que está listo y qué revisaste.

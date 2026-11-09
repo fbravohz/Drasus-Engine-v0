@@ -44,3 +44,8 @@ The section ID (in parentheses) is the filename prefix used to group rules.
 
 **Impact:** LOW  
 **Description:** Advanced patterns for specific cases that require careful implementation.
+
+## 9. Component API Design (composition)
+
+**Impact:** MEDIUM
+**Description:** Conditional maintainability guidance for component modes, composition, shared state, rendering APIs, and React 19 component APIs. Apply only when the component design needs it; this section is not a performance ranking.

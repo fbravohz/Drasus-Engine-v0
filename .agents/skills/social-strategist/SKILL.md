@@ -1,32 +1,42 @@
 ---
 name: social-strategist
-description: Convierte avances verificados de Drasus en contenido bilingüe, episodios y cápsulas educativas. Úsala para producción de contenido o revisión de su entorno.
+description: Convierte avances verificados de Drasus Engine en borradores y planes de contenido. Úsala para preparar Pulso, episodios, postura, cápsulas o revisar herramientas de producción.
 ---
 
 # Social Strategist
 
-Convierte avances verificados en Pulso, episodios, Postura y cápsulas; prepara guiones y assets, no publica sin autorización. Aplica `AGENTS.md`. `CONTENT-STRATEGY.md` es el canon de pilares, idioma, guiones, formatos y líneas rojas: léelo al invocar; si falta, declara el límite y no inventes su política ni contenido que dependa de ella.
+Prepara contenido listo para revisión. No publiques en redes sin autorización explícita.
 
-## Selección del flujo
+## Fuentes e invariantes
 
-- Sin bandera: escanea y presenta opciones aplicables. `--estado`: informa sin generar.
-- `--postura`: contenido de Pilar F sin depender del avance de código; usa el procedimiento de producción.
-- `--entorno`: verifica/configura herramientas, sin escaneo editorial.
-- `--capsula [concepto]`: con concepto explícito localiza su implementación y produce la cápsula; sin concepto detecta semillas y ofrece selección.
+- Consulta las secciones pertinentes de [docs/CONTENT-STRATEGY.md](../../../docs/CONTENT-STRATEGY.md) para pilares, formatos, idiomas, marca y líneas rojas. Si falta, declara el límite y no inventes esas reglas.
+- Basa las afirmaciones de producto en Órdenes, commits y la fuente pertinente —feature, ADR o TTR—. Distingue lo implementado de lo planeado; no presentes una capacidad futura como disponible ni simules el producto.
+- Genera Pulso y cápsulas en español e inglés, en archivos separados. Sigue el canon para el idioma de episodios.
+- En contenido del Pilar F, no presentes una tasa fiscal fija. Somete cada cifra fiscal a revisión del General Counsel por jurisdicción antes de publicarla.
+- Lee la referencia del flujo elegido. Las instalaciones requieren confirmación explícita; para acciones con sudo o instalaciones manuales, entrega instrucciones y deja la ejecución al usuario.
 
-Lee [producción](references/production.md) al ejecutar el flujo elegido y [archivos](references/artifacts.md) al guardar resultados. Para verificar o instalar herramientas lee [entorno](references/environment.md).
+## Entrada y selección del flujo
 
-## Escaneo y decisión
+- Sin modo: escanea el estado y presenta un menú de 2–4 opciones aplicables. Genera contenido solo después de que el usuario elija.
+- `--estado`: informa el estado sin generar contenido ni modificar archivos.
+- `--postura`: inicia el flujo de postura del Pilar F, sin depender de cierres recientes.
+- `--entorno`: verifica herramientas; no instala nada automáticamente.
+- `--capsula [concepto]`: produce el concepto indicado desde su fuente canónica. Sin concepto, detecta semillas y ofrece opciones.
 
-1. Lee `.agents/state/social-strategist/PROGRESS.md`; si falta créalo con los campos de la referencia de archivos. Lee `git log --oneline` desde `último_commit_procesado`.
-2. Revisa en `docs/execution/` Historias/Riesgos/Tareas cerradas aún no registradas, desde el primer commit hacia el presente y en orden cronológico, sin saltar cierres. Usa Orden y commits como evidencia; consulta el progreso del Tech Lead solo ante dudas de estado/decisión o petición del usuario.
-3. Agrupa Pulso sin graduar por Pilar según el canon: un Pilar desbloqueado con 2+ entradas está listo para episodio.
-4. Detecta semillas educativas en features, TTRs y decisiones **implementadas por Órdenes cerradas**: algoritmos, estadística o ingeniería con contexto educativo. No elijas al azar del catálogo ni generes durante el escaneo.
-5. Verifica disponibilidad con `command -v manim ffmpeg whisper node npm python3`; informa faltantes, sin instalar.
-6. Presenta cierres, masa por Pilar, semillas y entorno; ofrece Pulso, episodio si aplica, Postura, cápsula, entorno y solo estado. Aunque no haya novedades, ofrece Postura. Si el usuario combina opciones, ejecútalas en ese orden sin nuevas preguntas, salvo la autorización de instalación.
+Al combinar opciones, ejecútalas en el orden indicado. La confirmación para instalar herramientas sigue siendo obligatoria.
 
-## Invariantes y cierre
+## Escaneo
 
-Todo cierre puede producir Pulso; propón episodio al acumular masa y educación a partir de semillas verificadas aunque no haya cierres nuevos. Pulso y cápsulas van en ES y EN completos, en documentos separados; idioma de episodio según canon. Discord recibe contenido premium con 12–24 h de exclusividad. Todo resultado enlaza commit o fuente y evita duplicados mediante progreso.
+1. Compara todas las Órdenes cerradas con `.agents/state/social-strategist/PROGRESS.md` y `git log`. Procesa cada cierre no registrado en orden cronológico, aunque su commit sea anterior al último procesado. Si falta PROGRESS, cubre desde el primer commit.
+2. Calcula la masa narrativa según el canon: 2 o más entradas sin cubrir en un Pilar desbloqueado habilitan una propuesta de episodio.
+3. Detecta semillas educativas en fuentes pertinentes de `docs/features/`, `docs/adr/` y TTRs. Prioriza conceptos conectados con trabajo cerrado. No generes durante el escaneo.
+4. Verifica disponibilidad de las herramientas requeridas, sin instalar. Consulta el progreso del Tech Lead solo ante dudas de estado o arquitectura, o si el usuario lo pide.
+5. Presenta solo opciones aplicables; si no hay cierres ni episodio disponible, ofrece postura, cápsula o estado.
 
-Antes de cerrar verifica fuentes, cronología, cobertura, formatos, idiomas, líneas rojas y artefactos escritos. Actualiza progreso con resultado exacto: commit procesado, contenido nuevo, cierres cubiertos y semillas convertidas en cápsula. No marques producido lo que solo propusiste.
+El escaneo no escribe archivos. Si falta PROGRESS, inicialízalo solo cuando el usuario elija un flujo que produzca contenido.
+
+## Producción y cierre
+
+- Lee [production.md](references/production.md) para el flujo elegido, [artifacts.md](references/artifacts.md) para rutas y seguimiento, y [environment.md](references/environment.md) al verificar herramientas.
+- Para una cápsula, verifica el concepto en una fuente canónica. Si la implementación no existe, declara ese estado y menciona planes solo cuando la fuente los confirme.
+- Antes de cerrar, verifica fuentes, cronología, idioma, líneas rojas y archivos generados. Registra solo contenido efectivamente producido; no marques propuestas como publicadas o terminadas.

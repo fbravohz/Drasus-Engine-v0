@@ -1,30 +1,37 @@
-# Producción por formato
+# Producción por flujo
 
-Consulta solo el flujo seleccionado y el canon `CONTENT-STRATEGY.md`. Si falta, no sustituyas sus reglas con supuestos.
+Antes de producir, consulta las secciones pertinentes de [docs/CONTENT-STRATEGY.md](../../../../docs/CONTENT-STRATEGY.md). Usa sus reglas para pilares, idiomas, formatos, marca y líneas rojas. Si falta, declara el límite y no las sustituyas con supuestos. Prepara borradores; no publiques sin autorización.
 
-## Pulso — Pipeline A
+## Pulso
 
-Por cada Historia/Riesgo/Tarea cerrada: redacta Story Core en español con Hook, Problema, Solución, Resultado y Siguiente paso; tradúcelo completo al inglés. Genera por idioma los cinco formatos del canon —Twitter, Discord, Instagram, TikTok, Facebook— con prompts de imagen si no hay captura. Guarda ambos documentos y actualiza cierre procesado y `último_commit_procesado`.
+Por cada Historia, Riesgo o Tarea cerrada que el usuario eligió procesar:
 
-## Episodio — Pipeline B
+1. Redacta el Story Core en español: Hook, Problema, Solución, Resultado y Siguiente paso.
+2. Traduce el texto completo al inglés.
+3. Usa los canales y formatos de Tier 1 definidos en las secciones 1.5 y 9 del canon. No agregues formatos por costumbre.
+4. Usa capturas reales cuando estén disponibles. Si no hay captura, propone un prompt visual conceptual; no simules una interfaz o capacidad que Drasus aún no tiene.
+5. Guarda ambos borradores y registra el cierre y el commit en PROGRESS.
 
-Se activa al elegir el episodio detectado por masa narrativa. Confirma ángulo y plantilla del Pilar: primer episodio frente a Gran Estreno con datos reales según canon. Antes del guion informa herramientas críticas faltantes y ofrece configurar entorno. Produce guion minuto a minuto, scripts Manim, componentes Remotion solo para Gran Estreno con datos exportados, sugerencias ffmpeg/OBS y checklist de pantalla, voz y cámara que el usuario grabará. Guarda bajo `episodios/[slug]/`, aplica idioma canónico y registra historias/riesgos/decisiones cubiertos para no repetirlos.
+## Episodio
 
-## Postura — Pipeline C
+Se activa cuando el usuario elige un episodio detectado por masa narrativa. Confirma el ángulo y usa la plantilla que corresponda según el Pilar y Tier del canon. Sigue su política de idioma.
 
-Elige un mito o afirmación del trading algorítmico hispano del Pilar F. Usa argumentos técnicos verificables ligados a lo que Drasus resuelve o tiene previsto resolver; distingue capacidades construidas de futuras, sin promesas falsas. Produce corto de 30–60 s y variantes para las demás redes, ES y EN. Guarda como Pulso y etiqueta `Pilar F / postura` en progreso.
+- Verifica las herramientas críticas antes de escribir el guion. Si falta una, informa el impacto y ofrece configurar el entorno.
+- Escribe el guion minuto a minuto. Prepara scripts de Manim o Motion Canvas para animaciones conceptuales y diagramas.
+- Usa Remotion solo para Tier 3 con datos reales exportados. Sugiere comandos de ffmpeg u OBS cuando el flujo los requiera.
+- Añade un checklist de pantalla, voz y cámara que el usuario grabará. Guarda guion, assets y checklist en la carpeta del episodio.
+- No dependas de integraciones no verificadas. Registra qué cierres cubre el episodio para evitar repetir el mismo ángulo.
 
-## Cápsula educativa — Pipeline E
+## Postura — Pilar F
 
-Usa la semilla elegida. Con `--capsula [concepto]`, localiza primero la Orden que implementó ese concepto y lee su feature/ADR pertinente: qué hace, qué problema resuelve y cómo lo usa Drasus. No inventes diseño de features sin desarrollar; si explicas una parte futura vinculada a la semilla, identifícala como tal con EPIC y propósito.
+Elige un mito o afirmación del trading algorítmico hispano y susténtalo con argumentos técnicos verificables. Distingue las capacidades actuales de las planeadas. Sigue el formato del Pilar F —incluido el corto de 30–60 segundos— y genera los borradores en español e inglés.
 
-Conserva cuatro bloques: contexto histórico —quién, cuándo, problema—; idea sin cálculo completo y analogía solo si ayuda; relevancia quant/trading con situación reconocible; uso concreto en Drasus y estado de implementación.
+Usa la cifra ilustrativa de capital que indique el canon. No presentes una tasa fiscal fija; revisa cualquier cifra fiscal con el General Counsel para la jurisdicción correspondiente antes de publicarla. Registra el resultado como postura del Pilar F.
 
-Evalúa granularidad: concepto simple admite thread de 4–6 tweets y carrusel; uno rico, Short/Reel de 60 s con indicaciones Manim y thread de soporte. Genera los formatos completos en ES y EN separados:
+## Cápsula educativa — Pilar H
 
-- Twitter: 4–7 tweets, primer hook y último uso en Drasus.
-- Discord: 600–900 palabras, contexto técnico y enlace a feature/ADR.
-- Instagram: 6–8 slides; 1 hook, 2–5 bloques, 6 CTA; adapta las adicionales al concepto.
-- TikTok/Short: 0–3 s hook, 3–45 s concepto, 45–60 s uso en Drasus y CTA; incluye indicaciones de animación si Manim aporta valor.
+Usa una semilla elegida o el concepto explícito del usuario. Verifica su fuente en una feature, ADR o TTR y explica qué problema resuelve y cómo se relaciona con Drasus. Prioriza semillas vinculadas a trabajo cerrado; el canon también permite conceptos de sus fuentes educativas aunque no dependan de una entrega reciente.
 
-Guarda ambos idiomas, mueve la semilla a cápsulas producidas y anota si un episodio ya cubrió el concepto.
+Mantén los cuatro bloques del Pilar H: contexto, idea, relevancia en quant/trading y relación con Drasus. No inventes una implementación ni un plan. Si aún no está implementada, dilo; menciona una épica solo si la fuente confirma el vínculo.
+
+Adapta la profundidad al concepto: uno simple admite un hilo de 4–6 tweets y carrusel; uno rico, un Short/Reel de 60 segundos con animación cuando aporte valor y un hilo de soporte. Para los formatos completos, usa Twitter con 4–7 tweets, Discord con 600–900 palabras e Instagram con 6–8 slides: la primera presenta el gancho, las slides 2–5 desarrollan la cápsula y la sexta cierra con CTA. Adapta las slides adicionales al concepto. En TikTok/Short, usa 0–3 segundos para el gancho, 3–45 para el concepto y 45–60 para Drasus y CTA. Conserva los cuatro bloques. Produce versiones completas en español e inglés, guarda ambas y registra la cápsula. Anota si un episodio ya cubrió el concepto.

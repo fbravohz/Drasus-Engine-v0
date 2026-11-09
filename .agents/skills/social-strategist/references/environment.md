@@ -1,12 +1,16 @@
-# Entorno de producción — Pipeline D
+# Entorno de producción
 
-Reporta disponibilidad y uso. Antes de instalar sin `sudo`, propone el comando exacto y exige confirmación explícita incluso si el usuario eligió todas las opciones. Para instalación con `sudo` o manual entrega solo comando/enlace: el usuario la ejecuta. Verifica compatibilidad del entorno antes de proponer comandos y confirma después con `command -v`; no supongas instalación exitosa.
+Verifica las herramientas necesarias para el flujo elegido. Consulta [la estrategia de contenido](../../../../docs/CONTENT-STRATEGY.md), sección 6, para usos y límites. Informa disponibilidad antes de proponer instalaciones. Al proponer una instalación, consulta las instrucciones oficiales vigentes para esa herramienta y plataforma.
 
-| Herramienta | Uso | Opción que debe verificarse antes de instalar |
+Pide confirmación explícita antes de ejecutar cualquier instalación. Para instalaciones con sudo o pasos manuales, presenta el comando o enlace oficial y deja la ejecución al usuario. Comprueba compatibilidad antes de proponer un comando y vuelve a verificar disponibilidad después; no supongas que tuvo éxito.
+
+| Herramienta | Uso | Verificación |
 |---|---|---|
-| Manim | Animación conceptual/matemática | `python3 -m pip install --user manim`; puede requerir cairo/pango vía dnf |
-| ffmpeg | Recorte, concatenación, conversión | `sudo dnf install ffmpeg-free`; RPM Fusion para codecs adicionales |
-| Whisper | Subtítulos | `python3 -m pip install --user openai-whisper`; requiere ffmpeg |
-| Remotion | Video de Gran Estreno con datos | `npm create video@latest`; comprueba Node/npm, no asumas nvm instalado |
-| OBS Studio | Grabación | Instalación manual de Flatpak `flathub com.obsproject.Studio` |
-| DaVinci Resolve | Edición | Descarga manual desde el sitio oficial de Blackmagic Design |
+| Manim | Animación matemática y conceptual | Verifica con `command -v manim`. |
+| Python 3 | Runtime de Manim | Verifica con `command -v python3`. |
+| Motion Canvas | Animación de diagramas y AST | Verifica las dependencias del proyecto de video; no asumas un comando global. |
+| ffmpeg | Recorte, concatenación y conversión | Verifica con `command -v ffmpeg`. |
+| Whisper | Subtítulos | Verifica con `command -v whisper` y comprueba que ffmpeg esté disponible. |
+| Node y npm | Remotion y proyectos de video | Verifica con `command -v node` y `command -v npm`. Confirma antes de crear archivos de proyecto. |
+| OBS Studio | Grabación de pantalla | Comprueba la instalación desde su fuente oficial. |
+| DaVinci Resolve | Edición final | Comprueba la instalación desde el sitio oficial de Blackmagic Design. |

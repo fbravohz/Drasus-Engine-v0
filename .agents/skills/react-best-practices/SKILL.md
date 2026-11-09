@@ -1,6 +1,6 @@
 ---
 name: vercel-react-best-practices
-description: React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
+description: React and Next.js performance guidance plus conditional component API patterns. Use for React/Next.js implementation, review, or optimization; apply composition guidance only for interacting modes, compound APIs, shared state, or render-prop decisions.
 license: MIT
 metadata:
   author: vercel
@@ -9,7 +9,7 @@ metadata:
 
 # Vercel React Best Practices
 
-Comprehensive performance optimization guide for React and Next.js applications, maintained by Vercel. Contains 70 rules across 8 categories, prioritized by impact to guide automated refactoring and code generation.
+Performance optimization guidance for React and Next.js, plus focused component API patterns. Keep the eight performance categories separate from conditional maintainability guidance for composition.
 
 ## When to Apply
 
@@ -19,6 +19,7 @@ Reference these guidelines when:
 - Reviewing code for performance issues
 - Refactoring existing React/Next.js code
 - Optimizing bundle size or load times
+- Designing component APIs with interacting modes, composable parts, shared state, or custom rendering
 
 ## Rule Categories by Priority
 
@@ -32,6 +33,15 @@ Reference these guidelines when:
 | 6 | Rendering Performance | MEDIUM | `rendering-` |
 | 7 | JavaScript Performance | LOW-MEDIUM | `js-` |
 | 8 | Advanced Patterns | LOW | `advanced-` |
+
+## Component API Design
+
+Load these rules only when a component API has interacting modes, independently composed parts, shared state, or a render-prop decision. Keep simple components simple; do not add providers or compound APIs preemptively.
+
+- [Use explicit variants for interacting modes](rules/composition-explicit-variants.md).
+- [Use compound components and shared state conditionally](rules/composition-compound-components.md).
+- [Choose children or render props by data flow](rules/composition-children-or-render-props.md).
+- [Apply React 19 ref and context APIs where they fit](rules/composition-react19-apis.md).
 
 ## Quick Reference
 
@@ -137,6 +147,8 @@ Read individual rule files for detailed explanations and code examples:
 rules/async-parallel.md
 rules/bundle-barrel-imports.md
 ```
+
+For component API design, read only the linked composition rule that matches the issue.
 
 Each rule file contains:
 - Brief explanation of why it matters

@@ -14,7 +14,7 @@ January 2026
 
 ## Abstract
 
-Comprehensive performance optimization guide for React and Next.js applications, designed for AI agents and LLMs. Contains 40+ rules across 8 categories, prioritized by impact from critical (eliminating waterfalls, reducing bundle size) to incremental (advanced patterns). Each rule includes detailed explanations, real-world examples comparing incorrect vs. correct implementations, and specific impact metrics to guide automated refactoring and code generation.
+Performance optimization guidance for React and Next.js across eight impact-ranked categories, plus conditional component API patterns. Composition guidance targets maintainability and applies only when component modes, slots, or shared state justify it.
 
 ---
 
@@ -98,6 +98,11 @@ Comprehensive performance optimization guide for React and Next.js applications,
    - 8.2 [Initialize App Once, Not Per Mount](#82-initialize-app-once-not-per-mount)
    - 8.3 [Store Event Handlers in Refs](#83-store-event-handlers-in-refs)
    - 8.4 [useEffectEvent for Stable Callback Refs](#84-useeffectevent-for-stable-callback-refs)
+9. [Component API Design](#9-component-api-design) — **CONDITIONAL**
+   - 9.1 [Use Explicit Variants for Interacting Modes](#91-use-explicit-variants-for-interacting-modes)
+   - 9.2 [Use Compound Components for Shared UI State](#92-use-compound-components-for-shared-ui-state)
+   - 9.3 [Choose Children or Render Props by Data Flow](#93-choose-children-or-render-props-by-data-flow)
+   - 9.4 [Apply React 19 Ref and Context APIs Where They Fit](#94-apply-react-19-ref-and-context-apis-where-they-fit)
 
 ---
 
@@ -113,7 +118,7 @@ Waterfalls are the #1 performance killer. Each sequential await adds full networ
 
 When a branch uses `await` for a flag or remote value and also requires a **cheap synchronous** condition (local props, request metadata, already-loaded state), evaluate the cheap condition **first**. Otherwise you pay for the async call even when the compound condition can never be true.
 
-This is a specialization of [Defer Await Until Needed](./async-defer-await.md) for `flag && cheapCondition` style checks.
+This is a specialization of [Defer Await Until Needed](rules/async-defer-await.md) for `flag && cheapCondition` style checks.
 
 **Incorrect:**
 
@@ -216,7 +221,7 @@ async function updateResource(resourceId: string, userId: string) {
 
 This optimization is especially valuable when the skipped branch is frequently taken, or when the deferred operation is expensive.
 
-For `await getFlag()` combined with a cheap synchronous guard (`flag && someCondition`), see [Check Cheap Conditions Before Async Flags](./async-cheap-condition-before-await.md).
+For `await getFlag()` combined with a cheap synchronous guard (`flag && someCondition`), see [Check Cheap Conditions Before Async Flags](rules/async-cheap-condition-before-await.md).
 
 ### 1.3 Dependency-Based Parallelization
 
@@ -889,7 +894,7 @@ Safe exceptions:
 
 - Process-wide singletons that do not store request- or user-specific mutable data
 
-For static assets and config, see [Hoist Static I/O to Module Level](./server-hoist-static-io.md).
+For static assets and config, see [Hoist Static I/O to Module Level](rules/server-hoist-static-io.md).
 
 ### 3.4 Cross-Request LRU Caching
 
@@ -3796,6 +3801,30 @@ function SearchInput({ onSearch }: { onSearch: (q: string) => void }) {
   }, [query])
 }
 ```
+
+---
+
+## 9. Component API Design
+
+Apply this section only when component modes interact, consumers need to compose subparts, sibling UI shares state, or a render API is under design. Keep the eight performance categories and this maintainability guidance distinct.
+
+### 9.1 Use Explicit Variants for Interacting Modes
+
+Avoid multiple boolean props that select different structures or actions and create invalid combinations. Use named variants or composed parts when they clarify real behavior differences. A single independent state prop remains appropriate. Keep implementations local until a second real consumer justifies extraction under [ADR-0139](../../../docs/adr/ADR-0139.md).
+
+### 9.2 Use Compound Components for Shared UI State
+
+Use compound components only when consumers need to arrange related subcomponents around shared state. Keep state-source details in the provider; expose the smallest context interface the UI needs. A `state`/`actions`/`meta` shape is one option when multiple real providers must support the same UI, not a required schema. Lift state only to the nearest common owner when sibling components need it; otherwise keep state local or pass props.
+
+### 9.3 Choose Children or Render Props by Data Flow
+
+Use `children` for static structure and slots. Use render props when the parent must supply per-item data or state, such as an item, index, or selection. Do not replace a useful data callback with children merely to avoid render props.
+
+### 9.4 Apply React 19 Ref and Context APIs Where They Fit
+
+For new React 19 components that expose a ref, accept `ref` as a prop; `forwardRef` is no longer necessary. `useContext` remains suitable for top-level context reads. Use `use(context)` when a context must be read conditionally or in a loop; it is an alternative, not a blanket replacement. React 19 also permits `<Context value={...}>`; do not migrate existing `.Provider` usage solely for consistency.
+
+See the [variant](rules/composition-explicit-variants.md), [compound component](rules/composition-compound-components.md), [render API](rules/composition-children-or-render-props.md), and [React 19 API](rules/composition-react19-apis.md) rules. Official references: [`forwardRef`](https://react.dev/reference/react/forwardRef), [`use`](https://react.dev/reference/react/use), [`useContext`](https://react.dev/reference/react/useContext), and [`createContext`](https://react.dev/reference/react/createContext).
 
 ---
 

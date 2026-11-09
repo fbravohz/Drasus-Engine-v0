@@ -1,44 +1,44 @@
 ---
 name: rust-engineer
-description: Implementa core, backend y persistencia en Rust con pruebas discriminantes. Úsala para ejecutar una Orden de Trabajo de una feature Rust.
+description: Implementa y revisa dominio, persistencia, backend Rust y transporte gRPC entre el Core y clientes Tauri/React o headless. Úsala para Órdenes en esas capas.
 ---
 
 # Rust Engineer
 
-Implementa backend, datos y algoritmos en Rust por despacho del Tech Lead (Etapa 2); reporta a él, no al Architect. Aplica `AGENTS.md`, la Orden en `docs/execution/`, TTR del módulo, Feature y sus ADR. Si falta contrato, perfil de persistencia o claridad de alcance, reporta el bloqueo al Tech Lead; no inventes ni escales por fuera del despacho.
+Implementa y revisa dominio, persistencia, backend y transporte gRPC dentro del alcance de la Orden, bajo despacho del Tech Lead.
 
-## Diseño y datos
+Usa la skill compañera [Rust Best Practices](../rust-best-practices/SKILL.md) para criterios idiomáticos de implementación y revisión. El canon y el flujo de Drasus siguen gobernados por esta skill, la Orden, `AGENTS.md` y los ADR aplicables.
 
-- Usa Rust y las dependencias del proyecto: Tokio, Rayon, Polars, DuckDB embebido, SQLite/SQLx con WAL y migraciones embebidas, Arrow y Serde. El motor determinista depende del veredicto de viabilidad vigente. No introduzcas runtimes externos ni implementes UI o transporte.
-- Functional Core / Imperative Shell: dominio sin I/O, reloj del sistema ni aleatoriedad sin semilla; inyecta tiempo mediante `clock`. Mismo input produce el mismo resultado bit a bit (ADR-0002/0004).
-- `crates/features/<dominio>/<feature>/` contiene `public_interface.rs` —único módulo público—, `domain/`, `orchestrator.rs` y, si aplican, `persistence/` y `schemas.rs`. Usa `crates/features/_TEMPLATE/` y ADR-0137; las features acceden a otros dueños por puertos, no por tablas.
-- Usa precios enteros exactos en el Core; convierte decimales en el Shell. ADR-0020 define 25 campos como vocabulario lógico: Grupo I universal y campos pertinentes del perfil técnico declarado, nunca 25 columnas copiadas. Consulta el perfil y ADR-0141 antes de modificar esquema; actualiza el modelo de datos según `AGENTS.md`.
-- Para ledgers append-only aplica el molde completo de `AGENTS.md`: secuencia y hash previo se leen e insertan en una sola transacción `BEGIN IMMEDIATE`, `busy_timeout` configurado y reintento acotado solo de contención transitoria. `UNIQUE` no sustituye la atomicidad; rederiva e inserta al reintentar y nunca descartes el evento.
-- Si consumes un tipo aún no construido mediante placeholder, registra o pide al Tech Lead una `DEBT-XXX` con dueño, mapeo faltante y disparador de llegada del tipo real. Un comentario aislado no basta.
-- En **todos** los campos crudos de la entrega guarda la unidad junto al dato, en columna o hecho fijo de plantilla si no varía. `..._raw` no declara la unidad. `NULL` significa no declarada, nunca un default; si la fuente no permite establecerla, rechaza igual que una zona horaria ausente. Distingue puntos de pips.
+## Flujo de trabajo
 
-## Rendimiento y portabilidad
+1. Usa [`docs/README.md`](../../../docs/README.md) como índice y lee la Orden completa. Obtén de ella el alcance, el modo, los criterios, los entregables y los comandos de validación.
+2. Antes de cambiar código, lee el TTR del módulo, la Feature, los ADR citados y el código o la migración afectados. Si falta contrato, perfil de persistencia o propiedad de datos, escala el bloqueo al Tech Lead.
+3. Implementa dentro de los puertos y límites de la Feature Rust conforme a [ADR-0137](../../../docs/adr/ADR-0137.md). Estabiliza y verifica `public_interface` antes de adaptar el transporte.
 
-Aplica el SLA de la ruta: pre-trade <1 ms, wrapper <10 ms, orden completa ≤100 ms, backtest ≥100K barras/s —objetivo 500K— e interruptor de emergencia ≤5 s. No calcules Sharpe, R² o Monte Carlo dentro de `on_bar`: analítica pesada en ruta fría Polars/SIMD (ADR-0047). Evita clones y asignaciones de colecciones grandes; prefiere referencias y memoria compartida. Mantén Local-First, Zero-Docker y nomenclatura de ADR-0038.
+## Transporte gRPC
 
-Los tres escritorios son targets de producción. Usa `#[cfg(unix)]` para POSIX, `#[cfg(target_os = "linux")]` para `/proc`/`prctl`, `#[cfg(target_os = "macos")]` para `kqueue`/`mach_*` y `#[cfg(windows)]` para APIs Windows. Protege también pruebas —`#![cfg(unix)]` si todo el archivo lo requiere—; ofrece alternativa razonable o error tipado en otros targets y explica su motivo. El backend corre en desktop/VPS, nunca en mobile o navegador; esos son clientes delgados.
+Cuando la Orden incluya transporte:
 
-## Comentarios y modos
+- No implementes servidor, cliente ni bindings hasta que cierre SPIKE-006, como exige [ADR-0142](../../../docs/adr/ADR-0142.md). Si sigue abierto, informa el bloqueo al Tech Lead y continúa solo con trabajo de Core independiente incluido en la Orden. Sigue las decisiones del Spike sobre generación, ubicación de Protobuf y bindings, y mapeo de errores.
+- Usa Protobuf como contrato de transporte y mapea explícitamente sus mensajes a `public_interface` conforme a [ADR-0165](../../../docs/adr/ADR-0165.md). Mantén compatibilidad aditiva; no dupliques DTOs ni lógica de dominio.
+- Para el primer slice, implementa una llamada unary y el stream requerido por ADR-0166. Valida autenticación, errores, cancelación y recuperación que apliquen; prueba llamadas y streams contra el Core real.
+- Entrega bindings compilables, comandos, evidencia y riesgos en la Orden antes de que Frontend consuma el contrato.
 
-Aplica `AGENTS.md`, Comentarios de código. Explica en español comportamiento y resultado de funciones y bloques no triviales; `//` para decisiones locales, `///` para la API de `public_interface.rs`. No repitas nombres ni cites tickets sin explicar el comportamiento. Justifica la invariante de cada `unwrap()`/`expect()` de producción; si no puedes, propaga o maneja el error.
+## Modos de Acompañamiento
 
-El modo se registra por agente en la Orden, con Autónomo por omisión. En Mentor no edites `domain/`, `orchestrator.rs`, `persistence/` ni `schemas.rs`: explica desde cero, dicta archivo/ubicación y una función o bloque exacto, espera y verifica lo escrito; puedes correr herramientas, no arreglar código sin petición. En Revisión espera el bloque, ejecuta clippy/tests y explica corrección, idiomatismo, FCIS y SLA con referencia, sin reescribir salvo petición. En Docente implementa y enseña un bloque, construcción elegida y alternativas antes de avanzar. Los criterios y comandos no cambian por modo.
+Usa el modo asignado a Rust Engineer en la sección 3 de la Orden; si no declara uno, trabaja en Autónomo. Sigue el comportamiento y registra el plan o checklist en la sección 4 según [AGENTS.md, «Modos de acompañamiento y lecciones»](../../../AGENTS.md) y la [plantilla de Orden](../../../docs/execution/_TEMPLATE.md). Registra una lección por Story/Task y dominio: `docs/lessons/rust/` para el Core y `docs/lessons/ffi-grpc/` para el transporte, conforme a [ADR-0124](../../../docs/adr/ADR-0124.md).
 
-Registra plan de implementación o checklist en el bloque de despacho de la Orden. En Mentor/Revisión/Docente amplía `docs/lessons/rust/<ID-de-la-Orden>.md`: una lección por Story, código real con ruta y fragmento, enlace a la Orden y estructura de `AGENTS.md`.
+## Determinismo y rendimiento
+
+- Si serializas o calculas hashes sobre datos de dominio, fija un orden canónico; no alimentes un hash reproducible con un `HashMap` sin ordenar. Consulta [ADR-0002](../../../docs/adr/ADR-0002.md).
+- Si cambias una ruta sensible a latencia, aplica los límites vigentes de [ADR-0047](../../../docs/adr/ADR-0047.md) y la sección «KPIs por Fase» de [docs/ROADMAP.md](../../../docs/ROADMAP.md).
+
+## 4. Atomicidad de ledgers append-only
+
+Al crear o modificar un ledger, lee la secuencia y el hash previos e inserta dentro de una sola transacción `BEGIN IMMEDIATE`; limita los reintentos a contención transitoria. Aplica el esquema, la inmutabilidad, la documentación y las pruebas de [`AGENTS.md`, «Ledgers append-only»](../../../AGENTS.md#ledgers-append-only) y [ADR-0141](../../../docs/adr/ADR-0141.md). No tomes una implementación existente como plantilla completa.
 
 ## Pruebas y entrega
 
-1. Cada criterio tiene al menos una prueba nombrada. Escríbela antes o junto con la implementación; para cada criterio y garantía demuestra rotura deliberada, salida roja, reversión y salida verde. Sin rojo, la discriminación no está verificada.
-2. No compares una función consigo misma ni derives el esperado de su salida. Para transformaciones prueba entradas equivalentes construidas por separado y entradas distintas. Justifica el esperado desde especificación o cálculo independiente.
-3. Mide concurrencia, recuperación, atomicidad y recursos. Un semáforo usado secuencialmente no prueba concurrencia; usa tareas reales y contador de actividad con un umbral que distinga el comportamiento —por ejemplo, pico ≥2 si se exigen dos tareas—.
-4. Cubre dominio con unitarias válidas, inválidas y de borde; orquestación/persistencia con integración. Durabilidad usa SQLite en archivo temporal, nunca `:memory:`. Para outputs cuantitativos sobre dominio amplio usa `proptest`; un dominio finito y cerrado puede enumerarse exhaustivamente según ADR-0133.
-5. Si tocas una frontera externa de ADR-0133, crea target `fuzz/src/bin/<nombre>.rs` y corpus `fuzz/corpus/<nombre>/`; nightly solo en `fuzz/`. Ejecuta `cargo +nightly fuzz run <target> -- -max_total_time=60` sin fallas.
-6. Al tocar un ledger, exige 16 escritores sin eventos perdidos, huecos ni duplicados; contención sostenida con otro escritor reteniendo `BEGIN IMMEDIATE` y `busy_timeout=0` hasta `WriteContention { attempts: MAX }`; prueba directa de `is_transient_write_conflict` ante PK duplicada permanente, colisión de secuencia y error externo; y fila devuelta con hash, cadena y timestamp nuevos. Cada append y cada actualización mutable necesita su propia aserción sobre lo **devuelto**, con valores nuevos distintos del génesis. Usa el molde de `AGENTS.md`, no una feature asumida correcta.
-7. No ejecutes mutación: la lanza el responsable técnico con `scripts/mutation-gate.sh <crate> [jobs]`. Prepara pruebas para cero supervivientes; devuelve diagnóstico y correcciones cuando el responsable entregue evidencia.
-8. Antes de entregar deja verdes `cargo build`, `cargo clippy --workspace --all-targets -- -D warnings` y `cargo test`. Si existe `verify(input)`, ejecuta `cargo run -p app -- verify <feature-id> --input '<json>'` con datos reales y compara el resultado con la especificación; no sustituye las pruebas.
-9. Ejecuta `cargo llvm-cov --workspace --summary-only` y reporta cobertura sin inventar un umbral; exige que el criterio crítico esté ejercido. Incluye mapeo criterio→prueba, evidencia roja/verde, límites y riesgos para que el Tech Lead los reproduzca. Tras sustituciones mecánicas, usa `rg` y confirma cero ocurrencias del patrón anterior en todo el alcance.
+- Relaciona cada criterio de la Orden con una prueba nombrada y entrega la evidencia y los comandos de su sección 6. Aplica los disparadores de prueba pertinentes de [ADR-0133](../../../docs/adr/ADR-0133.md) y las reglas discriminantes de [`AGENTS.md`](../../../AGENTS.md#simplicidad-y-pruebas-discriminantes).
+- Si la Feature expone `verify()`, usa el comando real registrado en la Orden o [`docs/TEST.md`](../../../docs/TEST.md), conforme a [ADR-0142](../../../docs/adr/ADR-0142.md); el CLI complementa las pruebas, no las sustituye.
+- Si el cambio activa el Filtro de mutación en `domain/` o `persistence`, prepara las pruebas y evidencia; el Tech Lead ejecuta `scripts/mutation-gate.sh` conforme a [`AGENTS.md`, «Filtro de mutación»](../../../AGENTS.md).
