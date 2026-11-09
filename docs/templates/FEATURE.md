@@ -85,13 +85,14 @@ Describe entrada → proceso → salida, **sin detalles de implementación**. Ve
 
 > Obligatorio en toda feature. Define los tipos de dato que la feature acepta (inputs) y produce (outputs).
 > Los IDs de tipo deben pertenecer al catálogo de ADR-0137. Un puerto sin tipo declarado es inválido en el Canvas [Forge/Reactor].
+> Toda Feature, incluida plomería, declara al menos un puerto visible y conectable en Canvas que represente su contrato real. Los puertos internos no bastan; no inventes tipos o datos para cumplir el requisito.
 
 | Puerto | ID de tipo | Dirección | Cardinalidad | Descripción |
 |---|---|---|---|---|
 | `[nombre_puerto]` | `[Bars \| Signal \| Order \| Position \| RobustnessScore \| Capital \| ...]` | Input / Output | `1` / `0..1` / `0..N` / `1..N` | [qué dato entra/sale y qué representa en esta feature] |
 
 > **Cardinalidad:** `1` = exactamente uno · `0..1` = opcional · `0..N` = múltiple · `1..N` = al menos uno.
-> **Plomería sin puertos de usuario:** si la feature es plomería pura (bus, clock, queue), declara aun así sus puertos técnicos (ej. `job_in: AsyncJob | Input | 1..N`).
+> **Plomería sin interacción:** si la Feature es plomería pura (bus, clock, queue), declara aun así al menos un puerto técnico visible y conectable que represente su contrato real; los puertos internos son adicionales y no bastan para conectar su nodo.
 
 ## Operaciones observables y recuperables (OBLIGATORIO si un puerto público muta estado o puede ser invocado por un agente)
 
@@ -116,7 +117,7 @@ La actividad no guarda secretos, parámetros sensibles ni texto suministrado por
 >
 > El Banco de Verificación es un harness funcional por feature, no una galería de componentes. Su contrato y gate siguen ADR-0117/ADR-0152; su futura UI debe seguir Tauri/React y gRPC según ADR-0142/ADR-0165.
 >
-> Si la feature es Plomería (declara "Ventana de Verificación"), omite esta sección y declara solo el observable exigido por ADR-0117.
+> Toda Feature declara su representación en las tres superficies compartidas, aunque sea plomería. No requiere una pantalla de producto propia ni interacción si basta con exponer su observable real. La plomería declara además su Feature consumidora y el observable de su Ventana de Verificación.
 
 ### Contexto de superficie (ADR-0136)
 **[Dashboard widget | Canvas — Vista Relacional | Canvas — Vista Interior | Inspector Panel | Plomería]** — [una frase: qué ve el usuario y en qué parte del Canvas o Dashboard]
@@ -181,9 +182,11 @@ Referencia al ADR correspondiente. Omitir si la feature NO tiene decisión arqui
 - Qué otras features dependen de esta.
 - Qué la bloquea (ej: otra feature no implementada).
 - **"Consumido por" = accede al puerto, no al esquema (ADR-0003, Regla de Tabla Única):** cuando esta sección (o un campo "Consumido por") lista varios consumidores, acceden a través de la `public_interface` de la Feature. La tabla de la Feature se crea UNA SOLA VEZ, en la Feature dueña. Los presets de composición no corren migraciones ni son dueños de esquema; un TTR de integración enchufa el puerto. Si un consumidor necesita datos propios relacionados, los guarda en sus tablas con una referencia al dato de la Feature.
-- **Contrato de Integración UI (OBLIGATORIO — ADR-0117):** declara una de las dos:
-  - **Superficie propia:** nombre de la pestaña/sección que esta Feature aporta al Panel Operativo Fundacional, y cuál es su Superficie de Verificación Funcional (SVF) bajo el Techo Fijo — el control que dispara la operación real + el resultado real por gRPC + el observable persistido visible tras recargar.
-  - **Ventana de Verificación (si es Feature de plomería, sin superficie propia):** nombre de la Feature consumidora y de su pestaña/sección, y el observable concreto de ESTA feature (estado, conteo, timestamp, resultado) que debe quedar visible ahí. Esa visibilidad es la prueba de funcionamiento de la plomería — sin ella, la Cáscara Delgada de la Feature consumidora no se considera completa (Gate de Integración, ADR-0117).
+- **Contrato de Integración UI (OBLIGATORIO — ADR-0117):** para toda Feature, declara:
+  - **Banco de Verificación:** operación y resultado real por gRPC, observable persistido visible tras recargar; para plomería, una vista transversal del observable real puede ser de solo lectura y no requiere acción del usuario.
+  - **Canvas:** nodo conectable derivado de sus puertos tipados; inspector lateral con el mismo botón para desplegar el detalle a vista completa y volver, conservando selección y estado de edición.
+  - **Dashboard:** widget read-only con métricas o estado; los widgets de producto quedan habilitados y los de plomería desactivados en producción.
+  - **Ventana de Verificación (plomería):** además, nombra la Feature consumidora y el observable concreto (estado, conteo, timestamp o resultado) que debe mostrar su vista integrada.
 
 ## Regla de Soberanía Técnica (Solo para Módulos)
 

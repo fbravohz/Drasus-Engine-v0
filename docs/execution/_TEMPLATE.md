@@ -45,8 +45,8 @@ Enlaces a las unidades de especificación que gobiernan este trabajo:
 
 | Agente | Etapa del pipeline | Depende de | Modo |
 |---|---|---|---|
-| <Rust-Engineer / Frontend-Engineer / Bridge-Engineer / Quant-Engineer / Refactoring-Engineer> | Etapa <n> | <agente del que depende, o "ninguno"> | Autónomo \| Mentor \| Docente \| Revisión |
-| **QA-Engineer** | **Etapa 5 — obligatoria en toda Story** | **Entregas que audita** | **Autónomo**, salvo declaración distinta |
+| <Rust-Engineer / Frontend-Engineer / Quant-Engineer / Refactoring-Engineer> | Etapa <n> | <agente del que depende, o "ninguno"> | Autónomo \| Mentor \| Docente \| Revisión |
+| **QA-Engineer** | **Etapa final — obligatoria en toda Story** | **Entregas que audita** | **Autónomo**, salvo declaración distinta |
 
 > En toda Story, QA revisa cada entrega aplicable y el conjunto final, sin excepción por fase o capa. La Story no se cierra sin `APTO` de QA sobre el alcance completo. Las pruebas concretas se activan según sus propios criterios de aplicación, conforme a ADR-0133. En otras Órdenes, conserva la fila de QA cuando corresponda a su alcance o criterios.
 
@@ -72,6 +72,8 @@ Enlaces a las unidades de especificación que gobiernan este trabajo:
 ## 5. Criterio de aceptación (cada criterio ↔ su prueba)
 > Regla de proceso: ningún criterio se da por cumplido sin una prueba nombrada que lo ejerza. El ingeniero entrega ya en verde; el Tech-Lead reproduce y verifica cobertura del criterio (no solo "tests verdes").
 > Si solo el propietario puede ejecutar un criterio, incluye en «Comandos de validación» el recorrido exacto, el resultado esperado y las trampas conocidas.
+>
+> En toda Orden que implemente una Feature, incluye criterios separados para: (1) su vista/observable real en el Banco de Verificación, (2) su nodo Canvas conectable con inspector lateral y botón para alternar a vista completa, conservando selección y edición, y (3) su widget Dashboard. Aplica también a plomería; admite vista read-only sin interacción y exige widget desactivado en producción. Incluye además la Ventana de Verificación de plomería. Si falta infraestructura, agréguela al alcance o deja la Orden parcial; no marques esos criterios como deuda diferida.
 
 | # | Criterio verificable | Prueba que lo demuestra |
 |---|---|---|

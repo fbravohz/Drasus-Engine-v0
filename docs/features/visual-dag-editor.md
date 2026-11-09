@@ -39,7 +39,7 @@ Este lienzo funciona igual con la lógica de una estrategia. Cada pieza es un bl
 - [ ] Si el usuario intenta conectar un puerto `Bars` a un input `Signal`, la línea aparece en `criticalCrimson` con tooltip "tipos incompatibles: Bars → Signal".
 - [ ] Doble clic en un nodo de Módulo (compound) → canvas anima zoom in-place y expone sus Features internas, con toggle entre graph view y mixer view (estilo DAW).
 - [ ] Doble clic en una Strategy → canvas expone sus Logic Blocks (DAG de señales e indicadores micro).
-- [ ] Clic en un Feature node (nodo atómico hoja) → abre Inspector Panel lateral derecho sin salir del canvas.
+- [ ] Clic en un Feature node (nodo atómico hoja) → abre el Inspector Panel lateral derecho por defecto; el mismo botón alterna a vista completa dentro del Canvas y de regreso al panel lateral, conservando selección y valores en edición.
 - [ ] Al editar un parámetro en el Inspector Panel de un Logic Block, todos los nodos de validación de esa strategy en el canvas se colorean en `criticalCrimson` con etiqueta "Caché de Validación Inválido".
 - [ ] Un parámetro con el toggle "Exponer al Optimizador" activado queda resaltado en el Inspector Panel y se inyecta en el espacio de búsqueda del motor genético.
 - [ ] El usuario activa "Modo Rendimiento" y los nodos del canvas se colorean con gradiente `reactorGreen → alertAmber → criticalCrimson` según sus microsegundos de latencia medidos.

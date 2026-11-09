@@ -147,8 +147,8 @@ product:
       - "Investigar o generar estrategias, evaluar resultados y revisar robustez antes de incubar u operar."
       - "Consultar el Dashboard, abrir el contexto correspondiente en el Canvas y auditar la actividad y procedencia relevantes."
     feature_composition:
-      integration_model: "Las features exponen APIs de dominio mediante puertos tipados para operar sobre entidades del producto; el Canvas conecta contratos compatibles."
-      draggable_feature_node: "Cada feature declarada como nodo presenta sus entradas y salidas y la información, gráfica o contexto pertinente según su contrato. Esto no implica que toda feature requiera un nodo o una gráfica."
+      integration_model: "Las Features exponen contratos de dominio o infraestructura mediante puertos tipados; el Canvas conecta contratos compatibles."
+      draggable_feature_node: "Toda Feature se representa como nodo conectable y presenta entradas, salidas e información pertinente según su contrato. Plomería puede usar un inspector de solo lectura sin gráfica ni pantalla propia."
       beginner_support: "Los módulos funcionan como presets para facilitar la composición; el usuario experto puede conectar features compatibles directamente."
     frequent_tasks: []
     high_risk_actions: []
@@ -1427,7 +1427,7 @@ screens:
       status: "Superficie principal confirmada por el propietario; diseñada en ADR-0136, aún no implementada en la cáscara actual."
       route: "No disponible; el shell actual no tiene router."
       purpose: "Construcción y conexión visual de entidades, módulos y features compatibles."
-      feature_node_contract: "Los puertos de entrada y salida derivan de Puertos de Integración de cada feature; gráficas, datos y contenido del nodo dependen de su contrato y aplicabilidad, según ADR-0137."
+      feature_node_contract: "Toda Feature tiene un nodo Canvas conectable; sus puertos derivan de Puertos de Integración y la información del nodo depende de su contrato, según ADR-0137. El inspector abre en panel lateral y un mismo botón lo despliega a vista completa o lo devuelve al lateral, conservando selección y valores en edición, según ADR-0136. Plomería puede usar un detalle de solo lectura sin gráfica ni pantalla propia."
       module_role: "Los módulos ofrecen composiciones predefinidas que facilitan el inicio; usuarios expertos pueden componer features compatibles."
 
   archetypes:

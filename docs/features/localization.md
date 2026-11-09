@@ -80,7 +80,7 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
 - Cadena localizada lista para render; presentación local de fecha/número/moneda.
 
 ### Contextos de Uso
-- **Transversal a toda la UI:** cualquier feature con superficie propia consume esta capa para su texto.
+- **Transversal a toda la UI:** todas las Features consumen esta capa para el texto de sus vistas de Banco, Canvas/Inspector y Dashboard, incluidos los estados de plomería read-only.
 
 ---
 
@@ -123,7 +123,7 @@ Aquí pasa igual: cuando el motor dice "ocurrió el error número 47", la interf
 - **Inundación de Fundaciones (ADR-0020):** Perfil D (Ops / Auditoría) — Grupo I completo + `process_id`, `node_id`. La preferencia de locale del usuario es un ajuste persistido.
 
 ## Dependencias y Bloqueantes
-**Consumido por:** todas las features con superficie propia (transversal a la UI).
+**Consumido por:** todas las Features y sus superficies de UI, incluida plomería.
 
 **Contrato de Integración UI (ADR-0117):**
 - **Ventana de Verificación:** selector de idioma en Ajustes; al cambiarlo, toda la interfaz se re-renderiza en el idioma elegido — esa visibilidad es la prueba de funcionamiento de la capa.

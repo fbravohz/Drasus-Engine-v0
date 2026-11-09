@@ -99,7 +99,7 @@ Así que Drasus no adivina. O usa una plantilla que ya probó contra archivos re
 > Autoridad: ADR-0106 · ADR-0136 · ADR-0117 · ADR-0156 · ADR-0162 (enmienda 2026-07-26) · LDR-0008 · `docs/DESIGN.md` · `docs/DESIGN.md §"Catálogo de Componentes"`
 
 ### Contexto de superficie (ADR-0136)
-**Inspector Panel** — `data-import-wizard` es un feature node (leaf, sin sub-nodos) del pipeline `ingest` en la Vista Relacional del Canvas; un clic sobre ese nodo abre el panel lateral derecho con el asistente completo. Regla FIJO de ADR-0136 ("un feature node siempre abre inspector panel lateral, nunca pantalla full separada") gana sobre la tentación de producto de darle pantalla completa por ser la primera superficie de uso real — el ancho se resuelve con `scroll-area` horizontal en la tabla de vista previa (ver Layout), no rompiendo el panel lateral.
+**Inspector Panel** — `data-import-wizard` es un feature node (leaf, sin sub-nodos) del pipeline `ingest` en la Vista Relacional del Canvas; al hacer clic, abre por defecto el panel lateral con el asistente. El mismo botón alterna entre vista completa en el espacio de trabajo del Canvas y regreso al panel lateral, sin perder el paso, el mapeo ni los valores en edición. La vista completa da espacio a las tablas de vista previa; conservan desplazamiento horizontal cuando su contenido lo requiere.
 
 ### Superficie y Densidad
 - **Superficie principal:** panel lateral en `panel-glass` (`glassFill` + `glassRim`, radio 14–16) como chrome del Inspector Panel; el contenido interior de cada paso usa `panel-solid` (`panelSolid #0E1426`, radio 11) para las zonas de dato denso (tabla de mapeo, tabla de vista previa).
@@ -139,9 +139,10 @@ Así que Drasus no adivina. O usa una plantilla que ya probó contra archivos re
 
 ### Layout
 - Panel lateral derecho, ancho fijo cómodo (no redimensionable por el usuario — evita que el Inspector Panel invada el Canvas).
+- Un mismo botón alterna entre «Abrir en vista completa» y «Volver al panel lateral». Ambos modos presentan el mismo asistente y conservan el estado del flujo.
 - Estructura vertical fija: `stepper` (top, no scrollea) → chip de vía + banner contextual (top, no scrollea) → contenido del paso activo (`scroll-area` vertical) → barra de navegación Atrás/Siguiente/Confirmar (bottom, no scrollea).
 - Paso 2 (Mapeo manual): grid de `form-field` de una columna, uno por campo canónico (Timestamp, Open, High, Low, Close, Volumen…), cada uno con su `select / dropdown` de columna origen — sin límite de campos porque el esquema es abierto por arriba (Restricción de la feature).
-- Tablas de Paso 1/6: `scroll-area` horizontal propio dentro del panel — el panel no se ensancha, la tabla desplaza.
+- Tablas de Paso 1/6: en modo lateral usan `scroll-area` horizontal propio — el panel conserva su ancho fijo. En vista completa aprovechan el espacio disponible y mantienen desplazamiento si la tabla aún rebasa la ventana.
 - Paso 5 (fractura, si el gate la señala): tabla de sub-ventanas (columnas: rango de la sub-ventana, magnitud observada, `chip` de severidad) inmediatamente debajo del `date-range`, seguida de dos `button-glass`/`button-danger`: "Segmentar en tramos" (regresa al Paso 5 con el rango acotado) y "Confirmar homogeneidad pese a la fractura" (avanza, la vista previa ya revisada por el usuario es la evidencia de esa confirmación — no se inventa un campo de formulario nuevo).
 - Separación entre paneles: 24px (Inspector Panel es ceremonial/cómodo, no denso).
 

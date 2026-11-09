@@ -9,11 +9,11 @@
 
 ## ¿Qué es esta feature?
 
-El Banco de Pruebas es el harness genérico de verificación del Panel Operativo Fundacional: la superficie única en la interfaz de Flutter donde el propietario (perfil frontend, sin acceso práctico a terminal para verificar backend) confirma con el ratón que una feature funciona de verdad, contra el backend real de su propia máquina, sin datos simulados.
+El Banco de Pruebas es el harness genérico de verificación del Panel Operativo Fundacional: una superficie Tauri/React donde el propietario confirma que cada Feature funciona contra el backend real de su máquina, sin datos simulados.
 
-**Problema:** hoy, verificar que una feature de backend funciona exige dos caminos distintos según quién lo haga: el ingeniero corre `drasus verify <feature-id>` por CLI (Canal #2, ADR-0142); el propietario no tiene ese canal — su único canal práctico es la app Flutter. Cuando una tanda de features se construye "backend-first" (como ocurrió con los 14 cimientos del substrato de monetización, ADR-0144/0145/0146/0147/0148/0149), el propietario se queda sin forma de comprobarlas él mismo hasta que alguien construye, a mano, una sección de verificación por feature — trabajo que se pospone indefinidamente porque nada en el proceso de cierre lo exige (DEBT-005).
+**Problema:** verificar una Feature de backend requiere CLI o una interfaz local. Sin una vista por Feature, incluida plomería, el propietario no puede comprobar el resultado real desde la aplicación y el trabajo puede posponerse indefinidamente (DEBT-005).
 
-**Solución:** un único harness, construido una vez, que cualquier feature con superficie propia enchufa casi gratis: se añade una entrada a un registro central y automáticamente aparece en la lista de features verificables del Banco. El harness es la gemela gráfica de `drasus verify` — despacha a la misma función de verificación de la feature, nunca reimplementa su lógica.
+**Solución:** un único harness, construido una vez, donde cada Feature —también plomería— tiene una vista de verificación propia. Una entrada en el registro central la incorpora al Banco; para plomería puede mostrar solo su observable real, sin interacción. El harness es la gemela gráfica de `drasus verify`: despacha a la misma función de verificación de la Feature y nunca reimplementa su lógica.
 
 **Resultado observable:** el propietario abre la app, elige una feature de una lista, edita o acepta un JSON de ejemplo, presiona un botón y ve, en tiempo real, la respuesta real del backend — incluyendo si el JSON que escribió era una estructura válida para esa feature antes de que la llamada real siquiera se disparara.
 
@@ -27,8 +27,8 @@ El usuario nunca la ve — es una herramienta de verificación para quien constr
 
 ## Comportamientos Observables
 
-- [ ] El usuario abre el Banco de Pruebas y ve una lista lateral de features verificables (una entrada por feature con superficie propia que ya está conectada).
-  → Al seleccionar una, el panel de detalle muestra tres zonas: input JSON precargado y editable a la izquierda, un botón "Enviar" al centro, y un panel de respuesta vacío a la derecha.
+- [ ] El usuario abre el Banco de Pruebas y ve una lista lateral con cada Feature conectada, incluida plomería.
+  → Al seleccionar una Feature con operación, el panel muestra input, ejecución y resultado real. Para plomería muestra su observable real aunque no haya acción del usuario. El propio Banco ofrece en su vista anfitriona un autodiagnóstico no recursivo de su catálogo y despacho.
 
 - [ ] El usuario borra o corrompe un campo obligatorio del JSON de entrada y presiona "Enviar".
   → La Zona Derecha muestra de inmediato "Input inválido" con la razón concreta (ej. "falta el campo `email`", "el campo `days` no es un número") — **sin que la llamada real al backend llegue a dispararse**.
@@ -39,7 +39,7 @@ El usuario nunca la ve — es una herramienta de verificación para quien constr
 - [ ] El usuario selecciona otra feature en la lista lateral.
   → La Zona Izquierda recarga con el input de ejemplo propio de esa nueva feature; la Zona Derecha se limpia hasta el próximo envío.
 
-- [ ] Un ingeniero termina el backend de una feature nueva con superficie propia y quiere conectarla al Banco.
+- [ ] Un ingeniero termina el backend de cualquier Feature, incluida plomería, y la conecta al Banco.
   → Añade una entrada al registro central (un solo punto de extensión) con el input de ejemplo de la feature; no toca el layout del tab ni el despachador genérico.
 
 ## Restricciones
@@ -48,7 +48,7 @@ El usuario nunca la ve — es una herramienta de verificación para quien constr
 - NUNCA se dispara la llamada real al backend si el input no pasó primero la validación de forma — evita que basura del usuario rompa el backend y le ahorra un fallo confuso.
 - NUNCA conectar una feature nueva exige tocar más de un archivo de registro — el punto de extensión es único (mismo patrón que la galería de componentes, ADR-0117).
 - NUNCA el Banco de Pruebas depende del servidor central del proveedor (Cabina de Mando) para operar — corre siempre contra el backend local real por FFI; el cable de red hacia la Cabina es un adaptador diferido, fuera del alcance de esta feature (ADR-0143).
-- NUNCA una feature con superficie propia se declara "Terminada" (Etapa 5, QA) sin su conexión individual al Banco de Pruebas (ADR-0152).
+- NUNCA una Feature se declara "Terminada" (Etapa 5, QA) sin una vista u observable real propio en el Banco de Pruebas (ADR-0152).
 
 ## Parámetros Configurables
 
@@ -89,7 +89,7 @@ Siempre las mismas cuatro piezas de información, mostradas en la Zona Derecha:
 **Contexto 1: Verificación manual de un cimiento del substrato**
 - Los 14 cimientos de monetización (ADR-0144 y siguientes) tienen backend con QA aprobado, pero hoy solo son verificables por CLI. Conectarlos aquí es la primera tanda del sprint que abre esta feature.
 
-**Contexto 2: Verificación de cualquier feature futura con superficie propia**
+**Contexto 2: Verificación de cualquier Feature futura, incluida plomería**
 - Toda feature nueva se enchufa añadiendo una entrada al registro — sin construir una sección de verificación a medida.
 
 **Contexto 3: Detección temprana de contratos rotos durante el desarrollo**
@@ -100,17 +100,17 @@ Siempre las mismas cuatro piezas de información, mostradas en la Zona Derecha:
 ### **TTR-001: Despachador Genérico de Verificación (FFI)**
 - **Descripción:** punto de entrada único que recibe el identificador de una feature registrada más el JSON de entrada, valida su forma contra lo que esa feature espera, despacha a la función de verificación correspondiente cuando la forma es válida, y siempre devuelve el paquete de cuatro campos (estado del input, resultado general, salida real, error).
 - **Regla de negocio:** el despachador nunca reimplementa la lógica de ninguna feature — solo la invoca. Añadir una feature nueva al despachador es registrar su función de verificación existente, no escribir lógica nueva.
-- **Complemento:** un catálogo de solo lectura acompaña al despachador — enumera cada feature registrada con su identificador, nombre legible e input de ejemplo, para poblar el selector lateral y precargar la Zona Izquierda.
+- **Complemento:** un catálogo de solo lectura acompaña al despachador — enumera cada Feature con su identificador, nombre legible y operación con input de ejemplo, o su observable real de solo lectura cuando sea plomería.
 
 ### **TTR-002: Validación Visual de Forma del Input**
 - **Descripción:** la Zona Derecha distingue siempre, de forma inequívoca y antes de mostrar cualquier resultado de negocio, entre "input mal formado" (la llamada real nunca se disparó) e "input válido pero la operación falló" (la llamada real sí se disparó y el backend respondió con un error). Son dos estados distintos, con dos tratamientos visuales distintos — la mezcla de ambos es la causa raíz que este TTR corrige respecto del chasis parcial existente.
 
 ### **TTR-003: Conexión Retroactiva de los Cimientos del Substrato**
-- **Descripción:** cada una de las funciones de verificación que hoy solo se invocan por CLI (los 14 cimientos del substrato de monetización, más cualquier otra feature con backend terminado sin conexión individual al Banco) obtiene su entrada en el registro central, con su input de ejemplo precargado. Esta tarea paga DEBT-005.
+- **Descripción:** cada función de verificación u observable de solo lectura que hoy carezca de conexión al Banco —incluidos los 14 cimientos del substrato y cualquier otra Feature con backend terminado— obtiene su vista en el registro central. Solo las operaciones con input requieren un ejemplo precargado. Esta tarea paga DEBT-005.
 
 ## Puertos de Integración (ADR-0137)
 
-> El Banco de Pruebas es plomería crosscutting (mismo criterio bendecido que `clock`/`audit-log`/`telemetry` y que los 14 cimientos del substrato): no produce un tipo de dominio propio, no expone puerto de Alpha en el Canvas — no tiene nodo en el Canvas [Forge/Reactor], vive únicamente dentro del Banco de Verificación del Panel Operativo Fundacional. Declara igualmente sus puertos técnicos con el tipo de infraestructura ya catalogado en ADR-0137.
+> El Banco de Pruebas es plomería crosscutting: no produce un tipo de dominio de Alpha. Sus puertos técnicos tipados existentes se exponen como puertos conectables en su nodo Canvas, según ADR-0137; la vista anfitriona del Banco no se duplica como otra entrada de menú.
 
 | Puerto | ID de tipo | Dirección | Cardinalidad | Descripción |
 |---|---|---|---|---|
@@ -129,7 +129,7 @@ Ninguna. El chasis existente (`ui/lib/tabs/verification_bank/verification_bank_t
 
 ### Contexto de superficie (ADR-0136)
 
-**Plomería — harness SVF genérico.** El Banco de Pruebas no es una superficie de producto embebida en el Dashboard ni en el Canvas: es una **pestaña de plataforma de nivel superior**, hermana de `Dashboard`/`Auditoría`/`Trabajos`/`Components` en `panel_operativo.dart` (mismo patrón de `DefaultTabController` documentado en DESIGN.md §"Galería de Componentes — Implementación"). Es la gemela GUI de `drasus verify`: el propietario entra a probar una feature sin leer código, feature por feature, seleccionándola en el lateral. Por eso se diseña bajo la fila "Plomería" del catálogo de contextos de superficie (JSON precargado → enviar → respuesta real por FFI), no bajo los cuatro contextos de superficie de producto.
+**Plomería — harness SVF genérico.** El Banco de Pruebas es una **pestaña de plataforma de nivel superior** y el anfitrión de las verificaciones, no una pestaña duplicada dentro de sí mismo. En su propia vista integra un autodiagnóstico del catálogo y el despacho. También entrega su nodo Canvas conectable y su widget Dashboard según ADR-0117/0136; el widget queda desactivado en producción. Como en otras Features de plomería, esas superficies muestran estado real de solo lectura y no requieren una acción de usuario.
 
 ### Superficie y Densidad
 
@@ -179,7 +179,7 @@ Ninguna. El chasis existente (`ui/lib/tabs/verification_bank/verification_bank_t
 - [x] Foco de input: borde 1.5px + glow limpio (~200ms) — **ya integrado en `custom_ui.Textarea`**.
 - [x] Chip parpadeante / glow pulsante: `ScanRingWidget` durante `enviando` — mismo patrón que `sovereign_data_fetcher_section.dart`.
 - [ ] Transición Banner/Chip al cambiar de estado (idle→enviando→éxito/error): envolver el bloque de estado en `AnimatedSwitcher(duration: ~200ms)` para que el cambio de color/mensaje no sea un salto brusco — no bloqueante para la Historia 1, pero recomendado.
-- [ ] Zoom canvas: no aplica (Plomería, sin Canvas).
+- [ ] El nodo Canvas abre el inspector lateral y permite desplegar el mismo detalle a vista completa; conserva selección y edición.
 - [ ] Dropdown / Switch / Slider: no aplica a esta feature (sin esos controles en el chasis).
 
 ### Notas de implementación para el Flutter Engineer
@@ -213,19 +213,19 @@ Ninguno de los dos gaps bloquea la implementación: ambos tienen una solución f
 ## Dependencias y Bloqueantes
 
 **Depende de:**
-- Las funciones de verificación que cada feature con superficie propia ya expone en su `public_interface` (Canal #2, ADR-0142) — el Banco de Pruebas las invoca, nunca las reimplementa.
+- Las funciones de verificación que cada Feature expone en su `public_interface` (Canal #2, ADR-0142) — el Banco las invoca, nunca las reimplementa. Para plomería muestra el observable real sin exigir acción de usuario.
 - El chasis ya nacido en EPIC-0/SPIKE-006: el tab maestro-detalle y el registro extensible del Banco de Verificación (ADR-0117), sobre el que esta feature añade el despachador genérico y la validación visual de forma.
 
 **Bloquea:**
-- El cierre de Etapa 5 (QA) de cualquier feature nueva con superficie propia declarada, a partir de ADR-0152: sin su entrada conectada aquí, esa feature no se considera Terminada.
+- El cierre de Etapa 5 (QA) de toda Feature nueva: sin su vista u observable real conectado aquí, la Feature no se considera Terminada.
 
-**Consumido por:** Todos los módulos y features con superficie propia — es la realización canónica y permanente del Canal #1 de verificación (SVF) que ADR-0117 exige desde EPIC-0.
+**Consumido por:** Todos los módulos y Features, con o sin superficie propia. El Banco ofrece su autodiagnóstico dentro de la vista anfitriona y no crea otra sección recursiva.
 
 **Contrato de Integración UI (OBLIGATORIO — ADR-0117 / ADR-0152):**
 
-- **Superficie propia:** el Banco de Pruebas **ES** el Banco de Verificación del Panel Operativo Fundacional — no es una sección más dentro de él, es el tab-anfitrión mismo (menú lateral + panel de detalle de tres zonas). No tiene, ni necesita, una entrada separada "verification-bench" en su propio menú lateral.
-- **Su propia SVF es recursiva:** la prueba de que el harness funciona es que CUALQUIER sección registrada (cualquier feature conectada) dispare una verificación real por FFI y muestre la respuesta real, incluyendo el estado de validez del input. No existe una verificación aparte del harness distinta de verificar cualquiera de sus features conectadas.
-- **No duplica SVF ni galería:** la galería de componentes (`ui/lib/gallery/`) muestra widgets con datos mock para explorar el catálogo visual; el Banco de Pruebas dispara operaciones reales por FFI contra el backend real. Comparten el mismo patrón de navegación (registro central + menú lateral + construcción bajo demanda) pero se estratifican por propósito: galería = catálogo visual; Banco de Pruebas = verificación funcional real (memoria `feedback-svf-galeria-transversal`).
+- **Superficie propia del Banco:** el Banco de Pruebas **ES** el anfitrión del Banco de Verificación (menú lateral + panel de detalle). Su propia verificación es un autodiagnóstico integrado en esa vista, no una entrada duplicada en el menú ni una invocación recursiva de la UI.
+- **Vista de plomería:** el autodiagnóstico expone el estado real del catálogo, del despacho y de la validación del harness. No simula resultados ni exige interacción para mostrar su estado. Una Orden de implementación del Banco entrega esta vista, su nodo Canvas conectable y su widget Dashboard; el widget queda desactivado en producción.
+- **No duplica SVF ni galería:** la galería de componentes muestra widgets con datos mock para explorar el catálogo visual; el Banco de Pruebas dispara operaciones reales por gRPC contra el Core local. Comparten navegación centralizada, pero la galería es catálogo visual y el Banco es verificación funcional real.
 
 ---
 

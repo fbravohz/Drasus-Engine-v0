@@ -496,6 +496,8 @@ El contexto de agentes vive en este repositorio. `.agents/` contiene la capa act
 | Skill | Flujo | Descripción |
 |-------|-----|-------------|
 | [**ui-ux-designer**](./../.agents/skills/ui-ux-designer/SKILL.md) | Diseño | Diseña y evalúa la experiencia, la identidad y las interfaces de Drasus. |
+| [**rust-engineer**](./../.agents/skills/rust-engineer/SKILL.md) | Backend Rust | Implementa y revisa dominio, persistencia, backend y transporte gRPC conforme a la Orden. |
+| [**rust-best-practices**](./../.agents/skills/rust-best-practices/SKILL.md) | Rust | Guía idiomática de Rust y revisión integrada; la invoca Rust Engineer como su única skill compañera. |
 | [**drasus-dispatch**](./../.agents/skills/drasus-dispatch/SKILL.md) | Clasificación | Determina flujo, riesgo y contexto antes de editar. |
 | [**drasus-plan**](./../.agents/skills/drasus-plan/SKILL.md) | Planificación | Delimita un cambio con fuentes y validación. |
 | [**drasus-implement**](./../.agents/skills/drasus-implement/SKILL.md) | Implementación | Ejecuta cambios de producto aprobados. |
@@ -503,3 +505,4 @@ El contexto de agentes vive en este repositorio. `.agents/` contiene la capa act
 | [**drasus-verify**](./../.agents/skills/drasus-verify/SKILL.md) | Verificación | Recoge evidencia de pruebas y de los límites afectados. |
 | [**drasus-review**](./../.agents/skills/drasus-review/SKILL.md) | Revisión | Audita intención, diferencias y evidencia. |
 | [**drasus-context**](./../.agents/skills/drasus-context/SKILL.md) | Contexto | Mantiene la capa de Codex y su entrega de contexto. |
+| [**notion-hub**](./../.agents/skills/notion-hub/SKILL.md) | Operación | Consulta y gestiona el hub Drasus Engine en Notion con autorización vigente; no migra documentación Git en bloque. |

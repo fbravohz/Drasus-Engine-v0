@@ -37,7 +37,7 @@ Esta es una aspiración de experiencia, no una promesa de rentabilidad. La entre
 
 **Por confirmar:** la ubicación visual concreta del menú global, la distribución inicial del resumen y cómo se accede al detalle.
 
-Las capacidades expuestas como nodos de Canvas se integran mediante APIs de feature y puertos tipados. Cada nodo presenta sus entradas, salidas y la gráfica o información que aplique según su contrato; no toda feature necesita un nodo, una gráfica o una superficie propia. Los módulos ofrecen composiciones predefinidas para facilitar el inicio; los usuarios expertos pueden conectar features compatibles directamente. La autoridad de dominio está en [ADR-0137](./adr/ADR-0137.md).
+Toda Feature se representa como nodo conectable de Canvas mediante sus APIs y puertos tipados. Cada nodo presenta sus entradas, salidas y la información pertinente según su contrato; una Feature de plomería puede usar un inspector de solo lectura sin gráfica ni pantalla propia. Los módulos ofrecen composiciones predefinidas para facilitar el inicio; los usuarios expertos pueden conectar Features compatibles directamente. La autoridad de dominio está en [ADR-0137](./adr/ADR-0137.md).
 
 ### Referencias de la entrevista
 
@@ -180,9 +180,9 @@ Cada ficha deberá concretar sus variantes, estados y reglas de uso antes de que
 
 ## 5. Experiencia, estructura e interacción
 
-El Canvas es la superficie central de composición del producto y su principal atractivo; el Dashboard es una superficie oficial complementaria para monitoreo y navegación. Cada feature arrastrable como nodo expone sus puertos de entrada y salida tipados; la información, las gráficas y el contenido del nodo dependen de su contrato y de lo que aplique. No toda feature requiere un nodo, una gráfica o una superficie propia. Los módulos sirven como presets para facilitar el inicio y los usuarios expertos pueden conectar features compatibles directamente, conforme a [ADR-0136](./adr/ADR-0136.md) y [ADR-0137](./adr/ADR-0137.md).
+El Canvas es la superficie central de composición del producto y su principal atractivo; el Dashboard es una superficie oficial complementaria para monitoreo y navegación. Toda Feature tiene un nodo conectable con puertos de entrada y salida tipados; la información y las gráficas del nodo dependen de su contrato. La plomería puede usar un inspector de solo lectura sin gráfica ni pantalla propia. Los módulos sirven como presets para facilitar el inicio y los usuarios expertos pueden conectar Features compatibles directamente, conforme a [ADR-0136](./adr/ADR-0136.md) y [ADR-0137](./adr/ADR-0137.md).
 
-**Vigente:** [ADR-0136](./adr/ADR-0136.md) define el Dashboard como pantalla de inicio y centro de monitoreo. El usuario organiza widgets de features arrastrándolos en una cuadrícula *bento*. Los datos del Dashboard son de solo lectura y sus elementos navegables llevan al Canvas en el contexto correspondiente. El Canvas es único para las entidades y los procesos; las features se inspeccionan en un panel lateral. [ADR-0165](./adr/ADR-0165.md) fija los atajos de la aplicación y distingue la escala tipográfica global del zoom del Canvas.
+**Vigente:** [ADR-0136](./adr/ADR-0136.md) define el Dashboard como pantalla de inicio y centro de monitoreo. El usuario organiza widgets de features arrastrándolos en una cuadrícula *bento*. Los datos del Dashboard son de solo lectura y sus elementos navegables llevan al Canvas en el contexto correspondiente. El Canvas es único para las entidades y los procesos; las features abren por defecto en un panel lateral que puede desplegarse a vista completa y volver al lateral desde el mismo contexto. [ADR-0165](./adr/ADR-0165.md) fija los atajos de la aplicación y distingue la escala tipográfica global del zoom del Canvas.
 
 **Canvas:** [ADR-0136](./adr/ADR-0136.md) selecciona React Flow como base de la superficie nodal. La elección no significa que la integración, el zoom anidado o los puertos ya estén implementados o verificados.
 

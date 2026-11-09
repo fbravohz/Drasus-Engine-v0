@@ -149,7 +149,7 @@ Ninguna. El texto de la feature no menciona WebGL/DOM/HTML/CSS/SVG, no calcula m
 
 ### Contexto de superficie (ADR-0136)
 
-**Inspector Panel**, con entrada por card-node en **Canvas — Vista Relacional**. `hybrid-data-transformer` es un *feature node* (leaf, sin sub-nodos) del pipeline de `ingest`/`generate`/`validate`: por el "Contrato del nodo Canvas por-feature" (ADR-0136 §111-116) todo feature-leaf abre siempre el inspector lateral al hacer clic — nunca pantalla full — y ese inspector **es** esta misma Cáscara Visual, no una segunda UI paralela.
+**Inspector Panel**, con entrada por card-node en **Canvas — Vista Relacional**. `hybrid-data-transformer` es un *feature node* (leaf, sin sub-nodos) del pipeline de `ingest`/`generate`/`validate`: al hacer clic abre por defecto el inspector lateral. El mismo botón alterna entre vista completa en el espacio de trabajo del Canvas y regreso al lateral; ambos modos conservan el estado de la Feature. El inspector reutiliza esta misma Cáscara Visual, sin una segunda UI paralela.
 
 ### Superficie y Densidad
 

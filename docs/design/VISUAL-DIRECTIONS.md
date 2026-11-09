@@ -16,7 +16,7 @@ Propongo esta secuencia de entregables, sin convertirla todavía en compromiso d
 1. **Dirección de diseño:** este documento y tres propuestas comparables. Elegir personalidad y prioridad de uso.
 2. **Prototipo de flujos:** tareas completas con estados normales, errores y recuperación. Validar con personas representativas.
 3. **Sistema de diseño v1:** tokens aprobados, biblioteca de componentes, patrones, accesibilidad y reglas de contenido.
-4. **Especificación por feature:** adaptar la superficie propia, el widget y el nodo a contratos reales y a su entrega progresiva.
+4. **Especificación por Feature:** definir la vista/observable del Banco, el widget y el nodo Canvas según contratos reales, incluida plomería.
 
 Este documento permanece como registro de alternativas. Una vez elegida la dirección, conviene crear una guía específica del sistema aprobado y enlazarla desde aquí. Evita convertir tres alternativas incompatibles en instrucciones activas.
 
