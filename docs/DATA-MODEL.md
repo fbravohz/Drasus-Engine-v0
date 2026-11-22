@@ -1,7 +1,7 @@
 # DATA-MODEL.md — Índice del Modelo de Datos Real
 
 > **Propósito:** el mapa de las tablas SQLite que existen HOY (`migrations/*.sql`), quién es su dueña, y cómo se relacionan — sin tener que abrir el `.sql` ni el código. Igual que `docs/ADR.md`/`docs/SAD.md`, este archivo es el **índice**; la ficha completa de cada tabla vive en `docs/data-model/<tabla>.md` (plantilla: [`docs/templates/DATA-MODEL.md`](./templates/DATA-MODEL.md)).
-> **Cobertura:** 36 tablas reales en 23 migraciones (`migrations/0001` a `migrations/0023`), verificado 2026-07-12 leyendo el 100% de las migraciones línea por línea — cero tablas inventadas o supuestas (`transformation_records`/`0021` añadida 2026-07-18, STORY-051; `instrument_master`/`broker_instrument_terms`/`session_template`/`session_template_window`/`0022` añadidas 2026-07-25, STORY-066; `import_mapping_declarations`/`0023` añadida 2026-07-25, STORY-068; `broker_server_clock`/`0022` añadida 2026-07-26, STORY-070 — retrofit in-situ de `0022`/`0023` por ADR-0162 "Enmienda 2026-07-26": grano de declaración de mapeo de "archivo" a "tramo"; Grupo I/IV completados el mismo día en STORY-070bis/TASK-071, tras escalamiento resuelto por el Architect).
+> **Cobertura:** 37 tablas reales en 24 migraciones (`migrations/0001` a `migrations/0024`). El conteo auditado el 2026-07-12 se actualiza aquí para `desktop_status_events`/`0024`, STORY-076 (2026-11-09); los antecedentes de esquema quedan descritos abajo.
 > **Protocolo de sincronización (OBLIGATORIO):** toda migración nueva/modificada actualiza su ficha correspondiente en el MISMO cambio. Si una migración no tiene ficha, o la ficha no coincide con la migración real, la migración es la fuente de verdad y la ficha está desactualizada — repórtalo.
 
 ---
@@ -57,6 +57,7 @@
 | [`broker_instrument_terms`](./data-model/broker_instrument_terms.md) | [`instrument-catalog`](./features/instrument-catalog.md) | `0022` | Mutable | `instrument_id → instrument_master(instrument_id)`, `session_template_id_override → session_template` (nullable) |
 | [`broker_server_clock`](./data-model/broker_server_clock.md) | [`instrument-catalog`](./features/instrument-catalog.md) | `0022` | Mutable | — |
 | [`import_mapping_declarations`](./data-model/import_mapping_declarations.md) | [`data-import-wizard`](./features/data-import-wizard.md) | `0023` | Append-only | `instrument_id → instrument_master(instrument_id)` |
+| [`desktop_status_events`](./data-model/desktop_status_events.md) | [`desktop-packaging-manager`](./features/desktop-packaging-manager.md) | `0024` | Append-only | — |
 
 ---
 

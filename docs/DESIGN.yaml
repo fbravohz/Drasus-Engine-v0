@@ -926,14 +926,35 @@ components:
       properties: {}
       defaults: {}
       states:
-        core_unavailable: "Muestra texto de estado localizado; no representa conectividad validada."
-      keyboard_interactions: ["El selector de idioma es un select nativo."]
-      screen_reader_behavior: "El estado usa role=status; el selector tiene label visible."
+        core_connected: "Muestra 'Core conectado' solo después del health check gRPC autenticado. Confirma readiness del Core, no disponibilidad de datos de Features."
+        core_reconnecting: "Tras perder una conexión establecida, muestra 'Reconectando al Core' mientras el host reanuda el stream desde el cursor durable o solicita una vista inicial nueva si el cursor venció."
+        core_connection_error: "Ante fallo terminal de recuperación, muestra 'No se pudo recuperar la conexión al Core' y la acción 'Reintentar'; nunca expone códigos crudos ni datos sensibles."
+      keyboard_interactions: ["El selector de idioma es un select nativo.", "Reintentar es un botón nativo, visible solo ante error terminal y deshabilitado durante la recuperación."]
+      screen_reader_behavior: "Cada transición del estado usa role=status; 'Reintentar' es un botón nativo con nombre localizado. El selector tiene etiqueta visible."
       responsive_behavior: "Título y acciones se apilan a 1050px o menos; umbral actual provisional."
-      content_rules: ["Todo texto visible se obtiene de recursos es/en."]
-      dos: ["Distinguir indisponibilidad del Core de un estado vacío real cuando exista la integración."]
-      donts: ["No mostrar valores de ejemplo."]
+      content_rules: ["Todo texto visible se obtiene de recursos es/en.", "Localizar códigos estables del host sin mostrarlos como texto técnico."]
+      dos: ["Distinguir la conexión del Core de los estados vacíos de los widgets.", "Acompañar el estado con texto y símbolo; el color no basta."]
+      donts: ["No mostrar valores de ejemplo.", "No presentar 'Core conectado' como disponibilidad de datos o Features."]
       implementation_reference: "apps/desktop/src/components/DashboardChrome.tsx"
+
+    window_titlebar:
+      enabled: true
+      purpose: "Mantiene juntos minimizar, maximizar/restaurar y cerrar cuando el gestor de ventanas no muestra todos los botones nativos."
+      anatomy: [drag_region, title, minimize_button, maximize_restore_button, close_button]
+      variants: [desktop]
+      sizes: ["50px de alto en la implementación actual; botones de 48px"]
+      token_references: {}
+      properties: {}
+      defaults: {}
+      states:
+        action_error: "Si Tauri rechaza una acción, anuncia un error localizado sin cerrar la aplicación."
+      keyboard_interactions: ["Los tres botones nativos se activan con teclado y tienen foco visible."]
+      screen_reader_behavior: "El grupo y cada botón tienen nombre accesible localizado; la marca puede arrastrarse sin cubrir los botones."
+      responsive_behavior: "El título se trunca antes de invadir los controles; los tres botones permanecen visibles en ventanas estrechas."
+      content_rules: ["Los nombres accesibles vienen de los recursos es/en."]
+      dos: ["Conservar juntos los tres controles y el cierre ordenado del Core."]
+      donts: ["No poner los controles de ventana junto al selector de idioma del Dashboard."]
+      implementation_reference: "apps/desktop/src/components/WindowTitlebar.tsx"
 
     widget_card:
       enabled: true
@@ -981,7 +1002,7 @@ components:
       enabled: true
       purpose: "Acción compacta con icono y nombre accesible."
       anatomy: [icon]
-      variants: [pin_navigation]
+      variants: [pin_navigation, window_control]
       sizes: ["48px en la implementación actual"]
       token_references: {}
       properties:
@@ -1266,18 +1287,18 @@ states:
     progress_indicator: null
 
   empty:
-    no_data: "Cinco widgets muestran estados vacíos contextualizados y el encabezado indica que los datos del Core no están disponibles. Sin gRPC, no representa un resultado real del Core."
+    no_data: "Cinco widgets muestran estados vacíos contextualizados hasta que sus Features tengan datos reales. El vacío de cada widget se mantiene independiente del estado de conexión del Core. Sin gRPC, el encabezado tampoco representa conexión real."
     no_search_results: null
     first_time_user: null
     filtered_empty: null
 
   error:
     field_error: null
-    request_failure: null
+    request_failure: "Un fallo terminal de recuperación se muestra en el encabezado con un mensaje localizado y la acción 'Reintentar'; no se exponen códigos crudos ni diagnósticos sensibles."
     permission_denied: null
-    server_error: null
+    server_error: "El estado de conexión informa el fallo sin mostrar credenciales, payloads, códigos crudos ni diagnósticos sensibles."
     partial_failure: null
-    recovery_action: null
+    recovery_action: "'Reintentar' solicita una nueva recuperación al host y se deshabilita mientras opera."
 
   success:
     inline_feedback: null
@@ -1285,8 +1306,8 @@ states:
     persistent_confirmation: null
 
   connectivity:
-    offline_indicator: "El encabezado muestra un aviso localizado de Core no disponible; aún no distingue desconexión, carga ni falta de datos."
-    retry_strategy: null
+    offline_indicator: "DashboardHeader.core_status muestra Core conectado tras readiness gRPC autenticada, Reconectando al Core tras perder una sesión establecida y un error localizado ante fallo terminal de recuperación."
+    retry_strategy: "El host recupera el stream desde el cursor durable o pide una vista inicial nueva si el cursor venció. La interfaz muestra Reintentar solo tras fallo terminal; no inventa porcentajes ni tiempos."
     stale_data_indicator: null
 
 # ============================================================
@@ -1346,7 +1367,7 @@ accessibility:
     heading_hierarchy: "Dashboard usa h1 y cada widget h2."
     aria_usage: "aria-current, aria-pressed, aria-label, aria-labelledby y role=status se usan en los controles y estado actuales."
     control_labels: "El selector tiene etiqueta visible; el botón de pin tiene nombre accesible localizado."
-    dynamic_announcements: "El aviso de disponibilidad usa role=status; la integración con Core no está conectada."
+    dynamic_announcements: "Cada cambio del estado real de conexión del Core se anuncia mediante role=status; la integración gRPC de la cáscara aún está pendiente de implementación."
 
   preferences:
     reduced_motion: "Implementado mediante media query CSS prefers-reduced-motion."
@@ -1422,7 +1443,7 @@ screens:
       status: "Cáscara oficial implementada; datos reales, tokens finales y QA visual pendientes."
       route: "Raíz de la aplicación; sin router."
       widgets: ["Ganancias y pérdidas", "Período de actividad", "Investigación de estrategias", "Portafolios", "Avisos y riesgo"]
-      visible_states: ["Datos del Core no disponibles", "Estado vacío localizado por widget"]
+      visible_states: ["Core conectado tras readiness autenticada", "Reconectando al Core", "Error terminal de conexión con Reintentar", "Estado vacío localizado por widget"]
     - id: canvas
       status: "Superficie principal confirmada por el propietario; diseñada en ADR-0136, aún no implementada en la cáscara actual."
       route: "No disponible; el shell actual no tiene router."
@@ -1453,7 +1474,7 @@ screens:
     layout_pattern: "Dashboard tipo bento de 12 columnas; composición amplia con widget de resultados 8/12, período 4/12 y tres widgets inferiores."
     components: ["Sidebar", "DashboardHeader", "WidgetCard", "WidgetEmptyState", "IconButton"]
     interactions: ["Fijar o desfijar navegación", "Cambiar locale durante la sesión"]
-    states: ["Aviso de Core no disponible", "Estado vacío localizado en cada widget"]
+    states: ["Core conectado tras readiness autenticada", "Reconectando al Core", "Error terminal de conexión con Reintentar", "Estado vacío localizado en cada widget"]
     responsive_variations: ["Reflujo en 1050px, 760px y 540px según CSS actual; medidas provisionales."]
     accessibility_requirements: ["Semántica nativa", "Foco visible", "Textos localizados", "Estado no indicado solo por color"]
     acceptance_criteria: ["No mostrar datos ficticios como reales.", "Mostrar cinco estados vacíos localizados mientras no haya datos del Core."]

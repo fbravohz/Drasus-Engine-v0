@@ -1,7 +1,7 @@
 # Desktop Packaging Manager
 
 **Carpeta:** `./features/desktop-packaging-manager.md`
-**Estado:** 🟡 En curso (2026-11-02). TTR-001 y TTR-002 pendientes; TTR-003 parcial. Evidencia de TTR-003: [STORY-074](../execution/STORY-074-cascaron-tauri-react.md).
+**Estado:** 🟡 En curso (2026-11-09). TTR-001 parcial; TTR-002 pendiente; TTR-003 parcial. Evidencia de TTR-001: [STORY-076](../execution/STORY-076-bootstrap-escritorio-conectado.md). Evidencia de TTR-003: [STORY-074](../execution/STORY-074-cascaron-tauri-react.md).
 **Decisión Arquitectónica Asociada:** ADR-0165
 
 ## ¿Qué es esta feature?
@@ -48,8 +48,8 @@ La feature entrega el contenedor de escritorio, el ciclo de vida del Core y los 
 
 Construir el supervisor de proceso, el health check y la credencial de sesión local. Está terminado cuando una máquina limpia abre y cierra la aplicación sin procesos huérfanos ni listener externo.
 
-- **Estado:** Pendiente; depende de resolver SPIKE-006.
-- **Precondición:** TTR-003 completo; el trabajo del servidor gRPC espera el Spike de ADR-0142.
+- **Estado:** 🟡 Parcial; Core/gRPC, sesión local y Dashboard conectado implementados. QA integrado mantiene NO APTO; faltan reauditoría del cursor durable, Ventana de Verificación, Banco, Canvas/inspector y revisión visual. Evidencia: [STORY-076](../execution/STORY-076-bootstrap-escritorio-conectado.md).
+- **Precondición:** SPIKE-006 resolvió el transporte gRPC; el cascarón ejecutable y el Dashboard están en STORY-076. La revisión visual y QA de distribución siguen pendientes.
 
 ### TTR-002: Bundling y actualización
 
@@ -76,6 +76,8 @@ Preparar la aplicación React/TypeScript con Tauri 2 y Vite en `apps/desktop`, c
 ## Persistencia
 
 Registrar únicamente identidad de instancia, marca temporal, resultado de salud, versión del paquete, sesión y hash de auditoría. Secretos, credenciales y contenido de operaciones quedan excluidos.
+
+El Core conserva en `desktop_status_events` las transiciones históricas STARTING, READY y STOPPED, con cursor estable por base local. Un READY histórico no acredita presencia viva: CheckReadiness consulta solo el proceso actual. El historial se reproduce desde el cursor dentro de una ventana lógica de 64 eventos; sus filas no se eliminan.
 
 ## Gobernanza y Estándares
 

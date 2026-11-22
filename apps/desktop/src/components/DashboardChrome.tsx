@@ -2,6 +2,8 @@ import type { MessageKey } from "../localization/catalog";
 import { useLocale } from "../localization/LocaleProvider";
 import { Icon, type IconName } from "./Icon";
 import { IconButton } from "./Controls";
+import { useCoreStatus } from "../features/dashboard/useCoreStatus";
+import type { CoreConnectionPhase } from "../bridge/core";
 
 type SidebarProps = {
   pinned: boolean;
@@ -14,6 +16,20 @@ const navigationItems = [
   { key: "navigation.strategies", icon: "layers", current: false },
   { key: "navigation.data", icon: "data", current: false },
 ] as const satisfies readonly { key: MessageKey; icon: IconName; current: boolean }[];
+
+const coreStatusMessageKeys = {
+  starting: "dashboard.core-connecting",
+  connected: "dashboard.core-connected",
+  reconnecting: "dashboard.core-reconnecting",
+  error: "dashboard.core-error",
+} as const satisfies Record<CoreConnectionPhase, MessageKey>;
+
+const coreStatusSymbols = {
+  starting: "◌",
+  connected: "●",
+  reconnecting: "↻",
+  error: "!",
+} as const satisfies Record<CoreConnectionPhase, string>;
 
 export function Sidebar({ pinned, onPinnedChange }: SidebarProps) {
   const { t } = useLocale();
@@ -59,6 +75,10 @@ export function Sidebar({ pinned, onPinnedChange }: SidebarProps) {
 
 export function DashboardHeader() {
   const { locale, locales, setLocale, t } = useLocale();
+  const { status, retry, retrying } = useCoreStatus();
+  const statusKey = coreStatusMessageKeys[status.phase];
+  const statusSymbol = coreStatusSymbols[status.phase];
+
   return (
     <header className="dashboard-header">
       <div className="dashboard-header__title">
@@ -66,10 +86,20 @@ export function DashboardHeader() {
         <p>{t("dashboard.subtitle")}</p>
       </div>
       <div className="dashboard-header__actions">
-        <span className="dashboard-data-status" role="status">
-          <span aria-hidden="true" />
-          {t("dashboard.data-unavailable")}
-        </span>
+        <div aria-atomic="true" aria-live="polite" className={`dashboard-core-status dashboard-core-status--${status.phase}`} role="status">
+          <span aria-hidden="true" className="dashboard-core-status__symbol">{statusSymbol}</span>
+          <span>{t(statusKey)}</span>
+        </div>
+        {status.phase === "error" && (
+          <button
+            className="dashboard-core-retry"
+            disabled={retrying || status.isRecovering}
+            onClick={() => void retry()}
+            type="button"
+          >
+            {t("dashboard.core-retry")}
+          </button>
+        )}
         <label className="dashboard-locale-setting" htmlFor="dashboard-locale">
           <span>{t("locale.selector-label")}</span>
           <select

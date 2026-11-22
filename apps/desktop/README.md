@@ -19,8 +19,12 @@ corepack pnpm build
 
 La ventana monta React vacía. Las fuentes Geist se sirven desde archivos locales.
 
-En este host, ejecuta Tauri dentro de `personal-env` para usar Rust y las bibliotecas nativas:
+La app compila el binario Core antes de iniciar Tauri. El host entrega una sesión corta por un pipe local, valida readiness gRPC y cierra el proceso al salir. Los widgets siguen vacíos hasta que sus Features publiquen datos reales.
+
+Ejecuta Tauri dentro de `personal-env` para usar Rust y las bibliotecas nativas:
 
 ```bash
-distrobox enter --name personal-env -- bash -ic 'cd "$PWD/apps/desktop"; pnpm tauri dev'
+distrobox enter --name personal-env -- bash -ic 'cd "$PWD/apps/desktop" && pnpm tauri dev'
 ```
+
+`pnpm tauri dev` ejecuta `cargo build --manifest-path ../../Cargo.toml --bin drasus` desde `beforeDevCommand`. `pnpm tauri build` compila la variante `--release` antes de construir la interfaz.

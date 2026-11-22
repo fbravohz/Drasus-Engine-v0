@@ -10,28 +10,34 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 use clap::{Parser, Subcommand};
-use shared::public_interface::{
-    create_pool, run_migrations, run_mcp_server, verify_central_identity, verify_consent_registry,
-    verify_data_aggregation, verify_data_portability, verify_enriched_domain_events,
-    verify_institutional_report_engine, verify_instance_continuity, verify_licensing_system,
-    verify_master_account_hierarchy, verify_operator_roles, verify_plan_tier_quota,
-    verify_third_party_api_gateway, verify_usage_metering, verify_verified_account_registry,
-    CentralIdentityVerifyInput, ConsentRegistryVerifyInput, DataAggregationVerifyInput,
-    DataPortabilityVerifyInput, EnrichedDomainEventsVerifyInput, ExecutorIdentity,
-    InstanceContinuityVerifyInput, InstitutionalReportEngineVerifyInput, JobExecutor,
-    JobExecutorConfig, LicensingSystemVerifyInput, MasterAccountHierarchyVerifyInput,
-    OperatorRolesVerifyInput, PlanTierQuotaVerifyInput, SystemClock, ThirdPartyApiGatewayVerifyInput,
-    UsageMeteringVerifyInput, VerifiedAccountRegistryVerifyInput,
+use data_import_wizard::public_interface::{
+    verify as verify_data_import_wizard, VerifyInput as DataImportWizardVerifyInput,
 };
-use sovereign_data_fetcher::public_interface::{VerifyInput, verify};
 use hybrid_data_transformer::public_interface::{
     verify as verify_hybrid_data_transformer, VerifyInput as HybridDataTransformerVerifyInput,
 };
 use instrument_catalog::public_interface::{
     verify as verify_instrument_catalog, VerifyInput as InstrumentCatalogVerifyInput,
 };
-use session_catalog::public_interface::{verify as verify_session_catalog, VerifyInput as SessionCatalogVerifyInput};
-use data_import_wizard::public_interface::{verify as verify_data_import_wizard, VerifyInput as DataImportWizardVerifyInput};
+use session_catalog::public_interface::{
+    verify as verify_session_catalog, VerifyInput as SessionCatalogVerifyInput,
+};
+use shared::public_interface::{
+    create_pool, run_mcp_server, run_migrations, verify_central_identity, verify_consent_registry,
+    verify_data_aggregation, verify_data_portability, verify_enriched_domain_events,
+    verify_instance_continuity, verify_institutional_report_engine, verify_licensing_system,
+    verify_master_account_hierarchy, verify_operator_roles, verify_plan_tier_quota,
+    verify_third_party_api_gateway, verify_usage_metering, verify_verified_account_registry,
+    CentralIdentityVerifyInput, ConsentRegistryVerifyInput, DataAggregationVerifyInput,
+    DataPortabilityVerifyInput, EnrichedDomainEventsVerifyInput, ExecutorIdentity,
+    InstanceContinuityVerifyInput, InstitutionalReportEngineVerifyInput, JobExecutor,
+    JobExecutorConfig, LicensingSystemVerifyInput, MasterAccountHierarchyVerifyInput,
+    OperatorRolesVerifyInput, PlanTierQuotaVerifyInput, SystemClock,
+    ThirdPartyApiGatewayVerifyInput, UsageMeteringVerifyInput, VerifiedAccountRegistryVerifyInput,
+};
+use sovereign_data_fetcher::public_interface::{verify, VerifyInput};
+
+mod desktop_transport;
 
 // ────────────────────────────────────────────────────────────────────────────
 // CLI declarativa (Clap 4 con el macro `derive`)
@@ -101,6 +107,17 @@ enum Commands {
         #[arg(long)]
         input: Option<String>,
     },
+
+    /// Inicia el listener gRPC local para el host de escritorio.
+    /// El host escribe 32 bytes de sesión por stdin; nunca los pasa como argumento.
+    DesktopServer {
+        /// Vigencia de la sesión local en segundos.
+        #[arg(long, default_value_t = 300)]
+        session_ttl_seconds: u64,
+        /// Ruta SQLite local; comparte el default del subcomando `start`.
+        #[arg(long, default_value = "drasus.db")]
+        db: String,
+    },
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -130,6 +147,23 @@ async fn main() {
         Commands::Verify { feature_id, input } => {
             // Despacha la verificación y delega la presentación del resultado.
             run_verify(&feature_id, input.as_deref()).await;
+        }
+
+        Commands::DesktopServer {
+            session_ttl_seconds,
+            db,
+        } => {
+            if let Err(error) = desktop_transport::serve_from_stdin(
+                std::time::Duration::from_secs(session_ttl_seconds),
+                &db,
+            )
+            .await
+            {
+                eprintln!("No se pudo iniciar el Core de escritorio: {error}");
+                std::process::exit(1);
+            }
+            // Tokio no puede cancelar la lectura bloqueante interna de stdin al cerrar por señal.
+            std::process::exit(0);
         }
     }
 }
@@ -257,7 +291,9 @@ async fn run_verify(feature_id: &str, input_json: Option<&str>) {
                 None => match serde_json::from_str("{}") {
                     Ok(v) => v,
                     // "{}" con todos los campos #[serde(default)] siempre parsea.
-                    Err(_) => unreachable!("LicensingSystemVerifyInput con defaults debe parsear desde '{{}}'"),
+                    Err(_) => unreachable!(
+                        "LicensingSystemVerifyInput con defaults debe parsear desde '{{}}'"
+                    ),
                 },
             };
 
@@ -290,7 +326,9 @@ async fn run_verify(feature_id: &str, input_json: Option<&str>) {
                 None => match serde_json::from_str("{}") {
                     Ok(v) => v,
                     // "{}" con todos los campos #[serde(default)] siempre parsea.
-                    Err(_) => unreachable!("PlanTierQuotaVerifyInput con defaults debe parsear desde '{{}}'"),
+                    Err(_) => unreachable!(
+                        "PlanTierQuotaVerifyInput con defaults debe parsear desde '{{}}'"
+                    ),
                 },
             };
 
@@ -858,10 +896,7 @@ async fn run_start(db_path: &str) {
         .expect("La recuperación de startup falló.");
 
     if !recovered.is_empty() {
-        println!(
-            "Recuperados {} jobs del crash anterior.",
-            recovered.len()
-        );
+        println!("Recuperados {} jobs del crash anterior.", recovered.len());
     }
 
     // Lanza el servidor MCP en background (stdio).
@@ -911,8 +946,8 @@ async fn sigterm_received() {
     use tokio::signal::unix::{signal, SignalKind};
     // `signal(SignalKind::terminate())` registra un listener de SIGTERM.
     // `recv()` bloquea hasta recibir la señal.
-    let mut stream = signal(SignalKind::terminate())
-        .expect("No se pudo registrar el listener de SIGTERM.");
+    let mut stream =
+        signal(SignalKind::terminate()).expect("No se pudo registrar el listener de SIGTERM.");
     stream.recv().await;
 }
 
@@ -946,7 +981,10 @@ mod tests {
 
         match cli.command {
             Commands::Verify { feature_id, input } => {
-                assert_eq!(feature_id, "sovereign-data-fetcher", "feature_id incorrecto");
+                assert_eq!(
+                    feature_id, "sovereign-data-fetcher",
+                    "feature_id incorrecto"
+                );
                 let input_str = input.expect("--input debe estar presente");
                 // El JSON del input debe parsear a VerifyInput correctamente.
                 let parsed: VerifyInput = serde_json::from_str(&input_str)
@@ -954,7 +992,10 @@ mod tests {
                 assert_eq!(parsed.symbol, "BTCUSDT");
                 assert_eq!(parsed.interval, "1h");
             }
-            other => panic!("se esperaba Commands::Verify, se obtuvo {:?}", std::mem::discriminant(&other)),
+            other => panic!(
+                "se esperaba Commands::Verify, se obtuvo {:?}",
+                std::mem::discriminant(&other)
+            ),
         }
     }
 
@@ -981,6 +1022,9 @@ mod tests {
     fn cli_verify_unknown_feature_parses_at_clap_level() {
         let result = Cli::try_parse_from(["drasus", "verify", "feature-inexistente"]);
         // Clap debe aceptar el argumento; la validación es responsabilidad de run_verify.
-        assert!(result.is_ok(), "Clap debe aceptar cualquier feature-id sin validar");
+        assert!(
+            result.is_ok(),
+            "Clap debe aceptar cualquier feature-id sin validar"
+        );
     }
 }

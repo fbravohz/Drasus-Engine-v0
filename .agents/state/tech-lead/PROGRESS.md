@@ -4,10 +4,12 @@
 
 ## Estado de reanudación
 
-Última actualización: 2026-11-02. Contrasta el estado operativo con las Órdenes y el ROADMAP al reanudar.
+Última actualización: 2026-11-08. Contrasta el estado operativo con las Órdenes y el ROADMAP al reanudar.
 
 - **Fase:** EPIC-1 — Soberanía de Datos (`ingest`), en curso.
 - **Orden activa de UI:** [STORY-075 — Dashboard oficial](../../../docs/execution/STORY-075-dashboard-oficial-tauri-react.md), 🟡 parcial: typecheck y build pasan; faltan revisión visual y QA independiente.
+- **Secuencia de escritorio instruida por el propietario:** Dashboard inicial conectado al Core, luego Banco de Verificación y después Canvas. Tras esa base, auditar cada Feature backend y conectar su frontend. Los widgets de Features siguen vacíos hasta sus slices reales.
+- **Prerequisito de conexión:** [SPIKE-006](../../../docs/execution/SPIKE-006-integracion-grpc-local.md) completado como prueba de viabilidad; [STORY-076](../../../docs/execution/STORY-076-bootstrap-escritorio-conectado.md) prepara TTR-001 y el transporte gRPC integrado.
 - **Siguiente paso de UI:** observar la ventana Tauri y completar QA. La integración de datos reales espera SPIKE-006; persistencia del locale espera un contrato de ajustes del Core.
 - **Orden de ingesta pendiente:** [STORY-073 — Asistente de Importación](../../../docs/execution/STORY-073-asistente-importacion-pantalla.md), construida y verificada; registra 13/14 criterios.
 - **Para cerrar STORY-073:** el propietario debe completar el criterio 13 importando el archivo real desde la aplicación; el recorrido está en §6.1. Faltan las tres lecciones del Modo Docente (§8).

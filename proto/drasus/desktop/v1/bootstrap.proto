@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package drasus.desktop.v1;
+
+service DesktopBootstrap {
+  rpc CheckReadiness(ReadinessRequest) returns (ReadinessReply);
+  rpc WatchStatus(WatchStatusRequest) returns (stream StatusEvent);
+}
+
+message ReadinessRequest {}
+
+message ReadinessReply {
+  bool ready = 1;
+  string stream_scope = 2;
+  uint64 sequence = 3;
+  uint64 observed_at_unix_ms = 4;
+}
+
+message WatchStatusRequest {
+  string stream_scope = 1;
+  uint64 after_sequence = 2;
+}
+
+message StatusEvent {
+  string stream_scope = 1;
+  uint64 sequence = 2;
+  StatusKind kind = 3;
+  bool ready = 4;
+  uint64 observed_at_unix_ms = 5;
+}
+
+enum StatusKind {
+  STATUS_KIND_UNSPECIFIED = 0;
+  STATUS_KIND_INITIAL_SNAPSHOT = 1;
+  STATUS_KIND_READINESS_CHANGED = 2;
+}

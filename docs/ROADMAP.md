@@ -273,7 +273,7 @@ Orden sugerido por ROI esperado, revisable con datos reales: transpilador MQL5 (
 
 ## 6. Estado de los Spikes de Viabilidad
 
-SPIKE-001–005 cuentan con veredictos documentados. SPIKE-006 conserva el objetivo del bootstrap de escritorio, actualizado a Tauri/React por ADR-0165, y permanece pendiente para resolver la integración gRPC previa a su implementación. El detalle vive en los ADR; aquí solo se registra el estado.
+SPIKE-001–005 cuentan con veredictos documentados. [SPIKE-006](./execution/SPIKE-006-integracion-grpc-local.md) demostró viabilidad gRPC; [STORY-076](./execution/STORY-076-bootstrap-escritorio-conectado.md) prepara el bootstrap de producto. Tras el Dashboard inicial conectado, el desarrollo auditará cada Feature backend y construirá su slice frontend; el Banco de Verificación sigue después del Dashboard y Canvas después del Banco. Cada Feature conserva las tres superficies exigidas por ADR-0117 al cerrar su Orden.
 
 | Spike | Riesgo | Veredicto (ADR) | Estado |
 |---|---|---|---|
@@ -282,7 +282,7 @@ SPIKE-001–005 cuentan con veredictos documentados. SPIKE-006 conserva el objet
 | SPIKE-003 | PySR "en Rust" | ADR-0113 (erradicado; simbólico nativo en NSGA-II) | ✅ cerrado para EPIC-0 (erradicación verificada: `pysr`/`python` ausentes del workspace, grep 2026-06-23; el simbólico nativo se construye en EPIC-3) |
 | SPIKE-004 | Motor de backtest dual | ADR-0114 (Express híbrido + Event-Driven) | veredicto en ADR; **validación de desempeño diferida a EPIC-2** (es su criterio de salida — el motor no existe en EPIC-0) |
 | SPIKE-005 | Ollama/LLM local | ADR-0115 (Verdict Engine determinista; LLM opcional) | veredicto en ADR; **validación residual diferida a EPIC-8** (el Verdict Engine/LLM no existe en EPIC-0) |
-| SPIKE-006 | Integración gRPC local para Tauri/React | ADR-0142 + ADR-0165 + ADR-0166 | pendiente: generación Protobuf/workspace, ubicación de esquemas y bindings, mapeo de errores y pruebas autenticadas; no reabre la elección de Protobuf |
+| [SPIKE-006](./execution/SPIKE-006-integracion-grpc-local.md) | Integración gRPC local para Tauri/React | ADR-0142 + ADR-0165 + ADR-0166 | completado: experimento gRPC autenticado 1/1; integración en Core y Tauri asignada a STORY-076 |
 
 ---
 

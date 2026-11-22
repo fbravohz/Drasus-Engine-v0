@@ -20,8 +20,8 @@ use std::time::Duration;
 
 use nix::sys::signal::{self, Signal};
 use nix::unistd::Pid;
-use sqlx::{Row, SqlitePool};
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
+use sqlx::{Row, SqlitePool};
 use std::str::FromStr;
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -132,16 +132,11 @@ async fn job_survives_kill9_and_recovers_on_restart() {
     // A diferencia de SIGTERM, SIGKILL no puede ser interceptado ni ignorado.
     // El proceso muere sin ejecutar ningún handler de limpieza — esto es
     // exactamente lo que ocurre en un `kill -9` o en un OOM killer del OS.
-    signal::kill(
-        Pid::from_raw(pid as i32),
-        Signal::SIGKILL,
-    )
-    .expect("enviar SIGKILL al primer proceso");
+    signal::kill(Pid::from_raw(pid as i32), Signal::SIGKILL)
+        .expect("enviar SIGKILL al primer proceso");
 
     // Esperamos a que el proceso hijo termine (ya lo mató SIGKILL).
-    let exit_status = first_process
-        .wait()
-        .expect("esperar al primer proceso");
+    let exit_status = first_process.wait().expect("esperar al primer proceso");
 
     // Verificamos que murió por señal, no por `exit(0)`.
     // En Unix, `status.success()` retorna false si el proceso terminó por señal.
@@ -171,14 +166,12 @@ async fn job_survives_kill9_and_recovers_on_restart() {
     // (a) El job debe seguir en QUEUED.
     // Si el executor lo encontró en QUEUED lo re-encoló sin cambiar el estado.
     // Si lo encontró en RUNNING (no aplica aquí) lo habría reseteado a QUEUED.
-    let job_state: String = sqlx::query(
-        "SELECT state FROM jobs WHERE id = ?",
-    )
-    .bind(job_id)
-    .fetch_one(&verify_pool)
-    .await
-    .expect("consultar estado del job")
-    .get(0);
+    let job_state: String = sqlx::query("SELECT state FROM jobs WHERE id = ?")
+        .bind(job_id)
+        .fetch_one(&verify_pool)
+        .await
+        .expect("consultar estado del job")
+        .get(0);
 
     assert_eq!(
         job_state, "QUEUED",
@@ -207,15 +200,10 @@ async fn job_survives_kill9_and_recovers_on_restart() {
     // Usamos SIGTERM (no SIGKILL): el binario tiene handler de SIGTERM que
     // llama `pool.close()` y sale con código 0 — verificamos que el cierre
     // es limpio.
-    signal::kill(
-        Pid::from_raw(second_pid as i32),
-        Signal::SIGTERM,
-    )
-    .expect("enviar SIGTERM al segundo proceso");
+    signal::kill(Pid::from_raw(second_pid as i32), Signal::SIGTERM)
+        .expect("enviar SIGTERM al segundo proceso");
 
-    let second_exit = second_process
-        .wait()
-        .expect("esperar al segundo proceso");
+    let second_exit = second_process.wait().expect("esperar al segundo proceso");
 
     assert!(
         second_exit.success(),

@@ -1,0 +1,10 @@
+syntax = "proto3";
+package drasus.spike.v1;
+service Probe {
+  rpc Check(CheckRequest) returns (CheckReply);
+  rpc Watch(WatchRequest) returns (stream WatchReply);
+}
+message CheckRequest {}
+message CheckReply { bool ready = 1; }
+message WatchRequest { uint64 after = 1; }
+message WatchReply { uint64 sequence = 1; bool initial = 2; }

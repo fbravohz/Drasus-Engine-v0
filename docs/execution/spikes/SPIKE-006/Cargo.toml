@@ -1,0 +1,17 @@
+[package]
+name = "drasus-spike-006"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+tonic = "0.14.9"
+tonic-prost = "0.14"
+prost = "0.14"
+tokio-stream = { version = "0.1", features = ["net"] }
+
+[build-dependencies]
+tonic-prost-build = "0.14"
+protoc-bin-vendored = "3"

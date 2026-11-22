@@ -3,6 +3,7 @@ name = "app"
 edition.workspace = true
 version.workspace = true
 license.workspace = true
+build = "build.rs"
 
 [[bin]]
 name = "drasus"
@@ -13,7 +14,14 @@ path = "src/main.rs"
 clap = { version = "4", features = ["derive"] }
 
 # Runtime asíncrono + señales del OS (SIGINT/SIGTERM).
-tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "signal", "net", "sync", "time", "io-std", "io-util", "process"] }
+
+# Transporte gRPC local del bootstrap de escritorio (ADR-0165).
+prost = "0.14"
+tokio-stream = { version = "0.1", features = ["net"] }
+tonic = { version = "0.14.9", features = ["transport"] }
+tonic-prost = "0.14"
+zeroize = "1"
 
 # shared expone los puertos públicos del Core (Clock, JobExecutor, AuditLog).
 # Acceso exclusivo vía public_interface (ADR-0003).
@@ -36,13 +44,21 @@ hybrid-data-transformer = { path = "../features/data/hybrid-data-transformer" }
 instrument-catalog = { path = "../features/data/instrument-catalog" }
 session-catalog = { path = "../features/data/session-catalog" }
 
+# Feature dueña del historial local de readiness del Core.
+desktop-packaging-manager = { path = "../features/infrastructure/desktop-packaging-manager" }
+
 # Lector del archivo de barras de MetaTrader (ADR-0155/0156/0162, STORY-068).
 # Se añade para soportar el subcomando `verify data-import-wizard`.
 data-import-wizard = { path = "../features/data/data-import-wizard" }
 
 # Serialización/deserialización JSON para el input/output del subcomando `verify`.
 # Reutiliza la misma versión que ya usa el workspace (ya presente en el feature crate).
+serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+[build-dependencies]
+protoc-bin-vendored = "3"
+tonic-prost-build = "0.14"
 
 [dev-dependencies]
 sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio", "macros"] }

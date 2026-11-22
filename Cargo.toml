@@ -3,7 +3,7 @@ resolver = "2"
 members = [
     "crates/shared",
     # ── Feature crates (se añaden al crear cada feature en el ROADMAP) ──
-    # "crates/features/infrastructure/*",
+    "crates/features/infrastructure/*",
     "crates/features/data/*",
     # "crates/features/generation/*",
     # "crates/features/validation/*",

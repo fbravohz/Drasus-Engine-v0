@@ -1,0 +1,19 @@
+[package]
+name = "desktop-packaging-manager"
+description = "Ciclo de vida del Core de escritorio e historial durable de readiness local."
+edition.workspace = true
+version.workspace = true
+license.workspace = true
+
+[dependencies]
+shared = { path = "../../../shared" }
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio"] }
+sha2 = "0.10"
+thiserror = "1"
+tokio = { version = "1", features = ["time"] }
+uuid = { version = "1", features = ["v7"] }
+
+[dev-dependencies]
+sqlx = { version = "0.8", default-features = false, features = ["sqlite", "runtime-tokio", "macros"] }
+tempfile = "3"
+tokio = { version = "1", features = ["rt-multi-thread", "macros", "sync", "time"] }

@@ -196,7 +196,25 @@ El Canvas es la superficie central de composición del producto y su principal a
 
 **Vigente:** [ADR-0167](./adr/ADR-0167.md) establece el selector global simple/avanzado en un menú accesible desde cualquier pantalla. Cambia qué controles de configuración se muestran, mantiene una sola configuración efectiva y conserva los valores ocultos. El modo inicial es simple. La densidad de cada widget es independiente de este selector.
 
-**Preferencia del propietario:** la navegación principal será lateral, tomando como referencia la pantalla Overview. Se presenta como un riel de iconos que se expande para mostrar etiquetas al pasar el cursor y se contrae al retirarlo si no está fijada. Un clic permite fijarla abierta; también será accesible mediante teclado. **Por confirmar:** el manejo concreto del foco y la acción de teclado para fijarla, sus destinos y etiquetas, los flujos prioritarios, la ayuda contextual y el tratamiento de carga, error, desconexión y recuperación. Cada interacción se especificará con su activación, comportamiento y respuesta visible.
+**Preferencia del propietario:** la navegación principal será lateral, tomando como referencia la pantalla Overview. Se presenta como un riel de iconos que se expande para mostrar etiquetas al pasar el cursor y se contrae al retirarlo si no está fijada. Un clic permite fijarla abierta; también será accesible mediante teclado. **Por confirmar:** el manejo concreto del foco y la acción de teclado para fijarla, sus destinos y etiquetas, los flujos prioritarios y la ayuda contextual. La conexión local del Core en el Dashboard se especifica abajo para STORY-076; los estados de carga, error y recuperación de otras Features siguen abiertos.
+
+### Conexión al Core en el Dashboard
+
+**Especificación para STORY-076; implementación y validación visual pendientes.** `desktop-packaging-manager` monta el Dashboard tras confirmar readiness gRPC autenticada. Por eso el primer estado visible en el Dashboard es **Core conectado**. El texto solo confirma readiness del Core; no significa que existan datos de Features ni que sus resultados estén validados.
+
+El encabezado existente muestra el estado sin interrumpir la tarea:
+
+- **Core conectado / Core connected:** el host confirmó el health check autenticado.
+- **Reconectando al Core… / Reconnecting to Core…:** una conexión ya establecida se perdió y el host restaura el stream desde el cursor durable. Si el cursor venció, solicita una vista inicial nueva y conserva este estado hasta recibirla.
+- **No se pudo recuperar la conexión al Core / Could not restore the connection to Core:** el host informa un fallo terminal. El encabezado ofrece **Reintentar / Retry**, que vuelve a solicitar recuperación y se deshabilita mientras opera.
+
+Cada estado combina texto y símbolo; el color no lleva el significado por sí solo. La región existente `role=status` anuncia los cambios. `Reintentar` es un botón nativo, localizable y operable por teclado. No se exponen credenciales, payloads, códigos crudos ni diagnósticos sensibles. Los cinco widgets conservan sus estados vacíos hasta integrar datos reales de sus Features.
+
+La ventana usa una barra superior propia: título arrastrable y botones juntos de minimizar, maximizar/restaurar y cerrar. Los controles tienen nombres accesibles es/en y foco visible. Cerrar solicita el mismo apagado ordenado del Core que el cierre nativo; una acción rechazada se anuncia sin cerrar la aplicación. La barra conserva los tres botones visibles en ventana estrecha. Sus propiedades estructuradas están en `components.specifications.window_titlebar` de `DESIGN.yaml`.
+
+**Ventana de Verificación:** la consumidora inmediata es el Dashboard. La vista integrada muestra el estado real informado por Tauri, el último resultado de readiness autenticada y el resultado de recuperación del stream —cursor reanudado o vista inicial nueva— con su marca temporal. No expone identidad de sesión ni contenido de operaciones. Esta vista integrada no sustituye el observable propio en el Banco ni el nodo Canvas con inspector exigidos por [ADR-0117](./adr/ADR-0117.md). La secuencia de la Orden es Dashboard → Banco → Canvas; la Story permanece parcial hasta completar las tres superficies y QA.
+
+La semántica de conexión sigue [desktop-packaging-manager](./features/desktop-packaging-manager.md), [SPIKE-006](./execution/SPIKE-006-integracion-grpc-local.md#decisiones-de-integración-para-ttr-001), [ADR-0165](./adr/ADR-0165.md) y [ADR-0166](./adr/ADR-0166.md). Los estados estructurados están en [DESIGN.yaml](./DESIGN.yaml), bajo `components.specifications.dashboard_header`, `states.connectivity`, `states.error` y `screens.screen_contract`.
 
 ## 6. Visualización de datos
 
