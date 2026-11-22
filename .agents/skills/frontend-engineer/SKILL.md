@@ -16,7 +16,7 @@ Implementa la Cáscara Visual, una vez que el contrato del Bridge esté disponib
 
 ## Implementación
 
-1. Verifica la firma real generada y sus tipos, errores y streams. Tras cambiar contratos o dependencias, regenera y recompila la frontera antes de ejecutar la app; confirma que el binario usa el artefacto actual.
+1. Verifica la firma real generada y sus tipos, errores y streams. Todo payload de comandos o eventos entre Tauri y React debe tener un tipo TypeScript generado desde su contrato Rust/Protobuf, o una adaptación cuya prueba detecte cualquier diferencia de campos, nombres y estados; no mantengas una copia manual sin esa verificación. Tras cambiar contratos o dependencias, regenera y recompila la frontera antes de ejecutar la app; confirma que el binario usa el artefacto actual.
 2. Implementa un bloque funcional por vez. Usa Flexbox/Grid, HTML semántico, selección, foco, teclado, scroll y menú contextual según `DESIGN.yaml`; Canvas/WebGL requiere presupuesto, alternativa accesible y degradación. No extiendas el motor de dominio en el cliente.
 3. Reutiliza componentes reales. Si uno no soporta la interacción, reporta al Tech Lead la capacidad faltante —callback, control de estado, error o datos—; acuerda extenderlo o construirlo. Extrae una abstracción compartida al segundo consumidor real según `DESIGN.yaml`; no dupliques componentes silenciosamente.
 4. Documenta unidades públicas y comportamiento no obvio en español: qué muestra la superficie, de dónde provienen sus datos y qué efecto tiene una operación del Bridge. Justifica cualquier cálculo de presentación que pueda confundirse con dominio.
