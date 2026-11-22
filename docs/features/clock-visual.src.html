@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="es" data-register="blueprint">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Clock entrega tiempo real o reproducible</title>
+<link rel="stylesheet" href="kit.css" data-ve-kit>
+<style>
+main {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: var(--s-6) var(--s-4);
+}
+header {
+  max-width: 76ch;
+  padding-block: var(--s-6);
+}
+section {
+  margin-block: var(--s-8);
+}
+figure {
+  margin: 0;
+}
+.frame {
+  overflow-x: auto;
+  padding: var(--s-4);
+}
+.frame > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.lead {
+  max-width: 65ch;
+}
+.note {
+  max-width: 76ch;
+  margin-block: var(--s-4);
+}
+.ve-table-wrap {
+  overflow-x: auto;
+}
+.ve-table {
+  min-width: 820px;
+}
+.sources ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--s-2) var(--s-5);
+  padding-inline-start: var(--s-4);
+}
+.sources li {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 700px) {
+  main {
+    padding: var(--s-4) var(--s-3);
+  }
+  .frame > svg {
+    min-width: 820px;
+  }
+}
+</style>
+</head>
+<body>
+<nav class="ve-toc" aria-label="Secciones">
+  <div>
+    <a href="#contrato">Contrato</a>
+    <a href="#avance">Reloj simulado</a>
+    <a href="#auditoria">Auditoría</a>
+    <a href="#desajustes">Desajustes</a>
+    <a href="#fuentes">Fuentes</a>
+  </div>
+  <span class="pos"></span>
+</nav>
+<main>
+  <header>
+    <p class="eyebrow">Infraestructura · shared</p>
+    <h1>Clock entrega tiempo real o reproducible</h1>
+    <p class="lead">El Core consulta un solo puerto. El proceso de ejecución inyecta un reloj de sistema o uno determinista; ambos devuelven Unix en nanosegundos como <code>i64</code>.</p>
+    <p class="meta">Lectura del contrato y del código · los desajustes de la ficha aparecen al final</p>
+  </header>
+
+  <section id="contrato">
+    <div class="sec-head">
+      <p class="ve-label caps">Contrato</p>
+      <h2>Un puerto conecta a todos los consumidores con el reloj elegido</h2>
+    </div>
+    <figure>
+      <div class="frame">
+        <svg class="ve-svg" viewBox="0 0 1080 360" aria-label="Un módulo del Core consulta Clock; la implementación inyectada es SystemClock o DeterministicClock y devuelve un timestamp Unix en nanosegundos.">
+          <rect class="ve-bnd" x="270" y="42" width="780" height="278" rx="12"/>
+          <text class="ve-bnd-t" x="292" y="66">shared · ejecución inyecta una implementación</text>
+          <path class="ve-e" d="M210 190H300"/>
+          <text class="ve-el" x="224" y="174">consulta</text>
+          <path class="ve-e" d="M550 178H605V125H675"/>
+          <text class="ve-el" x="574" y="157">REAL</text>
+          <path class="ve-e" d="M550 220H605V254H675"/>
+          <text class="ve-el" x="574" y="238">SIMULATION</text>
+          <g class="ve-n" transform="translate(30 150)">
+            <rect class="sh" width="180" height="82" rx="8"/>
+            <text class="ve-kind" x="90" y="24">CONSUMIDOR</text>
+            <text x="90" y="48">Módulo del Core</text>
+            <text class="sub" x="90" y="68">necesita la hora</text>
+          </g>
+          <g class="ve-n is-key" transform="translate(300 145)">
+            <rect class="sh" width="250" height="92" rx="8"/>
+            <text class="ve-kind" x="125" y="25">PUERTO</text>
+            <text x="125" y="51">Clock</text>
+            <text class="sub" x="125" y="73">timestamp_ns() → i64</text>
+          </g>
+          <g class="ve-n" transform="translate(675 85)">
+            <rect class="sh" width="300" height="80" rx="8"/>
+            <text class="ve-kind" x="150" y="23">PRODUCCIÓN</text>
+            <text x="150" y="46">SystemClock</text>
+            <text class="sub" x="150" y="66">SystemTime · ns · sin retroceso</text>
+          </g>
+          <g class="ve-n" transform="translate(675 210)">
+            <rect class="sh" width="300" height="90" rx="8"/>
+            <text class="ve-kind" x="150" y="22">BACKTEST / TEST</text>
+            <text x="150" y="46">DeterministicClock</text>
+            <text class="sub" x="150" y="68">initial ns · advance() / tick()</text>
+            <text class="sub" x="150" y="84">lecturas iguales entre avances</text>
+          </g>
+        </svg>
+      </div>
+      <figcaption><span class="fig-n">Fig. 1</span> Cada consumidor usa el mismo puerto; el runtime inyecta una implementación real o determinista.</figcaption>
+    </figure>
+    <p class="note">El Core no consulta el reloj del sistema directamente. <code>SystemClock</code> convierte la hora de pared a nanosegundos y fuerza lecturas crecientes; <code>DeterministicClock</code> mantiene el valor hasta un avance explícito.</p>
+  </section>
+
+  <section id="avance">
+    <div class="sec-head">
+      <p class="ve-label caps">Simulación</p>
+      <h2>Leer el reloj no lo mueve</h2>
+    </div>
+    <figure>
+      <div class="frame">
+        <svg class="ve-svg" viewBox="0 0 1080 220" aria-label="El reloj determinista comienza en t0; una lectura conserva t0, tick avanza step_ns, las lecturas conservan t1 y advance suma un delta explícito.">
+          <path class="ve-e" d="M180 112H235"/>
+          <path class="ve-e" d="M385 112H440"/>
+          <path class="ve-e is-hot" d="M600 112H655"/>
+          <path class="ve-e" d="M805 112H860"/>
+          <text class="ve-el" x="207" y="96">lee</text>
+          <text class="ve-el" x="411" y="96">sin avance</text>
+          <text class="ve-el" x="624" y="96">step_ns</text>
+          <text class="ve-el" x="830" y="96">delta_ns</text>
+          <g class="ve-n" transform="translate(30 72)">
+            <rect class="sh" width="150" height="80" rx="8"/>
+            <text x="75" y="31">t₀</text>
+            <text class="sub" x="75" y="55">initial_timestamp_ns</text>
+          </g>
+          <g class="ve-n" transform="translate(235 72)">
+            <rect class="sh" width="150" height="80" rx="8"/>
+            <text x="75" y="31">read()</text>
+            <text class="sub" x="75" y="55">devuelve t₀</text>
+          </g>
+          <g class="ve-n is-key" transform="translate(440 72)">
+            <rect class="sh" width="160" height="80" rx="8"/>
+            <text x="80" y="31">tick()</text>
+            <text class="sub" x="80" y="55">avanza a t₁</text>
+          </g>
+          <g class="ve-n" transform="translate(655 72)">
+            <rect class="sh" width="150" height="80" rx="8"/>
+            <text x="75" y="31">read() × 2</text>
+            <text class="sub" x="75" y="55">ambas dan t₁</text>
+          </g>
+          <g class="ve-n" transform="translate(860 72)">
+            <rect class="sh" width="190" height="80" rx="8"/>
+            <text x="95" y="31">advance(Δns)</text>
+            <text class="sub" x="95" y="55">suma un delta explícito</text>
+          </g>
+          <text class="ve-tag" x="30" y="190">El llamador decide cuándo invocar tick() o advance().</text>
+        </svg>
+      </div>
+      <figcaption><span class="fig-n">Fig. 2</span> Las lecturas repetidas conservan el timestamp; solo <code>tick()</code> o <code>advance(ns)</code> lo cambian.</figcaption>
+    </figure>
+  </section>
+
+  <section id="auditoria">
+    <div class="sec-head">
+      <p class="ve-label caps">Auditoría</p>
+      <h2>Tres eventos llegan a Audit Log; las lecturas frecuentes quedan fuera</h2>
+    </div>
+    <figure>
+      <div class="frame">
+        <svg class="ve-svg" viewBox="0 0 1120 360" aria-label="Tres momentos del ciclo de vida llaman a clock_audit y luego a AuditLogRepository append; timestamp_ns, advance y tick no emiten auditoría.">
+          <rect class="ve-bnd" x="365" y="38" width="710" height="282" rx="12"/>
+          <text class="ve-bnd-t" x="387" y="62">shared · clock_audit + audit-log</text>
+          <path class="ve-e" d="M300 89H340V160H405"/>
+          <path class="ve-e" d="M300 189H405"/>
+          <path class="ve-e" d="M300 289H340V210H405"/>
+          <path class="ve-e is-hot" d="M635 180H775"/>
+          <text class="ve-el" x="674" y="162">repo.append()</text>
+          <g class="ve-n" transform="translate(25 45)">
+            <rect class="sh" width="275" height="88" rx="8"/>
+            <text x="137" y="24">Arranque · NTP verificada</text>
+            <text class="sub" x="137" y="47">CLOCK_NTP_SYNC</text>
+            <text class="sub" x="137" y="69">ntp_sync_offset_ns</text>
+          </g>
+          <g class="ve-n" transform="translate(25 145)">
+            <rect class="sh" width="275" height="88" rx="8"/>
+            <text x="137" y="24">Cambio REAL ↔ SIMULATION</text>
+            <text class="sub" x="137" y="47">CLOCK_MODE_TRANSITION</text>
+            <text class="sub" x="137" y="69">from · to</text>
+          </g>
+          <g class="ve-n" transform="translate(25 245)">
+            <rect class="sh" width="275" height="88" rx="8"/>
+            <text x="137" y="24">Cierre de sesión simulada</text>
+            <text class="sub" x="137" y="47">CLOCK_SESSION_CLOSE</text>
+            <text class="sub" x="137" y="67">real_virtual_delta_ns</text>
+            <text class="sub" x="137" y="82">virtual_process_id</text>
+          </g>
+          <g class="ve-n is-key" transform="translate(405 135)">
+            <rect class="sh" width="230" height="90" rx="8"/>
+            <text class="ve-kind" x="115" y="22">CÁSCARA</text>
+            <text x="115" y="47">clock_audit</text>
+            <text class="sub" x="115" y="68">arma details_json</text>
+          </g>
+          <g class="ve-n" transform="translate(775 135)">
+            <rect class="sh" width="250" height="90" rx="8"/>
+            <text class="ve-kind" x="125" y="22">BITÁCORA EXISTENTE</text>
+            <text x="125" y="47">Audit Log</text>
+            <text class="sub" x="125" y="68">solo anexado · Perfil D</text>
+          </g>
+          <text class="ve-tag" x="405" y="275">Sin eventos por timestamp_ns(), advance() ni tick().</text>
+        </svg>
+      </div>
+      <figcaption><span class="fig-n">Fig. 3</span> La auditoría ocurre en hitos de ciclo de vida y no en el camino caliente del reloj.</figcaption>
+    </figure>
+    <p class="note">Los payloads viven en <code>details_json</code>: <code>ntp_sync_offset_ns</code>, <code>from/to</code>, y <code>real_virtual_delta_ns</code> junto con <code>virtual_process_id</code>.</p>
+    <p class="note">El código define y exporta los tres emisores. La búsqueda de llamadas en archivos Rust solo encontró definiciones, pruebas y reexportaciones; no localizó una integración productiva que dispare esos hitos.</p>
+  </section>
+
+  <section id="desajustes">
+    <div class="sec-head">
+      <p class="ve-label caps">Lectura segura</p>
+      <h2>La ficha mezcla contratos de épocas distintas</h2>
+    </div>
+    <figure>
+      <div class="ve-table-wrap">
+        <div class="ve-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Tema</th>
+                <th>Resumen inicial de la ficha</th>
+                <th>TTR / código</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="chip warn">Conflicto</span><br>Unidad</td>
+                <td>Segundos como número flotante.</td>
+                <td><code>timestamp_ns() → i64</code>; Unix en nanosegundos.</td>
+              </tr>
+              <tr>
+                <td><span class="chip warn">Conflicto</span><br>Avance</td>
+                <td>Avanza por barra; incluye opción <code>FROZEN</code>.</td>
+                <td><code>tick()</code> y <code>advance(ns)</code> son llamadas explícitas; no hay flag <code>FROZEN</code>.</td>
+              </tr>
+              <tr>
+                <td><span class="chip warn">Ambiguo</span><br>Monotonía</td>
+                <td>“Creciente” puede leerse como estricta.</td>
+                <td>El contrato prohíbe retroceder; el reloj determinista permite delta cero e igualdad.</td>
+              </tr>
+              <tr>
+                <td><span class="chip warn">Pendiente</span><br>Operación atómica</td>
+                <td>El reloj no cambia durante una operación.</td>
+                <td>La implementación no bloquea <code>advance()</code> durante una operación; debe coordinarlo el llamador.</td>
+              </tr>
+              <tr>
+                <td><span class="chip warn">Sin llamada</span><br>Auditoría</td>
+                <td>Declara tres eventos implementados.</td>
+                <td>El código expone emisores, pero no aparecen invocados desde una integración productiva en Rust.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <figcaption><span class="fig-n">Fig. 4</span> La vista usa nanosegundos y avance explícito, que coinciden con los tipos y métodos implementados.</figcaption>
+    </figure>
+    <p class="note">Esta visual conserva las divergencias como hallazgos. No modifica <code>clock.md</code> ni eleva una inferencia a contrato nuevo.</p>
+  </section>
+
+  <section class="sources" id="fuentes" aria-label="Fuentes">
+    <p class="ve-label caps">Fuentes</p>
+    <ul>
+      <li><a href="clock.md">Feature Clock</a> · narrativas, TTR, auditoría y puertos.</li>
+      <li><a href="../../crates/shared/src/domain/clock.rs"><code>domain/clock.rs</code></a> · puerto y reloj determinista.</li>
+      <li><a href="../../crates/shared/src/orchestrator/mod.rs"><code>orchestrator/mod.rs</code></a> · <code>SystemClock</code>.</li>
+      <li><a href="../../crates/shared/src/clock_audit.rs"><code>clock_audit.rs</code></a> · emisores y payloads.</li>
+      <li><a href="../../crates/shared/src/public_interface.rs"><code>public_interface.rs</code></a> · reexportación del puerto y emisores.</li>
+      <li><a href="../execution/STORY-003-clock.md">STORY-003</a> · alcance y cierre registrado.</li>
+      <li><a href="../adr/ADR-0020.md">ADR-0020</a> · perfiles de auditoría.</li>
+      <li><a href="../adr/ADR-0137.md">ADR-0137</a> · tipos y ubicación de infraestructura transversal.</li>
+      <li><a href="audit-log.md">Audit Log</a> · persistencia y Perfil D.</li>
+      <li><a href="../DESIGN.yaml">Sistema de diseño</a> · tokens y estados estructurados.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>
